@@ -45,7 +45,7 @@ $config = [
         'errorHandler' => [
             //'errorAction' => 'site/error',
         ],
-        //'db' => $params['mysql'],
+        'db' => $params['mysql'],
         'view' => [
             'renderers' => [
                 'tpl' => [

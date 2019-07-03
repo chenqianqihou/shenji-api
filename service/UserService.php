@@ -3,16 +3,14 @@
 namespace app\service;
 
 use app\models\UserDao;
-use Yii;
-use linslin\yii2\curl\Curl;
 
 class UserService
 {
 
-    // 查询用户所属组
-    public function getUserGroup($userId) {
+    // 查询用户信息
+    public function getUserInfo($pid) {
         $userDao = new UserDao();
-        $ret = $userDao->queryByName($userId);
+        $ret = $userDao->queryByID($pid);
         return $ret;
     }
 }
