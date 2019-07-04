@@ -14,7 +14,41 @@ class OrganizationService
 
     //添加机构
     public function insertOrganization( $params = []) {
+        $checkres = $this->checkParams($params);
+        if( !$checkres['res'] ){
+            return $checkres;    
+        }
+
+        $organDao = new OrganizationDao;       
+        $organDao->name = $params['name'];
+        $organDao->otype = $params['otype'];
+        $organDao->deputy = $params['deputy'];
+        $organDao->regtime = $params['regtime'];
+        $organDao->regnum = $params['regnum'];
+        $organDao->regaddress = $params['regaddress'];
+        $organDao->category = $params['category'];
+        $organDao->level = $params['level'];
+        $organDao->capital = $params['capital'];
+        $organDao->workbegin = $params['workbegin'];
+        $organDao->costeng = $params['costeng'];
+        $organDao->coster = $params['coster'];
+        $organDao->accountant = $params['accountant'];
+        $organDao->highlevel = $params['highlevel'];
+        $organDao->midlevel = $params['midlevel'];
+        $organDao->retiree = $params['retiree'];
+        $organDao->parttimers = $params['parttimers'];
+        $organDao->contactor = $params['contactor'];
+        $organDao->contactphone = $params['contactphone'];
+        $organDao->contactnumber = $params['contactnumber'];
+        $organDao->officenum = $params['officenum'];
+        $organDao->officeaddress = $params['officeaddress'];
+        $res = $organDao->save();
         
+        return [
+            'res' => $res,
+            'key' => \Yii::$app->db->lastInsertID,
+            'message' => $organDao
+        ];
     }
 
     public function checkParams( $params ){
@@ -184,11 +218,11 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['contacts']) ){
+        if( empty($params['contactor']) ){
             $result = [
                 'res' => false,
-                'key' => 'contacts',
-                'message' => 'contacts can not be null'
+                'key' => 'contactor',
+                'message' => 'contactor can not be null'
             ];
 
             return $result;
@@ -233,5 +267,7 @@ class OrganizationService
 
             return $result;
         }
+
+        return $result;
     }
 }
