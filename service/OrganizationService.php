@@ -12,6 +12,20 @@ class OrganizationService
         return OrganizationDao::find()->where(['id' => $oid])->asArray()->one();
     }
 
+    // 查询机构列表
+    public function getOrganizationList($keyword,$otype,$start,$length) {
+        $res = OrganizationDao::find();
+        if( $otype > 0 ){
+            $res = $res->where(['otype'=>$otype]);    
+        }
+        if( trim($keyword) != '' ){
+            $res = $res->where(['like', 'name', $keyword]);    
+        }
+        $total = $res->count();
+        $list = $res->offset( $start )->limit($length)->asArray()->all();
+        return ['total'=>$total,'list'=>$list];
+    }
+
     //添加机构
     public function insertOrganization( $params = []) {
         $checkres = $this->checkParams($params);
