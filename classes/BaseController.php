@@ -79,7 +79,7 @@ class BaseController extends Controller {
         if (!$token) {
             Log::addLogNode('Invalid token', '');
             $this->noLogin();
-            return;
+            return false;
         }
         try {
             //解析token
@@ -123,7 +123,8 @@ class BaseController extends Controller {
     protected function noLogin() {
         $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户未登录');
         $ret = $this->outputJson('', $error);
-        return $ret;
+        Yii::$app->response->data = $ret;
+        Yii::$app->end();
     }
 
     /**
@@ -164,6 +165,10 @@ class BaseController extends Controller {
             return $this->params[$strKey];
         }
         return $default;
+    }
+
+    public function getParams() {
+        return $this->params;    
     }
 
     /**
