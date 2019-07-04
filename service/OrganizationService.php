@@ -51,6 +51,46 @@ class OrganizationService
         ];
     }
 
+    //修改机构
+    public function updateOrganization( $params = []) {
+        $checkres = $this->checkParams($params);
+        if( !$checkres['res'] ){
+            return $checkres;    
+        }
+
+        $oid = $params['id'];
+        $organDao = OrganizationDao::find()->where(['id' => $oid])->one();
+        $organDao->name = $params['name'];
+        $organDao->otype = $params['otype'];
+        $organDao->deputy = $params['deputy'];
+        $organDao->regtime = $params['regtime'];
+        $organDao->regnum = $params['regnum'];
+        $organDao->regaddress = $params['regaddress'];
+        $organDao->category = $params['category'];
+        $organDao->level = $params['level'];
+        $organDao->capital = $params['capital'];
+        $organDao->workbegin = $params['workbegin'];
+        $organDao->costeng = $params['costeng'];
+        $organDao->coster = $params['coster'];
+        $organDao->accountant = $params['accountant'];
+        $organDao->highlevel = $params['highlevel'];
+        $organDao->midlevel = $params['midlevel'];
+        $organDao->retiree = $params['retiree'];
+        $organDao->parttimers = $params['parttimers'];
+        $organDao->contactor = $params['contactor'];
+        $organDao->contactphone = $params['contactphone'];
+        $organDao->contactnumber = $params['contactnumber'];
+        $organDao->officenum = $params['officenum'];
+        $organDao->officeaddress = $params['officeaddress'];
+        $res = $organDao->save();
+        
+        return [
+            'res' => $res,
+            'key' => \Yii::$app->db->lastInsertID,
+            'message' => $organDao
+        ];
+    }
+
     public function checkParams( $params ){
         $result = [
             'res' => true,
@@ -83,6 +123,16 @@ class OrganizationService
                 'res' => false,
                 'key' => 'deputy',
                 'message' => 'deputy can not be null!'
+            ];
+
+            return $result;
+        }
+
+        if( empty($params['regtime']) || strtotime( $params['regtime'] ) > time() ){
+            $result = [
+                'res' => false,
+                'key' => 'regtime',
+                'message' => 'regtime error!'
             ];
 
             return $result;
@@ -138,7 +188,7 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['workbegin']) ){
+        if( empty($params['workbegin']) || strtotime($params['workbegin']) > time() ){
             $result = [
                 'res' => false,
                 'key' => 'workbegin',

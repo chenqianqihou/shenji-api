@@ -6,4 +6,5 @@ return [
 
     'api/organization/add' => 'api/organization/add',
     'api/organization/info' => 'api/organization/info',
+    'api/organization/update' => 'api/organization/update',
 ];
