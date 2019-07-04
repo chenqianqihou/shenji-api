@@ -1,22 +1,14 @@
 <?php
 
-/*
- * This file is part of the GraphAware Neo4j Client package.
- *
- * (c) GraphAware Limited <http://graphaware.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace GraphAware\Neo4j\Client\Tests\Integration;
 
 use GraphAware\Common\Type\Node;
 use GraphAware\Common\Type\Relationship;
-use InvalidArgumentException;
+use \InvalidArgumentException;
 
 /**
- * Class ResultIntegrationTest.
+ * Class ResultIntegrationTest
+ * @package GraphAware\Neo4j\Client\Tests\Integration
  *
  * @group result-it
  */
@@ -58,27 +50,5 @@ class ResultIntegrationTest extends IntegrationTestCase
 
         $this->setExpectedException(InvalidArgumentException::class);
         $record->relationshipValue('r');
-    }
-
-    /**
-     * @group issue54
-     */
-    public function testExceptionIsThrownWhenTryingToGetRecordOnEmptyCursor()
-    {
-        $this->emptyDb();
-        $result = $this->client->run('MATCH (n) RETURN n');
-        $this->setExpectedException(\RuntimeException::class);
-        $result->firstRecord();
-    }
-
-    /**
-     * @group issue54
-     */
-    public function testExceptionIsThrownWhenTryingToGetRecordOnEmptyCursorWithGetRecord()
-    {
-        $this->emptyDb();
-        $result = $this->client->run('MATCH (n) RETURN n');
-        $this->setExpectedException(\RuntimeException::class);
-        $result->getRecord();
     }
 }

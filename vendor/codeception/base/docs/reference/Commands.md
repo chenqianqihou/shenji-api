@@ -27,7 +27,7 @@ Create new test suite. Requires suite name and actor name
 ## GherkinSnippets
 
 Generates code snippets for matched feature files in a suite.
-Code snuppets are expected to be implemtned in Actor or PageOjects
+Code snippets are expected to be implemented in Actor or PageObjects
 
 Usage:
 
@@ -35,6 +35,22 @@ Usage:
 * `codecept gherkin:snippets acceptance/feature/users` - snippets from `feature/users` dir of acceptance tests
 * `codecept gherkin:snippets acceptance user_account.feature` - snippets from a single feature file
 * `codecept gherkin:snippets acceptance/feature/users/user_accout.feature` - snippets from feature file in a dir
+
+
+
+## Init
+
+
+
+## GenerateSnapshot
+
+Generates Snapshot.
+Snapshot can be used to test dynamical data.
+If suite name is provided, an actor class will be included into placeholder
+
+* `codecept g:snapshot UserEmails`
+* `codecept g:snapshot Products`
+* `codecept g:snapshot acceptance UserEmails`
 
 
 
@@ -122,6 +138,12 @@ Override config values:
 * `codecept run -o "settings: lint: false"`: disable linting
 * `codecept run -o "reporters: report: \Custom\Reporter" --report`: use custom reporter
 
+Run with specific extension
+
+* `codecept run --ext Recorder` run with Recorder extension enabled
+* `codecept run --ext DotReporter` run with DotReporter printer
+* `codecept run --ext "My\Custom\Extension"` run with an extension loaded by class name
+
 Full reference:
 ```
 Arguments:
@@ -134,6 +156,7 @@ Options:
  --report              Show output in compact style
  --html                Generate html with results (default: "report.html")
  --xml                 Generate JUnit XML Log (default: "report.xml")
+ --phpunit-xml         Generate PhpUnit XML Log (default: "phpunit-report.xml")
  --tap                 Generate Tap Log (default: "report.tap.log")
  --json                Generate Json Log (default: "report.json")
  --colors              Use colors in output
@@ -145,12 +168,14 @@ Options:
  --coverage-html       Generate CodeCoverage HTML report in path (default: "coverage")
  --coverage-xml        Generate CodeCoverage XML report in file (default: "coverage.xml")
  --coverage-text       Generate CodeCoverage text report in file (default: "coverage.txt")
+ --coverage-phpunit    Generate CodeCoverage PHPUnit report in file (default: "coverage-phpunit")
  --no-exit             Don't finish with exit code
  --group (-g)          Groups of tests to be executed (multiple values allowed)
  --skip (-s)           Skip selected suites (multiple values allowed)
  --skip-group (-x)     Skip selected groups (multiple values allowed)
  --env                 Run tests in selected environments. (multiple values allowed, environments can be merged with ',')
  --fail-fast (-f)      Stop after first failure
+ --no-rebuild          Do not rebuild actor classes on start
  --help (-h)           Display this help message.
  --quiet (-q)          Do not output any message.
  --verbose (-v|vv|vvv) Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
@@ -158,6 +183,7 @@ Options:
  --ansi                Force ANSI output.
  --no-ansi             Disable ANSI output.
  --no-interaction (-n) Do not ask any interactive question.
+ --seed                Use the given seed for shuffling tests
 ```
 
 
@@ -170,6 +196,10 @@ Auto-updates phar archive from official site: 'http://codeception.com/codecept.p
 * `php codecept.phar self-update`
 
 @author Franck Cassedanne <franck@cassedanne.com>
+
+
+
+## CompletionFallback
 
 
 
@@ -225,7 +255,7 @@ Generates empty environment configuration file into envs dir:
 
  * `codecept g:env firefox`
 
-Required to have `envs` path to be specifed in `codeception.yml`
+Required to have `envs` path to be specified in `codeception.yml`
 
 
 
@@ -236,17 +266,6 @@ Generates Feature file (in Gherkin):
 * `codecept generate:feature suite Login`
 * `codecept g:feature suite subdir/subdir/login.feature`
 * `codecept g:feature suite login.feature -c path/to/project`
-
-
-
-
-## GeneratePhpUnit
-
-Generates skeleton for unit test as in classical PHPUnit.
-
-* `codecept g:phpunit unit UserTest`
-* `codecept g:phpunit unit User`
-* `codecept g:phpunit unit "App\User`
 
 
 
@@ -265,18 +284,17 @@ Generates user-friendly text scenarios from scenario-driven tests (Cest, Cept).
 
 Generates StepObject class. You will be asked for steps you want to implement.
 
-* `codecept g:step acceptance AdminSteps`
-* `codecept g:step acceptance UserSteps --silent` - skip action questions
+* `codecept g:stepobject acceptance AdminSteps`
+* `codecept g:stepobject acceptance UserSteps --silent` - skip action questions
 
 
 
 
 ## Clean
 
-Cleans `output` directory
+Recursively cleans `output` directory and generated code.
 
 * `codecept clean`
-* `codecept clean -c path/to/project`
 
 
 
@@ -288,6 +306,7 @@ Prints all steps from all Gherkin contexts for a specific suite
 ```
 codecept gherkin:steps acceptance
 ```
+
 
 
 

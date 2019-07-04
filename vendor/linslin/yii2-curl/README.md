@@ -18,8 +18,8 @@ Easy working cURL extension for Yii2, including RESTful support:
 Requirements
 ------------
 - Yii2
-- PHP 5.4+
-- Curl and php-curl installed
+- PHP >=7.1.3
+- ext-curl, ext-json, and php-curl installed
 
 
 Installation
@@ -78,6 +78,40 @@ $response = $curl->setPostParams([
      ])
      ->post('http://example.com/');
 ```
+
+```php
+// POST RAW JSON
+$curl = new curl\Curl();
+$response = $curl->setRawPostData(
+     json_encode[
+        'key' => 'value',
+        'secondKey' => 'secondValue'
+     ])
+     ->post('http://example.com/');
+```
+
+```php
+// POST RAW JSON and auto decode JSON respawn by setting raw = true. 
+// This is usefull if you expect an JSON response and want to autoparse it. 
+$curl = new curl\Curl();
+$response = $curl->setRawPostData(
+     json_encode[
+        'key' => 'value',
+        'secondKey' => 'secondValue'
+     ])
+     ->post('http://example.com/', true);
+     
+// JSON decoded response by parsing raw = true in to ->post().
+var_dump($response);
+```
+
+```php
+// POST RAW XML
+$curl = new curl\Curl();
+$response = $curl->setRawPostData('<?xml version="1.0" encoding="UTF-8"?><someNode>Test</someNode>')
+     ->post('http://example.com/');
+```
+
 
 ```php
 // POST with special headers
@@ -143,9 +177,35 @@ switch ($curl->responseCode) {
 var_dump($curl->responseHeaders);
 ```
 
+Testing
+------------
+
+- Run codeception tests with `vendor/bin/codecept run` in repository root dir. 
+  On windows run `vendor\bin\codecept.bat run`. 
+
  
 Changelog
 ------------
+##### Release 1.3.0 - Changelog
+- Fixed HTTP-Method parsing on PATCH request.
+- Updated DocBlocks + code refactoring.  
+- Removed deprecated PHP Version support. Minimum PHP Version is now 7.1.3. 
+Please use version "linslin/yii2-curl 1.2.1" - https://github.com/linslin/Yii2-Curl/releases/tag/1.2.1 if you need PHP 5.4+ support. 
+
+##### Release 1.2.2 - Changelog
+- Added some new cURL examples into readme.md.
+
+##### Release 1.2.1 - Changelog
+- Added `setRawPostData([mixed]) [this]` which allows you to post any data format. 
+
+##### Release 1.2.0 - Changelog
+- Added `unsetHeader([string header]) [this]` helper which allows you to unset one specific header.
+- Added `setHeader([string header, string value]) [this]` helper which allows you to set one specific header.
+- Added `getRequestHeaders() [array]` helper which returns all request headers as an array.
+- Added `getRequestHeader([string headerKey]) [string|null]`  helper which returns a specific request header as an string.
+- Added new test cases for `getRequestHeaders()` and `getRequestHeader()`.
+- Readme adjustments. 
+
 ##### Release 1.1.3 - Changelog
 - Fixed issue with patch request.
 - Fully added functionalTests for 100% coverage. 
@@ -222,7 +282,3 @@ Changelog
 
 ##### Release 1.0 - Changelog
 - Official stable release
-
-Testing
-------------
-

@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * This file is part of the GraphAware Neo4j Client package.
  *
  * (c) GraphAware Limited <http://graphaware.com>
@@ -17,8 +17,5 @@ interface Neo4jExceptionInterface extends NeoClientExceptionInterface
 
     const EFFECT_ROLLBACK = 'ROLLBACK';
 
-    /**
-     * @return string
-     */
     public function effect();
 }

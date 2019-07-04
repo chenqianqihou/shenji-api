@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * This file is part of the GraphAware Neo4j Client package.
  *
  * (c) GraphAware Limited <http://graphaware.com>
@@ -11,16 +11,18 @@
 
 namespace GraphAware\Neo4j\Client\Tests\Integration;
 
-use GraphAware\Bolt\Driver as BoltDriver;
 use GraphAware\Neo4j\Client\Client;
 use GraphAware\Neo4j\Client\ClientBuilder;
 use GraphAware\Neo4j\Client\Connection\Connection;
-use GraphAware\Neo4j\Client\Connection\ConnectionManager;
 use GraphAware\Neo4j\Client\HttpDriver\Driver as HttpDriver;
-use InvalidArgumentException;
+use GraphAware\Bolt\Driver as BoltDriver;
+use \InvalidArgumentException;
+use GraphAware\Neo4j\Client\Connection\ConnectionManager;
+use Prophecy\Prophet;
 
 /**
- * Class ClientSetupIntegrationTest.
+ * Class ClientSetupIntegrationTest
+ * @package GraphAware\Neo4j\Client\Tests\Integration
  *
  * @group setup
  */
@@ -77,17 +79,17 @@ class ClientSetupIntegrationTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($client->getConnectionManager()->getMasterConnection());
     }
 
-    public function testICanDefineConnectionAsWriteOrRead()
-    {
-        $client = ClientBuilder::create()
+   public function testICanDefineConnectionAsWriteOrRead()
+   {
+       $client = ClientBuilder::create()
            ->addConnection('default', 'http://localhost:7474')
            ->addConnection('conn2', 'http://localhost:7575')
            ->addConnection('conn3', 'http://localhost:7676')
            ->setMaster('conn2')
            ->build();
 
-        $this->assertEquals('conn2', $client->getConnectionManager()->getMasterConnection()->getAlias());
-    }
+       $this->assertEquals('conn2', $client->getConnectionManager()->getMasterConnection()->getAlias());
+   }
 
     public function testSecondIsMasterCallOverridesPreviousOne()
     {
@@ -115,20 +117,8 @@ class ClientSetupIntegrationTest extends \PHPUnit_Framework_TestCase
 
     public function testSendWriteUseMasterIfAvailable()
     {
-        $httpUri = 'http://localhost:7474';
-        if (isset($_ENV['NEO4J_USER'])) {
-            $httpUri = sprintf(
-                '%s://%s:%s@%s:%s',
-                getenv('NEO4J_SCHEMA'),
-                getenv('NEO4J_USER'),
-                getenv('NEO4J_PASSWORD'),
-                getenv('NEO4J_HOST'),
-                getenv('NEO4J_PORT')
-            );
-        }
-
         $connectionManager = $this->prophesize(ConnectionManager::class);
-        $conn = new Connection('default', $httpUri, null, 5);
+        $conn = new Connection('default', 'http://localhost:7474', null, 5);
         $connectionManager->getMasterConnection()->willReturn($conn);
         $connectionManager->getMasterConnection()->shouldBeCalled();
 

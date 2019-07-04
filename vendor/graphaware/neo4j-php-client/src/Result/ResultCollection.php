@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * This file is part of the GraphAware Neo4j Client package.
  *
  * (c) GraphAware Limited <http://graphaware.com>
@@ -16,35 +16,21 @@ use GraphAware\Common\Result\ResultCollection as BaseResultCollection;
 
 class ResultCollection extends BaseResultCollection
 {
-    /**
-     * @var string|null
-     */
     protected $tag;
 
-    /**
-     * @param string $tag
-     */
     public function setTag($tag)
     {
         $this->tag = $tag;
     }
 
-    /**
-     * @return null|string
-     */
     public function getTag()
     {
         return $this->tag;
     }
 
-    /**
-     * @param RecordCursorInterface $result
-     *
-     * @return ResultCollection
-     */
     public static function withResult(RecordCursorInterface $result)
     {
-        $coll = new self();
+        $coll = new ResultCollection();
         $coll->add($result);
 
         return $coll;

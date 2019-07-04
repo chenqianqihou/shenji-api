@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * This file is part of the GraphAware Neo4j Client package.
  *
  * (c) GraphAware Limited <http://graphaware.com>
@@ -19,7 +19,15 @@ class Neo4jException extends \Exception implements Neo4jExceptionInterface
     protected $statusCode;
 
     /**
-     * {@inheritdoc}
+     * @param string $code
+     */
+    public function setNeo4jStatusCode($code)
+    {
+        $this->statusCode = $code;
+    }
+
+    /**
+     * @return string
      */
     public function effect()
     {
@@ -37,14 +45,6 @@ class Neo4jException extends \Exception implements Neo4jExceptionInterface
             default:
                 throw new \InvalidArgumentException(sprintf('Invalid classification "%s" in "%s"', $classification, $this->getMessage()));
         }
-    }
-
-    /**
-     * @param string $code
-     */
-    public function setNeo4jStatusCode($code)
-    {
-        $this->statusCode = $code;
     }
 
     /**

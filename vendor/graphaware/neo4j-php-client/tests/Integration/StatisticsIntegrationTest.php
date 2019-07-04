@@ -1,19 +1,12 @@
 <?php
 
-/*
- * This file is part of the GraphAware Neo4j Client package.
- *
- * (c) GraphAware Limited <http://graphaware.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace GraphAware\Neo4j\Client\Tests\Integration;
-use GraphAware\Common\Result\StatementStatisticsInterface;
+
+use GraphAware\Neo4j\Client\Tests\Integration\IntegrationTestCase;
 
 /**
- * Class StatisticsIntegrationTest.
+ * Class StatisticsIntegrationTest
+ * @package GraphAware\Neo4j\Client\Tests\Integration
  *
  * @group stats-it
  */
@@ -52,20 +45,5 @@ class StatisticsIntegrationTest extends IntegrationTestCase
         $result = $this->client->run('MATCH (n) DETACH DELETE n', null, null, 'http');
 
         $this->assertEquals(1, $result->summarize()->updateStatistics()->relationshipsDeleted());
-    }
-
-    /**
-     * @group bolt-stats
-     */
-    public function testNodesCreatedWithBolt()
-    {
-        $this->emptyDb();
-        $result = $this->client->run('MATCH (n) RETURN count(n)', [], null, 'bolt');
-        $this->assertInstanceOf(StatementStatisticsInterface::class, $result->summarize()->updateStatistics());
-
-        $tx = $this->client->transaction('bolt');
-        $result = $tx->run('MATCH (n) RETURN count(n)');
-        $tx->commit();
-        $this->assertInstanceOf(StatementStatisticsInterface::class, $result->summarize()->updateStatistics());
     }
 }

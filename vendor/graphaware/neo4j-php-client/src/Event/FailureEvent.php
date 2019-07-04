@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * This file is part of the GraphAware Neo4j Client package.
  *
  * (c) GraphAware Limited <http://graphaware.com>
@@ -17,7 +17,7 @@ use Symfony\Component\EventDispatcher\Event;
 class FailureEvent extends Event
 {
     /**
-     * @var Neo4jExceptionInterface
+     * @var \GraphAware\Neo4j\Client\Exception\Neo4jExceptionInterface
      */
     protected $exception;
 
@@ -26,16 +26,13 @@ class FailureEvent extends Event
      */
     protected $shouldThrowException = true;
 
-    /**
-     * @param Neo4jExceptionInterface $exception
-     */
     public function __construct(Neo4jExceptionInterface $exception)
     {
         $this->exception = $exception;
     }
 
     /**
-     * @return Neo4jExceptionInterface
+     * @return \GraphAware\Neo4j\Client\Exception\Neo4jExceptionInterface
      */
     public function getException()
     {

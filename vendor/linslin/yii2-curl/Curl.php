@@ -8,7 +8,7 @@
  * @author    Nils Gajsek <info@linslin.org>
  * @copyright 2013-2017 Nils Gajsek <info@linslin.org>
  * @license   http://opensource.org/licenses/MIT MIT Public
- * @version   1.1.3
+ * @version   1.3.0
  * @link      http://www.linslin.org
  *
  */
@@ -16,19 +16,18 @@
 namespace linslin\yii2\curl;
 
 use Yii;
-use yii\base\Exception;
-use yii\helpers\Json;
-use yii\web\HttpException;
+
 
 /**
- * cURL class
+ * Class Curl
+ * @package linslin\yii2\curl
  */
 class Curl
 {
     // ################################################ class vars // ################################################
 
     /**
-     * @var string
+     * @var string|boolean
      * Holds response data right after sending a request.
      */
     public $response = null;
@@ -118,6 +117,7 @@ class Curl
     ];
 
 
+
     // ############################################### class methods // ##############################################
 
     /**
@@ -126,7 +126,8 @@ class Curl
      * @param string  $url
      * @param boolean $raw if response body contains JSON and should be decoded
      *
-     * @return mixed response
+     * @return mixed
+     * @throws \Exception
      */
     public function get($url, $raw = true)
     {
@@ -135,12 +136,14 @@ class Curl
     }
 
 
+
     /**
      * Start performing HEAD-HTTP-Request
      *
      * @param string $url
      *
-     * @return mixed response
+     * @return mixed
+     * @throws \Exception
      */
     public function head($url)
     {
@@ -155,7 +158,8 @@ class Curl
      * @param string  $url
      * @param boolean $raw if response body contains JSON and should be decoded
      *
-     * @return mixed response
+     * @return mixed
+     * @throws \Exception
      */
     public function post($url, $raw = true)
     {
@@ -170,7 +174,8 @@ class Curl
      * @param string  $url
      * @param boolean $raw if response body contains JSON and should be decoded
      *
-     * @return mixed response
+     * @return mixed
+     * @throws \Exception
      */
     public function put($url, $raw = true)
     {
@@ -182,10 +187,11 @@ class Curl
     /**
      * Start performing PATCH-HTTP-Request
      *
-     * @param string  $url
-     * @param boolean $raw if response body contains JSON and should be decoded
+     * @param string $url
+     * @param bool $raw if response body contains JSON and should be decoded
      *
-     * @return mixed response
+     * @return mixed
+     * @throws \Exception
      */
     public function patch($url, $raw = true)
     {
@@ -193,7 +199,7 @@ class Curl
         $this->setHeaders([
             'X-HTTP-Method-Override' => 'PATCH'
         ]);
-        return $this->_httpRequest('POST',$raw);
+        return $this->_httpRequest('PATCH',$raw);
     }
 
 
@@ -203,7 +209,8 @@ class Curl
      * @param string  $url
      * @param boolean $raw if response body contains JSON and should be decoded
      *
-     * @return mixed response
+     * @return mixed
+     * @throws \Exception
      */
     public function delete($url, $raw = true)
     {
@@ -274,6 +281,24 @@ class Curl
 
 
     /**
+     * Set raw post data allows you to post any data format.
+     *
+     * @param mixed $data
+     * @return $this
+     */
+    public function setRawPostData($data)
+    {
+        $this->setOption(
+            CURLOPT_POSTFIELDS,
+            $data
+        );
+
+        //return self
+        return $this;
+    }
+
+
+    /**
      * Set get params
      *
      * @param string $data
@@ -324,7 +349,7 @@ class Curl
 
 
     /**
-     * Set header for request
+     * Set multiple headers for request.
      *
      * @param array $headers
      *
@@ -336,6 +361,11 @@ class Curl
 
             //init
             $parsedHeader = [];
+
+            //collect currently set headers
+            foreach ($this->getRequestHeaders() as $header => $value) {
+                array_push($parsedHeader, $header.':'.$value);
+            }
 
             //parse header into right format key:value
             foreach ($headers as $header => $value) {
@@ -350,6 +380,106 @@ class Curl
         }
 
         return $this;
+    }
+
+
+    /**
+     * Set a single header for request.
+     *
+     * @param string $header
+     * @param string $value
+     *
+     * @return $this
+     */
+    public function setHeader($header, $value)
+    {
+        //init
+        $parsedHeader = [];
+
+        //collect currently set headers
+        foreach ($this->getRequestHeaders() as $headerToSet => $valueToSet) {
+            array_push($parsedHeader, $headerToSet.':'.$valueToSet);
+        }
+
+        //add override new header
+        if (strlen($header) > 0) {
+            array_push($parsedHeader, $header.':'.$value);
+        }
+
+        //set headers
+        $this->setOption(
+            CURLOPT_HTTPHEADER,
+            $parsedHeader
+        );
+
+        return $this;
+    }
+
+
+    /**
+     * Unset a single header.
+     *
+     * @param string $header
+     *
+     * @return $this
+     */
+    public function unsetHeader($header)
+    {
+        //init
+        $parsedHeader = [];
+
+        //collect currently set headers and filter "unset" header param.
+        foreach ($this->getRequestHeaders() as $headerToSet => $valueToSet) {
+            if ($header !== $headerToSet) {
+                array_push($parsedHeader, $headerToSet.':'.$valueToSet);
+            }
+        }
+
+        //set headers
+        $this->setOption(
+            CURLOPT_HTTPHEADER,
+            $parsedHeader
+        );
+
+        return $this;
+    }
+
+
+    /**
+     * Get all request headers as key:value array
+     *
+     * @return array
+     */
+    public function getRequestHeaders()
+    {
+        //Init
+        $requestHeaders = $this->getOption(CURLOPT_HTTPHEADER);
+        $parsedRequestHeaders = [];
+
+        if (is_array($requestHeaders)) {
+            foreach ($requestHeaders as $headerValue) {
+                list ($key, $value) = explode(':', $headerValue, 2);
+                $parsedRequestHeaders[$key] = $value;
+            }
+        }
+
+        return $parsedRequestHeaders;
+    }
+
+
+    /**
+     * Get specific request header as key:value array
+     *
+     * @param string $headerKey
+     *
+     * @return string|null
+     */
+    public function getRequestHeader($headerKey)
+    {
+        //Init
+        $parsedRequestHeaders = $this->getRequestHeaders();
+
+        return isset($parsedRequestHeaders[$headerKey]) ? $parsedRequestHeaders[$headerKey] : null;
     }
 
 
@@ -470,7 +600,7 @@ class Curl
      * @param string  $method
      * @param boolean $raw if response body contains JSON and should be decoded -> helper.
      *
-     * @throws Exception if request failed
+     * @throws \Exception if request failed
      *
      * @return mixed
      */
@@ -540,7 +670,7 @@ class Curl
         if ($this->getOption(CURLOPT_CUSTOMREQUEST) === 'HEAD') {
             return true;
         } else {
-            $this->response = $raw ? $this->response : Json::decode($this->response);
+            $this->response = $raw ? $this->response : json_decode($this->response, true);
             return $this->response;
         }
     }
@@ -579,7 +709,7 @@ class Curl
          */
         $this->responseLength = curl_getinfo($this->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
 
-        if((int)$this->responseLength == -1) {
+        if((int)$this->responseLength === -1) {
             $this->responseLength = strlen($this->response);
         }
     }

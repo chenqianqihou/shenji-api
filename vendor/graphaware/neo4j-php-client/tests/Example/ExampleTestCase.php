@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * This file is part of the GraphAware Neo4j Client package.
  *
  * (c) GraphAware Limited <http://graphaware.com>
@@ -22,23 +22,13 @@ abstract class ExampleTestCase extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $boltUrl = 'bolt://localhost';
-        if (isset($_ENV['NEO4J_USER'])) {
-            $boltUrl = sprintf(
-                'bolt://%s:%s@%s',
-                getenv('NEO4J_USER'),
-                getenv('NEO4J_PASSWORD'),
-                getenv('NEO4J_HOST')
-            );
-        }
-
         $this->client = ClientBuilder::create()
-            ->addConnection('default', $boltUrl)
+            ->addConnection('default', 'bolt://localhost')
             ->build();
     }
 
     public function emptyDB()
     {
-        $this->client->run('MATCH (n) DETACH DELETE n');
+        $this->client->run("MATCH (n) DETACH DELETE n");
     }
 }

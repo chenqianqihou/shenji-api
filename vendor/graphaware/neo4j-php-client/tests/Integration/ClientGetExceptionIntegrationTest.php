@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * This file is part of the GraphAware Neo4j Client package.
  *
  * (c) GraphAware Limited <http://graphaware.com>
@@ -18,21 +18,11 @@ class ClientGetExceptionIntegrationTest extends \PHPUnit_Framework_TestCase
 {
     public function testExceptionHandling()
     {
-        $boltUrl = 'bolt://localhost';
-        if (isset($_ENV['NEO4J_USER'])) {
-            $boltUrl = sprintf(
-                'bolt://%s:%s@%s',
-                getenv('NEO4J_USER'),
-                getenv('NEO4J_PASSWORD'),
-                getenv('NEO4J_HOST')
-            );
-        }
-
         $client = ClientBuilder::create()
-            ->addConnection('default', $boltUrl)
+            ->addConnection('default', 'bolt://localhost')
             ->build();
 
         $this->setExpectedException(Neo4jException::class);
-        $result = $client->run('CREATE (n:Cool');
+        $result = $client->run("CREATE (n:Cool");
     }
 }

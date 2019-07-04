@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * This file is part of the GraphAware Neo4j Client package.
  *
  * (c) GraphAware Limited <http://graphaware.com>
@@ -78,16 +78,16 @@ class StatementStatistics implements StatementStatisticsInterface
     /**
      * @param array $statistics
      */
-    public function __construct(array $statistics = [])
+    public function __construct(array $statistics = array())
     {
         $keys = [
             'contains_updates', 'nodes_created', 'nodes_deleted', 'properties_set', 'labels_added', 'labels_removed',
             'indexes_added', 'indexes_removed', 'constraints_added', 'constraints_removed', 'relationship_deleted',
-            'relationships_created',
+            'relationships_created'
         ];
 
         foreach ($statistics as $key => $value) {
-            if (!in_array($key, $keys, true)) {
+            if (!in_array($key, $keys)) {
                 throw new \InvalidArgumentException(sprintf('Key %s is invalid in statement statistics', $key));
             }
             $k = $this->toCamelCase($key);
@@ -193,14 +193,14 @@ class StatementStatistics implements StatementStatisticsInterface
 
     /**
      * @param $key
-     *
      * @return string
      */
     private function toCamelCase($key)
     {
         list($start, $end) = explode('_', $key);
-        $str = strtolower($start).ucfirst($end);
+        $str = strtolower($start) . ucfirst($end);
 
         return $str;
     }
+
 }
