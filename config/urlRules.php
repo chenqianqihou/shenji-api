@@ -11,4 +11,5 @@ return [
     'api/organization/info' => 'api/organization/info',
     'api/organization/update' => 'api/organization/update',
     'api/organization/search' => 'api/organization/search',
+    'api/organization/delete' => 'api/organization/delete',
 ];

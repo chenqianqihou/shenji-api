@@ -3,6 +3,7 @@
 namespace app\service;
 
 use app\models\OrganizationDao;
+use app\models\UserDao;
 
 class OrganizationService
 {
@@ -24,6 +25,30 @@ class OrganizationService
         $total = $res->count();
         $list = $res->offset( $start )->limit($length)->asArray()->all();
         return ['total'=>$total,'list'=>$list];
+    }
+
+    //删除机构
+    public function deleteOrganizations( $oids = [] ) {
+        if( count($oids) <= 0 ){
+            return 0;    
+        }    
+
+        foreach( $oids as $oid ){
+            if( $this->numberPeopleBelong($oid) > 0 ){
+                continue;    
+            }
+            $om = OrganizationDao::findOne($oid);
+            if( is_null($om)){
+                continue;    
+            }
+            $om->delete();
+        }
+        return true;
+    }
+
+    //检查机构下是否有人员
+    public function numberPeopleBelong( $oid ){
+        return UserDao::find()->where(['organid' => $oid])->count();    
     }
 
     //添加机构
