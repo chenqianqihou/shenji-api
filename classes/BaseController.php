@@ -226,4 +226,9 @@ class BaseController extends Controller {
         }
         return $_SERVER[$key];
     }
+
+    protected function getDistricts() {
+        $dists = Yii::$app->params['districts'];
+        return json_decode( $dists,true);
+    }
 } 
