@@ -145,5 +145,30 @@ class OrganizationController extends BaseController
         return $ret;
     }
 
+    public function actionDelete()
+    {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array ();
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $organService = new OrganizationService();
+        foreach( $this->getParams() as $oid ){
+            if( ! is_numeric($oid) ){
+                continue;    
+            }    
+            if( $organService->numberPeopleBelong($oid) > 0 ){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM);
+                $ret = $this->outputJson("$oid has people , can not be deleted.", $error);
+                return $ret;
+            }
+        }
+
+        $res = $organService->deleteOrganizations( $this->getParams());
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($res, $error);
+        return $ret;
+    }
 
 }
