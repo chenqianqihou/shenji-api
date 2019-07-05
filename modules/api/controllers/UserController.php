@@ -38,7 +38,7 @@ class UserController extends BaseController
         $userService = new UserService();
         $userInfo = $userService->getUserInfo($account);
         if (!$userInfo) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'sorry, account or password error.');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
@@ -71,12 +71,22 @@ class UserController extends BaseController
         return $ret;
     }
 
+    //用户信息
     public function actionInfo() {
         $ID = $this->data['ID'];
         $userService = new UserService();
         $userInfo = $userService->getUserInfo($ID);
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($userInfo, $error);
+        return $ret;
+    }
+
+    //用户属性下拉选配置
+    public function actionSelectconfig() {
+        $userService = new UserService();
+        $selectConfig = $userService->getSelectConfig();
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($selectConfig, $error);
         return $ret;
     }
 }

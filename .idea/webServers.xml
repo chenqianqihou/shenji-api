@@ -3,7 +3,7 @@
   <component name="WebServers">
     <option name="servers">
       <webServer id="bd57cb5a-060a-4222-ae7b-487a5b80d7ea" name="shenji-api" url="http://39.106.225.194">
-        <fileTransfer host="39.106.225.194" port="22" rootFolder="/data0/www/htdocs/shenji-api" accessType="SFTP">
+        <fileTransfer host="39.106.225.194" port="22" rootFolder="/data0/www/htdocs/shenji-glx" accessType="SFTP">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" />
           </advancedOptions>
