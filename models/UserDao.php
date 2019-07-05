@@ -15,6 +15,50 @@ class UserDao extends ActiveRecord{
         return "people";
     }
 
+    //学历
+    public static $education = [
+        1 => "中专",
+        2 => "大专",
+        3 => "大学本科",
+        4 => "硕士研究生",
+        5 => "博士研究生",
+        0 => "其他",
+    ];
+
+    //政治面貌
+    public static $political = [
+        1 => '党员',
+        2 => '团员',
+        3 => '群众',
+        4 => '其他',
+    ];
+
+    //能力等级
+    public static $level = [
+        1 => 'A',
+        2 => 'B',
+        3 => 'C',
+        4 => 'D',
+    ];
+
+    //现任职务
+    public static $position = [
+        1 => '厅长',
+        2 => '局长',
+        3 => '处长',
+        4 => '科长',
+        5 => '股长',
+        6 => '副主任科员',
+        7 => '科员',
+        8 => '其他',
+    ];
+
+    //岗位性质
+    public static $nature = [
+        1 => '业务岗位',
+        2 => '综合岗位',
+    ];
+
     //查询用户信息通过员工ID
     public function queryByID($pid) {
         $sql=sprintf('SELECT * FROM %s WHERE pid = :pid',
