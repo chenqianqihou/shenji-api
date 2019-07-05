@@ -38,7 +38,7 @@ class UserController extends BaseController
         $userService = new UserService();
         $userInfo = $userService->getUserInfo($account);
         if (!$userInfo) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'sorry, account or password error.');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
