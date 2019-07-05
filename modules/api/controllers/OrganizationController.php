@@ -135,9 +135,9 @@ class OrganizationController extends BaseController
             return $ret;
         }
         $keyword = $this->getParam('key','');
-        $otype = $this->getParam('type',-1);
+        $otype = intval($this->getParam('type',-1));
         $start = $this->getParam('start',0);
-        $length = $this->getParam('length',0);
+        $length = $this->getParam('length',10);
         $organService = new OrganizationService();
         $organList = $organService->getOrganizationList( $keyword,$otype,$start,$length );
         $error = ErrorDict::getError(ErrorDict::SUCCESS);

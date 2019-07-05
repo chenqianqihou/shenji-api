@@ -14,12 +14,12 @@ class OrganizationService
 
     // 查询机构列表
     public function getOrganizationList($keyword,$otype,$start,$length) {
-        $res = OrganizationDao::find();
+        $res = OrganizationDao::find()->where(1);
         if( $otype > 0 ){
-            $res = $res->where(['otype'=>$otype]);    
+            $res = $res->andWhere(['otype'=>$otype]);    
         }
         if( trim($keyword) != '' ){
-            $res = $res->where(['like', 'name', $keyword]);    
+            $res = $res->andWhere(['like', 'name', $keyword]);    
         }
         $total = $res->count();
         $list = $res->offset( $start )->limit($length)->asArray()->all();
