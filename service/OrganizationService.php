@@ -12,6 +12,20 @@ class OrganizationService
         return OrganizationDao::find()->where(['id' => $oid])->asArray()->one();
     }
 
+    // 查询机构列表
+    public function getOrganizationList($keyword,$otype,$start,$length) {
+        $res = OrganizationDao::find()->where(1);
+        if( $otype > 0 ){
+            $res = $res->andWhere(['otype'=>$otype]);    
+        }
+        if( trim($keyword) != '' ){
+            $res = $res->andWhere(['like', 'name', $keyword]);    
+        }
+        $total = $res->count();
+        $list = $res->offset( $start )->limit($length)->asArray()->all();
+        return ['total'=>$total,'list'=>$list];
+    }
+
     //添加机构
     public function insertOrganization( $params = []) {
         $checkres = $this->checkParams($params);
@@ -20,6 +34,46 @@ class OrganizationService
         }
 
         $organDao = new OrganizationDao;       
+        $organDao->name = $params['name'];
+        $organDao->otype = $params['otype'];
+        $organDao->deputy = $params['deputy'];
+        $organDao->regtime = $params['regtime'];
+        $organDao->regnum = $params['regnum'];
+        $organDao->regaddress = $params['regaddress'];
+        $organDao->category = $params['category'];
+        $organDao->level = $params['level'];
+        $organDao->capital = $params['capital'];
+        $organDao->workbegin = $params['workbegin'];
+        $organDao->costeng = $params['costeng'];
+        $organDao->coster = $params['coster'];
+        $organDao->accountant = $params['accountant'];
+        $organDao->highlevel = $params['highlevel'];
+        $organDao->midlevel = $params['midlevel'];
+        $organDao->retiree = $params['retiree'];
+        $organDao->parttimers = $params['parttimers'];
+        $organDao->contactor = $params['contactor'];
+        $organDao->contactphone = $params['contactphone'];
+        $organDao->contactnumber = $params['contactnumber'];
+        $organDao->officenum = $params['officenum'];
+        $organDao->officeaddress = $params['officeaddress'];
+        $res = $organDao->save();
+        
+        return [
+            'res' => $res,
+            'key' => \Yii::$app->db->lastInsertID,
+            'message' => $organDao
+        ];
+    }
+
+    //修改机构
+    public function updateOrganization( $params = []) {
+        $checkres = $this->checkParams($params);
+        if( !$checkres['res'] ){
+            return $checkres;    
+        }
+
+        $oid = $params['id'];
+        $organDao = OrganizationDao::find()->where(['id' => $oid])->one();
         $organDao->name = $params['name'];
         $organDao->otype = $params['otype'];
         $organDao->deputy = $params['deputy'];
@@ -88,6 +142,16 @@ class OrganizationService
             return $result;
         }
 
+        if( empty($params['regtime']) || strtotime( $params['regtime'] ) > time() ){
+            $result = [
+                'res' => false,
+                'key' => 'regtime',
+                'message' => 'regtime error!'
+            ];
+
+            return $result;
+        }
+
         if( empty($params['regnum']) || !is_numeric($params['regnum'])){
             $result = [
                 'res' => false,
@@ -138,7 +202,7 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['workbegin']) ){
+        if( empty($params['workbegin']) || strtotime($params['workbegin']) > time() ){
             $result = [
                 'res' => false,
                 'key' => 'workbegin',
