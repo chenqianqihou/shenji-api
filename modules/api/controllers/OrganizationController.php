@@ -223,4 +223,28 @@ class OrganizationController extends BaseController
         $ret = $this->outputJson($result, $error);
         return $ret;
     }
+
+    public function actionUsers()
+    {
+        $this->defineMethod = 'GET';
+        $this->defineParams = array (
+            'organid' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $organid = intval($this->getParam('organid',-1));
+        $start = $this->getParam('start',0);
+        $length = $this->getParam('length',10);
+        $organService = new OrganizationService();
+        $organList = $organService->getOrganizationPeopleList( $organid,$start,$length );
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($organList, $error);
+        return $ret;
+    }
+
 }

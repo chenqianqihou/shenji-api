@@ -32,6 +32,14 @@ class OrganizationService
         return ['total'=>$total,'list'=>$list];
     }
 
+    // 查询机构的用户列表
+    public function getOrganizationPeopleList($oid,$start,$length) {
+        $res = UserDao::find()->where(['organid'=>$oid]);
+        $total = $res->count();
+        $list = $res->offset( $start )->limit($length)->asArray()->all();
+        return ['total'=>$total,'list'=>$list];
+    }
+
     //删除机构
     public function deleteOrganizations( $oids = [] ) {
         if( count($oids) <= 0 ){
