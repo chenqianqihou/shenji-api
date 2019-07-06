@@ -8,6 +8,12 @@ use app\models\UserDao;
 
 class UserService
 {
+    //查询people表信息
+    public function getPeopleInfo($pid) {
+        $userDao = new UserDao();
+        $userInfo = $userDao->queryByID($pid);
+        return $userInfo;
+    }
     // 查询用户信息
     public function getUserInfo($pid) {
         $userDao = new UserDao();
@@ -20,7 +26,7 @@ class UserService
             if($techtitleInfo) {
                 $userInfo['techtitle'] = $techtitleInfo['name'];
             }else {
-                return false;
+                $userInfo['techtitle'] = "";
             }
             $expertiseArr = [];
             $expertiseIdArr = explode(',', $expertiseId);
@@ -28,12 +34,15 @@ class UserService
             foreach ($expertiseIdArr as $id) {
                 $expertiseInfo = $expertiseDao->queryById($id);
                 if ($expertiseInfo) {
-                    $expertiseArr[$expertiseInfo['id']] =  $expertiseInfo['name'];
+                    $expertiseArr[] =  $expertiseInfo['name'];
                 }else {
-                    return false;
+                   continue;
                 }
             }
             $userInfo['expertise'] = $expertiseArr;
+            $userInfo['type'] = UserDao::$type[$userInfo['type']];
+            unset($userInfo['id']);
+            unset($userInfo['passwd']);
         }
         return $userInfo;
     }
