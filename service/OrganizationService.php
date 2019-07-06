@@ -13,6 +13,11 @@ class OrganizationService
         return OrganizationDao::find()->where(['id' => $oid])->asArray()->one();
     }
 
+    // 根据type查询机构信息
+    public function getOrganizationListByType($otype) {
+        return OrganizationDao::find()->where(['otype' => $otype])->asArray()->all();
+    }
+
     // 查询机构列表
     public function getOrganizationList($keyword,$otype,$start,$length) {
         $res = OrganizationDao::find()->where(1);
@@ -155,6 +160,10 @@ class OrganizationService
             ];
 
             return $result;
+        }
+
+        if( intval($params['otype']) == 3 ){
+            return $result;    
         }
 
         if( empty($params['deputy']) ){

@@ -171,4 +171,56 @@ class OrganizationController extends BaseController
         return $ret;
     }
 
+    public function actionList() {
+        $this->defineMethod = 'GET';
+        $this->defineParams = array ();
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $organService = new OrganizationService();
+           
+        $result = [];
+        //中介列表
+        $onelist = $organService->getOrganizationListByType(1);
+        $result[] = [
+            'type' => 1,
+            'list' => $onelist
+        ];
+
+        //内审机构
+        $twolist = $organService->getOrganizationListByType(2);
+        $twores = [];
+        foreach( $twolist as $tr ){
+            $regnum = $tr['regnum'];    
+            if( !isset($twores[$regnum]) ){
+                $twores[$regnum] = [];    
+            }
+            $twores[$regnum][] = $tr;    
+        }
+        $result[] = [
+            'type' => 2,
+            'list' => $twores
+        ];
+
+        //机关机构
+        $threelist = $organService->getOrganizationListByType(3);
+        $threeres = [];
+        foreach( $threelist as $tr ){
+            $regnum = $tr['regnum'];    
+            if( !isset($threeres[$regnum]) ){
+                $threeres[$regnum] = [];    
+            }
+            $threeres[$regnum][] = $tr;    
+        }
+        $result[] = [
+            'type' => 3,
+            'list' => $threeres
+        ];
+
+
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($result, $error);
+        return $ret;
+    }
 }
