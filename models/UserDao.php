@@ -15,6 +15,12 @@ class UserDao extends ActiveRecord{
         return "people";
     }
 
+    //性别
+    public static $sex = [
+        1 => "男",
+        2 => "女",
+    ];
+
     //人员类别
     public static $type = [
         1 => "审计机关",
@@ -31,12 +37,12 @@ class UserDao extends ActiveRecord{
     
     //学历
     public static $education = [
-        1 => "中专",
-        2 => "大专",
-        3 => "大学本科",
-        4 => "硕士研究生",
-        5 => "博士研究生",
-        0 => "其他",
+        1 => "大学本科",
+        2 => "硕士研究生",
+        3 => "博士研究生",
+        4 => "大专",
+        5 => "中专",
+        6 => "其他",
     ];
 
     //政治面貌
