@@ -15,6 +15,20 @@ class UserDao extends ActiveRecord{
         return "people";
     }
 
+    //人员类别
+    public static $type = [
+        1 => "审计机关",
+        2 => "内审机构",
+        3 => "中介机构",
+    ];
+
+    //人员类别
+    public static $typeToName = [
+        "审计机关" => 1,
+        "内审机构" => 2,
+        "中介机构" => 3,
+    ];
+    
     //学历
     public static $education = [
         1 => "中专",
