@@ -13,6 +13,11 @@ class OrganizationService
         return OrganizationDao::find()->where(['id' => $oid])->asArray()->one();
     }
 
+    // 根据type查询机构信息
+    public function getOrganizationListByType($otype) {
+        return OrganizationDao::find()->where(['otype' => $otype])->asArray()->all();
+    }
+
     // 查询机构列表
     public function getOrganizationList($keyword,$otype,$start,$length) {
         $res = OrganizationDao::find()->where(1);
@@ -22,6 +27,14 @@ class OrganizationService
         if( trim($keyword) != '' ){
             $res = $res->andWhere(['like', 'name', $keyword]);    
         }
+        $total = $res->count();
+        $list = $res->offset( $start )->limit($length)->asArray()->all();
+        return ['total'=>$total,'list'=>$list];
+    }
+
+    // 查询机构的用户列表
+    public function getOrganizationPeopleList($oid,$start,$length) {
+        $res = UserDao::find()->where(['organid'=>$oid]);
         $total = $res->count();
         $list = $res->offset( $start )->limit($length)->asArray()->all();
         return ['total'=>$total,'list'=>$list];
@@ -155,6 +168,10 @@ class OrganizationService
             ];
 
             return $result;
+        }
+
+        if( intval($params['otype']) == 3 ){
+            return $result;    
         }
 
         if( empty($params['deputy']) ){
