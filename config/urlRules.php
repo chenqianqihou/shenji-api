@@ -3,6 +3,7 @@ return [
     'api/districts/list' => 'api/districts/list',
 
     'api/user/login' => 'api/user/login',
+    'api/user/add' => 'api/user/add',
     'api/user/info' => 'api/user/info',
     'api/user/selectconfig' => 'api/user/selectconfig',
 
