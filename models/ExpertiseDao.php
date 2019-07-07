@@ -41,6 +41,15 @@ class ExpertiseDao extends ActiveRecord{
         return $ret;
     }
 
+    public function deletePeopleExpertise($pid) {
+        $sql=sprintf('DELETE FROM peopleexpertise WHERE pid = :pid');
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':pid', $pid, \PDO::PARAM_STR);
+        $ret = $stmt->execute();
+        return $ret;
+    }
+
     public function queryByPid($pid) {
         $sql=sprintf('SELECT * FROM %s as e, peopleexpertise as p WHERE e.id = p.eid and pid = :pid',
             self::tableName()

@@ -41,6 +41,15 @@ class TechtitleDao extends ActiveRecord{
         return $ret;
     }
 
+    public function deletePeopletitle($pid) {
+        $sql=sprintf('DELETE FROM peopletitle where pid = :pid');
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':pid', $pid, \PDO::PARAM_STR);
+        $ret = $stmt->execute();
+        return $ret;
+    }
+
     public function queryByPid($pid) {
         $sql=sprintf('SELECT * FROM %s as t, peopletitle as p WHERE t.id = p.tid and pid = :pid',
             self::tableName()

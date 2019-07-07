@@ -27,6 +27,15 @@ class TrainDao extends ActiveRecord{
         return $ret;
     }
 
+    public function deleteTrain($pid) {
+        $sql=sprintf('DELETE FROM %s WHERE pid = :pid', self::tableName());
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':pid', $pid, \PDO::PARAM_STR);
+        $ret = $stmt->execute();
+        return $ret;
+    }
+
     public function queryByPid($pid) {
         $sql=sprintf('SELECT * FROM %s WHERE pid = :pid',
             self::tableName()

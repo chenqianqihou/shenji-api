@@ -319,6 +319,260 @@ class UserController extends BaseController
         return $ret;
     }
 
+    //修改人员信息
+    public function actionUpdate()
+    {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'pid' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'type' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'name' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'cardid' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'sex' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'phone' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'email' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'address' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'education' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'school' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'major' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'political' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'location' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'level' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'department' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'position' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'nature' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'techtitle' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'expertise' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'train' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'workbegin' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'auditbegin' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'organization' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'specialties' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'qualification' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'achievements' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'comment' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'role' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $pid = $this->getParam('pid', '');
+        $type = $this->getParam('type', '');
+        $name = $this->getParam('name', '');
+        $cardid = $this->getParam('cardid', '');
+        $sex = $this->getParam('sex', '');
+        $phone = $this->getParam('phone', '');
+        $email = $this->getParam('email', '');
+        $address = $this->getParam('address', '');
+        $education = $this->getParam('education', '');
+        $school = $this->getParam('school', '');
+        $major = $this->getParam('major', '');
+        $political = $this->getParam('political', '');
+        $location = $this->getParam('location', '');
+        $level = $this->getParam('level', '');
+        $comment = $this->getParam('comment', '');
+        $role = $this->getParam('role', '');
+        $position = $this->getParam('position', '');
+        //校验基本信息
+        //todo 校验手机号、邮箱、身份证号是否已存在
+        if (!isset(UserDao::$type[$type])) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'type is error');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+        if (!isset(UserDao::$sex[$sex])) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'sex is error');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+        if (!isset(UserDao::$education[$education])) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'education is error');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+        if (!isset(UserDao::$political[$political])) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'political is error');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+        if (!isset(UserDao::$political[$political])) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'political is error');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+        if (!isset(UserDao::$political[$political])) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'political is error');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+        $userService = new UserService();
+        //不同审计人员类别，填写不同的数据
+        if ($type == UserDao::$typeToName['审计机关']) {
+            $department = $this->getParam('department', '');
+            $nature = $this->getParam('nature', '');
+            $techtitle = $this->getParam('techtitle', '');
+            $expertise = $this->getParam('expertise', '');
+            $train = $this->getParam('train', '');
+            $workbegin = $this->getParam('workbegin', '');
+            $auditbegin = $this->getParam('auditbegin', '');
+            //校验审计机构的其他信息
+            if (!isset(UserDao::$positionToName[$position])) {
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'position is error');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            if (!isset(UserDao::$nature[$nature])) {
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'nature is error');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $workbegin = date('Y-m-d H:i:s', $workbegin);
+            $auditbegin = date('Y-m-d H:i:s', $auditbegin);
+            //todo 判断techtitle ID是否存在
+            //先删除，再重新插入
+            $techtitleDao = new TechtitleDao();
+            $techtitleDao->deletePeopletitle($pid);
+            $techtitleIdArr = explode(',', $techtitle);
+            foreach ($techtitleIdArr as $tid) {
+                $techtitleDao->addPeopletitle($pid, $tid);
+            }
+            //todo 判断expertise ID是否存在
+            //先删除，再重新插入
+            $expertiseDao = new ExpertiseDao();
+            $expertiseDao->deletePeopleExpertise($pid);
+            $expertiseIdArr = explode(',', $expertise);
+            foreach ($expertiseIdArr as $eid) {
+                $expertiseDao->addPeopleExpertise($pid, $eid);
+            }
+            //先删除，再重新插入
+            $trainDao = new TrainDao();
+            $trainDao->deleteTrain($pid);
+            foreach ($train as $oneTrain) {
+                $trainDao->addTrain($pid, $oneTrain);
+            }
+            //更新数据
+            //todo 添加事务
+            $userService->updatePeopleInfo($pid, $name, $sex, $type, 0, $department, $level, $phone, $email,
+                $cardid, $address, $education, $school, $major, $political, $nature,
+                '', '', $position, $location, $workbegin, $auditbegin, $comment);
+
+        }else {
+            $organization = $this->getParam('organization', '');
+            //todo 判断机构是否存在
+            $specialties = $this->getParam('specialties', '');
+            $qualification = $this->getParam('qualification', '');
+            $achievements = $this->getParam('achievements', '');
+            //先删除，后添加
+            $qualificationDao = new QualificationDao();
+            $qualificationDao->deleteQualification($pid);
+            $qualificationArr = $qualification;
+            $curTime = date('Y-m-d H:i:s');
+            foreach ($qualificationArr as $one) {
+                $one['time'] = date('Y-m-d', $one['time']);
+                $qualificationDao->addQualification($pid, $one['info'], $one['time']);
+            }
+            $userService->updatePeopleInfo($pid, $name, $sex, $type, $organization, '', $level, $phone, $email,
+                $cardid, $address, $education, $school, $major, $political, 0,
+                $specialties, $achievements, $position, $location, $curTime, $curTime, $comment);
+        }
+        //todo role id 是否准确
+        //先删除，后添加
+        $roleDao = new RoleDao();
+        $roleDao->deletePeopleRole($pid);
+        $roleIdArr = explode(',', $role);
+        foreach ($roleIdArr as $rid) {
+            $roleDao->addPeopleRole($pid, $rid);
+        }
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson('', $error);
+        return $ret;
+    }
+
     //用户信息
     public function actionInfo() {
         $this->defineMethod = 'POST';

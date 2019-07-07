@@ -23,6 +23,16 @@ class UserService
         return $ret;
     }
 
+    public function updatePeopleInfo($pid, $name, $sex, $type, $organId, $department, $level, $phone, $email,
+                                  $cardid, $address, $education, $school, $major, $political, $nature,
+                                  $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment) {
+        $userDao = new UserDao();
+        $ret = $userDao->updatePeople($pid, $name, $sex, $type, $organId, $department, $level, $phone, $email,
+            $cardid, $address, $education, $school, $major, $political, $nature,
+            $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment);
+        return $ret;
+    }
+
     //查询people表信息
     public function getPeopleInfo($pid) {
         $userDao = new UserDao();

@@ -41,6 +41,15 @@ class RoleDao extends ActiveRecord{
         return $ret;
     }
 
+    public function deletePeopleRole($pid) {
+        $sql=sprintf('DELETE FROM peoplerole WHERE pid = :pid');
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':pid', $pid, \PDO::PARAM_STR);
+        $ret = $stmt->execute();
+        return $ret;
+    }
+
     //查询人员有哪些角色
     public function queryByPid($pid) {
         $sql=sprintf('SELECT * FROM %s as r , peoplerole as p WHERE r.id = p.rid and pid = :pid',

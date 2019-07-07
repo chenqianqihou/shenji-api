@@ -136,6 +136,46 @@ class UserDao extends ActiveRecord{
         return $ret;
     }
 
+    public function updatePeople($pid, $name, $sex, $type, $organId, $department, $level, $phone, $email,
+                                 $cardid, $address, $education, $school, $major, $political, $nature,
+                              $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment) {
+        $sql=sprintf('UPDATE %s SET `name` = :name, sex = :sex, `type` = :type, organid = :organid,
+                              department = :department, `level` = :level, phone = :phone, email = :email, 
+                              cardid = :cardid, address = :address, education = :education, school = :school,
+                              major = :major, political = :political, nature = :nature, specialties = :specialties, 
+                              achievements = :achievements, `position` = :position, location = :location,
+                              workbegin = :workbegin, auditbegin = :auditbegin, 
+                              comment = :comment where pid = :pid', self::tableName()
+        );
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':pid', $pid, \PDO::PARAM_STR);
+        $stmt->bindParam(':name', $name, \PDO::PARAM_STR);
+        $stmt->bindParam(':sex', $sex, \PDO::PARAM_INT);
+        $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
+        $stmt->bindParam(':organid', $organId, \PDO::PARAM_INT);
+        $stmt->bindParam(':department', $department, \PDO::PARAM_STR);
+        $stmt->bindParam(':level', $level, \PDO::PARAM_INT);
+        $stmt->bindParam(':phone', $phone, \PDO::PARAM_STR);
+        $stmt->bindParam(':email', $email, \PDO::PARAM_STR);
+        $stmt->bindParam(':cardid', $cardid, \PDO::PARAM_STR);
+        $stmt->bindParam(':address', $address, \PDO::PARAM_STR);
+        $stmt->bindParam(':education', $education, \PDO::PARAM_INT);
+        $stmt->bindParam(':school', $school, \PDO::PARAM_STR);
+        $stmt->bindParam(':major', $major, \PDO::PARAM_STR);
+        $stmt->bindParam(':political', $political, \PDO::PARAM_INT);
+        $stmt->bindParam(':nature', $nature, \PDO::PARAM_INT);
+        $stmt->bindParam(':specialties', $specialties, \PDO::PARAM_STR);
+        $stmt->bindParam(':achievements', $achievements, \PDO::PARAM_STR);
+        $stmt->bindParam(':position', $position, \PDO::PARAM_STR);
+        $stmt->bindParam(':location', $location, \PDO::PARAM_STR);
+        $stmt->bindParam(':workbegin', $workbegin, \PDO::PARAM_STR);
+        $stmt->bindParam(':auditbegin', $auditbegin, \PDO::PARAM_STR);
+        $stmt->bindParam(':comment', $comment, \PDO::PARAM_STR);
+        $ret = $stmt->execute();
+        return $ret;
+    }
+
     //查询用户信息通过员工ID
     public function queryByID($pid) {
         $sql=sprintf('SELECT * FROM %s WHERE pid = :pid',
