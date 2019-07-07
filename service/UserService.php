@@ -129,6 +129,10 @@ class UserService
             $type = "";
         }
         $userDao = new UserDao();
+        $page = intval($page);
+        if ($page < 1) {
+            $page = 1;
+        }
         $start = $length * ($page - 1);
         $userList = $userDao->queryPeopleList($type, $organid, $query, $start, $length);
         foreach ($userList as $user) {
