@@ -100,11 +100,6 @@ class UserService
             foreach ($roleAllInfo as $one) {
                 $roleArr[] =  $one['rid'];
             }
-//            $organizationService = new OrganizationService();
-//            $organizationInfo = $organizationService->getOrganizationInfo($userInfo['organid']);
-//            if ($organizationInfo) {
-//                $userInfo['organization'] = $organizationInfo['name'];
-//            }
             $userInfo['organization'] = $userInfo['organid'];
             $userInfo['role'] = $roleArr;
             unset($userInfo['id']);
