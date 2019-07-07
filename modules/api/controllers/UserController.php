@@ -61,7 +61,7 @@ class UserController extends BaseController
             ->setAudience("shenji") //接收者
             ->setId("abc", true) //对当前token设置的标识
             ->setIssuedAt(time()) //token创建时间
-            ->setExpiration(time() + 3600) //过期时间
+            ->setExpiration(time() + 3600*24) //过期时间
             ->setNotBefore(time() + 5) //当前时间在这个时间前，token不能使用
             ->set('ID', $userInfo['pid'])
             ->set('name', $userInfo['name']); //自定义数据
