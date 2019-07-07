@@ -188,15 +188,19 @@ class OrganizationController extends BaseController
             'list' => $onelist
         ];
 
+        $distinct = $this->getDistrictRervMap( 520000 );
         //内审机构
         $twolist = $organService->getOrganizationListByType(2);
         $twores = [];
         foreach( $twolist as $tr ){
             $regnum = $tr['regnum'];    
             if( !isset($twores[$regnum]) ){
-                $twores[$regnum] = [];    
+                $twores[$regnum] = [
+                    'distinct'=> $distinct[$regnum],
+                    'list'=>[]
+                ];    
             }
-            $twores[$regnum][] = $tr;    
+            $twores[$regnum]['list'][] = $tr;    
         }
         $result[] = [
             'type' => 2,
@@ -209,9 +213,12 @@ class OrganizationController extends BaseController
         foreach( $threelist as $tr ){
             $regnum = $tr['regnum'];    
             if( !isset($threeres[$regnum]) ){
-                $threeres[$regnum] = [];    
+                $threeres[$regnum] = [
+                    'distinct'=> $distinct[$regnum],
+                    'list'=>[]
+                ];    
             }
-            $threeres[$regnum][] = $tr;    
+            $threeres[$regnum]['list'][] = $tr;    
         }
         $result[] = [
             'type' => 3,
