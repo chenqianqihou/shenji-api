@@ -760,6 +760,17 @@ class UserController extends BaseController
         $salt = '';
         $passwd = md5("12345678" . $salt);
         $userDao = new UserDao();
+        $userInfo = $userDao->queryByID($pid);
+        if (!$userInfo) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+        if ($userInfo['passwd'] == $passwd) {
+            $error = ErrorDict::getError(ErrorDict::SUCCESS);
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
         $ret = $userDao->updatePassword($pid, $passwd);
         if ($ret) {
             $error = ErrorDict::getError(ErrorDict::SUCCESS);
