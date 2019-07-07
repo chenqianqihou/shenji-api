@@ -121,6 +121,7 @@ class UserService
             $techtitleList[$one['id']] = $one['name'];
         }
         $selectConfig = [
+            'type' => UserDao::$type,
             'education' => UserDao::$education,
             'level' => UserDao::$level,
             'nature' => UserDao::$nature,
