@@ -168,7 +168,7 @@ class UserController extends BaseController
                 'checker' => 'noCheck',
             ),
             'organization' => array (
-                'require' => false,
+                'require' => true,
                 'checker' => 'noCheck',
             ),
             'specialties' => array (
@@ -212,6 +212,8 @@ class UserController extends BaseController
         $comment = $this->getParam('comment', '');
         $role = $this->getParam('role', '');
         $position = $this->getParam('position', '');
+        $organization = $this->getParam('organization', '');
+        //todo 判断机构是否存在
         //校验基本信息
         //todo 校验手机号、邮箱、身份证号是否已存在
         if (!isset(UserDao::$type[$type])) {
@@ -279,13 +281,11 @@ class UserController extends BaseController
             }
             //录入数据
             //todo 添加事务
-            $userService->AddPeopleInfo($pid, $name, $sex, $type, 0, $department, $level, $phone, $email,
+            $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, $department, $level, $phone, $email,
                 $passwd, $cardid, $address, $education, $school, $major, $political, $nature,
                 '', '', $position, $location, $workbegin, $auditbegin, $comment);
 
         }else {
-            $organization = $this->getParam('organization', '');
-            //todo 判断机构是否存在
             $specialties = $this->getParam('specialties', '');
             $qualification = $this->getParam('qualification', '');
             $achievements = $this->getParam('achievements', '');
@@ -450,7 +450,7 @@ class UserController extends BaseController
                 'checker' => 'noCheck',
             ),
             'organization' => array (
-                'require' => false,
+                'require' => true,
                 'checker' => 'noCheck',
             ),
             'specialties' => array (
@@ -495,6 +495,8 @@ class UserController extends BaseController
         $comment = $this->getParam('comment', '');
         $role = $this->getParam('role', '');
         $position = $this->getParam('position', '');
+        $organization = $this->getParam('organization', '');
+        //todo 判断机构是否存在
         //校验基本信息
         //todo 校验手机号、邮箱、身份证号是否已存在
         if (!isset(UserDao::$type[$type])) {
@@ -574,13 +576,11 @@ class UserController extends BaseController
             }
             //更新数据
             //todo 添加事务
-            $userService->updatePeopleInfo($pid, $name, $sex, $type, 0, $department, $level, $phone, $email,
+            $userService->updatePeopleInfo($pid, $name, $sex, $type, $organization, $department, $level, $phone, $email,
                 $cardid, $address, $education, $school, $major, $political, $nature,
                 '', '', $position, $location, $workbegin, $auditbegin, $comment);
 
         }else {
-            $organization = $this->getParam('organization', '');
-            //todo 判断机构是否存在
             $specialties = $this->getParam('specialties', '');
             $qualification = $this->getParam('qualification', '');
             $achievements = $this->getParam('achievements', '');
