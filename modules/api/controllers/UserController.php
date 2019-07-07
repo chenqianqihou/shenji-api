@@ -233,16 +233,6 @@ class UserController extends BaseController
             $ret = $this->outputJson('', $error);
             return $ret;
         }
-        if (!isset(UserDao::$political[$political])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'political is error');
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-        if (!isset(UserDao::$political[$political])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'political is error');
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
         $no = rand(10000, 20000);
         $pid = 'sj' . $no;
         $passwd = md5('12345678');
@@ -257,7 +247,7 @@ class UserController extends BaseController
             $workbegin = $this->getParam('workbegin', '');
             $auditbegin = $this->getParam('auditbegin', '');
             //校验审计机构的其他信息
-            if (!isset(UserDao::$positionToName[$position])) {
+            if (!isset(UserDao::$position[$position])) {
                 $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'position is error');
                 $ret = $this->outputJson('', $error);
                 return $ret;
