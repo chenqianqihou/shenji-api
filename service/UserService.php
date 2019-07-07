@@ -114,6 +114,45 @@ class UserService
         return $userInfo;
     }
 
+    // 用户列表
+    public function getUserList($organization, $type, $organid, $query, $length, $page) {
+        $data = [
+            'list' => [],
+            'total' => 0,
+        ];
+        $list = [];
+        //查询类型 1 所有 2 人员类型 3 具体机构
+        if ($organization == 1) {
+            $type = "";
+            $organid = "";
+        }elseif ($organization == 2) {
+            if (!isset(UserDao::$type[$type])) {
+                return $data;
+            }
+            $organid = "";
+        }else {
+            $type = "";
+        }
+        $userDao = new UserDao();
+        $start = $length * ($page - 1);
+        $userList = $userDao->queryPeopleList($type, $organid, $query, $start, $length);
+        foreach ($userList as $user) {
+            $one = [];
+            $one['name'] = $user['name'];
+            $one['pid'] = $user['pid'];
+            $one['sex'] = $user['sex'];
+            $one['type'] = $user['type'];
+            $one['level'] = $user['level'];
+            $one['location'] = $user['location'];
+            $list[] = $one;
+        }
+        $userDao = new UserDao();
+        $count = $userDao->countPeopleList($type, $organid, $query, $start, $length);
+        $data['list'] = $list;
+        $data['total'] = $count;
+        return $data;
+    }
+
     // 删除用户信息
     public function deleteUserInfo($pid, $type) {
         $tr = Yii::$app->get('db')->beginTransaction();

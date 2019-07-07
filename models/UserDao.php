@@ -189,6 +189,81 @@ class UserDao extends ActiveRecord{
         return $ret;
     }
 
+    //人员列表
+    public function queryPeopleList($type, $organid, $query, $start, $length) {
+        $condition = "";
+        if ($type != "") {
+            $condition = $condition . " type = :type ";
+        }elseif ($organid != "") {
+            $condition = $condition . " organid = :organid ";
+        }
+        if ($query != "") {
+            if ($condition != "") {
+                $condition = $condition . " and ";
+            }
+            $condition = $condition . " (name like '%$query%' or pid like '%$query%')";
+        }
+        if ($condition != "") {
+            $sql = sprintf('SELECT * FROM %s WHERE %s ',
+                self::tableName(), $condition
+            );
+        }else {
+            $sql = sprintf('SELECT * FROM %s',
+                self::tableName()
+            );
+        }
+        $sql = $sql . " limit $start, $length";
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        if ($type != "") {
+            $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
+        }elseif ($organid != "") {
+            $stmt->bindParam(':organid', $type, \PDO::PARAM_INT);
+        }
+        $stmt->execute();
+        $ret = $stmt->queryAll();
+        return $ret;
+    }
+
+    //人员列表总数
+    public function countPeopleList($type, $organid, $query, $start, $length) {
+        $condition = "";
+        if ($type != "") {
+            $condition = $condition . " type = :type ";
+        }elseif ($organid != "") {
+            $condition = $condition . " organid = :organid ";
+        }
+        if ($query != "") {
+            if ($condition != "") {
+                $condition = $condition . " and ";
+            }
+            $condition = $condition . " (name like '%$query%' or pid like '%$query%')";
+        }
+        if ($condition != "") {
+            $sql = sprintf('SELECT count(1) as c FROM %s WHERE %s ',
+                self::tableName(), $condition
+            );
+        }else {
+            $sql = sprintf('SELECT count(1) as c FROM %s',
+                self::tableName()
+            );
+        }
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        if ($type != "") {
+            $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
+        }elseif ($organid != "") {
+            $stmt->bindParam(':organid', $type, \PDO::PARAM_INT);
+        }
+        $stmt->execute();
+        $ret = $stmt->queryOne();
+        if ($ret) {
+            return $ret['c'];
+        }else {
+            return 0;
+        }
+    }
+
     //删除用户
     public function deletePeople($pid) {
         $sql=sprintf('DELETE FROM %s WHERE pid = :pid', self::tableName());

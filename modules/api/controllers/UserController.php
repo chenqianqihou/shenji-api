@@ -15,6 +15,7 @@ use app\service\UserService;
 use Yii;
 use \Lcobucci\JWT\Builder;
 use \Lcobucci\JWT\Signer\Hmac\Sha256;
+use yii\db\Exception;
 
 class UserController extends BaseController
 {
@@ -630,6 +631,59 @@ class UserController extends BaseController
         return $ret;
     }
 
+    //查询列表
+    public function actionList() {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'organization' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'type' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'organid' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'query' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'length' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'page' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        //查询类型 1 所有 2 人员类型 3 具体机构
+        $organizationArr = [1, 2, 3];
+        $organization = $this->getParam('organization');
+        $type = $this->getParam('type', '');
+        $organid = $this->getParam('organid', '');
+        $query = $this->getParam('query', '');
+        $length = $this->getParam('length');
+        $page = $this->getParam('page');
+        if (!in_array($organization, $organizationArr)) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'organization is error');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+        $userService = new UserService();
+        $data = $userService->getUserList($organization, $type, $organid, $query, $length, $page);
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($data, $error);
+        return $ret;
+    }
+
     //用户属性下拉选配置
     public function actionSelectconfig() {
         $userService = new UserService();
@@ -716,5 +770,47 @@ class UserController extends BaseController
             $ret = $this->outputJson('', $error);
             return $ret;
         }
+    }
+
+    //修改角色
+    public function actionUpdaterole()
+    {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'pid' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'role' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $pid = $this->getParam('pid', '');
+        $role = $this->getParam('role', '');
+        $tr = Yii::$app->get('db')->beginTransaction();
+        try {
+            //先删除，后添加
+            $roleDao = new RoleDao();
+            $roleDao->deletePeopleRole($pid);
+            $roleIdArr = explode(',', $role);
+            foreach ($roleIdArr as $rid) {
+                $roleDao->addPeopleRole($pid, $rid);
+            }
+            $tr->commit();
+        }catch (Exception $e) {
+            $tr->rollBack();
+            Log::addLogNode('update role exception', serialize($e->errorInfo));
+            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson('', $error);
+        return $ret;
     }
 }
