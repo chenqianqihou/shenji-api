@@ -4,6 +4,7 @@ namespace app\modules\api\controllers;
 
 use app\classes\BaseController;
 use app\classes\ErrorDict;
+use app\classes\Log;
 use app\models\ExpertiseDao;
 use app\models\QualificationDao;
 use app\models\RoleDao;
@@ -319,6 +320,51 @@ class UserController extends BaseController
         return $ret;
     }
 
+    //删除人员
+    public function actionDelete()
+    {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'pid' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $pidArr = $this->getParam('pid', '');
+        $successPid = [];
+        $failPid = [];
+        $userService = new UserService();
+        foreach ($pidArr as $pid) {
+            //todo 当人员还有项目时，不可删除
+            $peopleInfo = $userService->getPeopleInfo($pid);
+            if ($peopleInfo) {
+                $deleteRet = $userService->deleteUserInfo($pid, $peopleInfo['type']);
+                if ($deleteRet) {
+                    $successPid[] = $pid;
+                }else {
+                    $failPid[] = $pid;
+                }
+            }else {
+                $successPid[] = $pid;
+            }
+        }
+        if (count($failPid) == 0) {
+            $error = ErrorDict::getError(ErrorDict::SUCCESS);
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }else {
+            Log::addLogNode('delete user fail pid:', json_encode($failPid));
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '',
+                '部分人员删除成功');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+    }
+
     //修改人员信息
     public function actionUpdate()
     {
@@ -601,5 +647,84 @@ class UserController extends BaseController
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($selectConfig, $error);
         return $ret;
+    }
+
+    //修改用户密码
+    public function actionPwdupdate()
+    {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'old' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'new' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $old = $this->getParam('old', '');
+        $new = $this->getParam('new', '');
+        $pid = $this->data['ID'];
+        $salt = '';
+        $old = md5($old . $salt);
+        $new = md5($new . $salt);
+        $userService = new UserService();
+        $userInfo = $userService->getPeopleInfo($pid);
+        if (!$userInfo) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+        if ($old != $userInfo['passwd']) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'old password is error');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+        $userDao = new UserDao();
+        $ret = $userDao->updatePassword($pid, $new);
+        if ($ret) {
+            $error = ErrorDict::getError(ErrorDict::SUCCESS);
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }else {
+            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+    }
+
+    //重置密码
+    public function actionPwdreset()
+    {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'pid' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $pid = $this->getParam('pid', '');
+        $salt = '';
+        $passwd = md5("12345678" . $salt);
+        $userDao = new UserDao();
+        $ret = $userDao->updatePassword($pid, $passwd);
+        if ($ret) {
+            $error = ErrorDict::getError(ErrorDict::SUCCESS);
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }else {
+            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
     }
 }

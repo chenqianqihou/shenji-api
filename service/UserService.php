@@ -2,6 +2,7 @@
 
 namespace app\service;
 
+use app\classes\Log;
 use app\models\ExpertiseDao;
 use app\models\OrganizationDao;
 use app\models\QualificationDao;
@@ -10,6 +11,8 @@ use app\models\TechtitleDao;
 use app\models\TrainDao;
 use app\models\UserDao;
 use yii\web\User;
+use Yii;
+use yii\db\Exception;
 
 class UserService
 {
@@ -50,13 +53,13 @@ class UserService
                 $techtitleDao = new TechtitleDao();
                 $techtitleAllInfo = $techtitleDao->queryByPid($pid);
                 foreach ($techtitleAllInfo as $one) {
-                    $techtitleArr[] = $one['name'];
+                    $techtitleArr[] = $one['tid'];
                 }
                 $expertiseArr = [];
                 $expertiseDao = new ExpertiseDao();
                 $expertiseAllInfo = $expertiseDao->queryByPid($pid);
                 foreach ($expertiseAllInfo as $one) {
-                    $expertiseArr[] =  $one['name'];
+                    $expertiseArr[] =  $one['eid'];
                 }
                 $trainArr = [];
                 $trainDao = new TrainDao();
@@ -69,7 +72,6 @@ class UserService
                 $userInfo['train'] = $trainArr;
                 $userInfo['workbegin'] = strtotime($userInfo['workbegin']);
                 $userInfo['auditbegin'] = strtotime($userInfo['auditbegin']);
-                $userInfo['nature'] = UserDao::$nature[$userInfo['nature']];
                 unset($userInfo['specialties']);
                 unset($userInfo['achievements']);
 
@@ -96,24 +98,48 @@ class UserService
             $roleDao = new RoleDao();
             $roleAllInfo = $roleDao->queryByPid($pid);
             foreach ($roleAllInfo as $one) {
-                $roleArr[] =  $one['name'];
+                $roleArr[] =  $one['rid'];
             }
-            $organizationService = new OrganizationService();
-            $organizationInfo = $organizationService->getOrganizationInfo($userInfo['organid']);
-            if ($organizationInfo) {
-                $userInfo['organization'] = $organizationInfo['name'];
-            }
+//            $organizationService = new OrganizationService();
+//            $organizationInfo = $organizationService->getOrganizationInfo($userInfo['organid']);
+//            if ($organizationInfo) {
+//                $userInfo['organization'] = $organizationInfo['name'];
+//            }
+            $userInfo['organization'] = $userInfo['organid'];
             $userInfo['role'] = $roleArr;
-            $userInfo['type'] = UserDao::$type[$userInfo['type']];
-            $userInfo['sex'] = UserDao::$sex[$userInfo['sex']];
-            $userInfo['level'] = UserDao::$level[$userInfo['level']];
-            $userInfo['education'] = UserDao::$education[$userInfo['education']];
-            $userInfo['political'] = UserDao::$political[$userInfo['political']];
             unset($userInfo['id']);
             unset($userInfo['passwd']);
             unset($userInfo['organid']);
         }
         return $userInfo;
+    }
+
+    // 删除用户信息
+    public function deleteUserInfo($pid, $type) {
+        $tr = Yii::$app->get('db')->beginTransaction();
+        try {
+            if ($type == UserDao::$typeToName['审计机关']) {
+                $techtitleDao = new TechtitleDao();
+                $techtitleDao->deletePeopletitle($pid);
+                $expertiseDao = new ExpertiseDao();
+                $expertiseDao->deletePeopleExpertise($pid);
+                $trainDao = new TrainDao();
+                $trainDao->deleteTrain($pid);
+            } else {
+                $qualificationDao = new QualificationDao();
+                $qualificationDao->deleteQualification($pid);
+            }
+            $roleDao = new RoleDao();
+            $roleDao->deletePeopleRole($pid);
+            $userDao = new UserDao();
+            $userDao->deletePeople($pid);
+            $tr->commit();
+        }catch (Exception $e) {
+            $tr->rollBack();
+            Log::addLogNode('deleteUserException', serialize($e->errorInfo));
+            return false;
+        }
+        return true;
     }
 
     //查询人员属性下拉选的配置信息
@@ -131,6 +157,7 @@ class UserService
             $techtitleList[$one['id']] = $one['name'];
         }
         $selectConfig = [
+            'sex' => UserDao::$sex,
             'type' => UserDao::$type,
             'education' => UserDao::$education,
             'level' => UserDao::$level,

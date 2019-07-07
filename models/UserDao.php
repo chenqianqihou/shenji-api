@@ -188,4 +188,27 @@ class UserDao extends ActiveRecord{
         $ret = $stmt->queryOne();
         return $ret;
     }
+
+    //删除用户
+    public function deletePeople($pid) {
+        $sql=sprintf('DELETE FROM %s WHERE pid = :pid', self::tableName());
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':pid', $pid, \PDO::PARAM_STR);
+        $ret = $stmt->execute();
+        return $ret;
+    }
+
+    //修改用户密码
+    public function updatePassword($pid, $passwd) {
+        $sql=sprintf('UPDATE %s SET passwd = :passwd WHERE pid = :pid',
+            self::tableName()
+        );
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':pid', $pid, \PDO::PARAM_STR);
+        $stmt->bindParam(':passwd', $passwd, \PDO::PARAM_STR);
+        $ret = $stmt->execute();
+        return $ret;
+    }
 }

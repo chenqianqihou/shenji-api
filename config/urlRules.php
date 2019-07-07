@@ -4,9 +4,12 @@ return [
 
     'api/user/login' => 'api/user/login',
     'api/user/add' => 'api/user/add',
+    'api/user/delete' => 'api/user/delete',
     'api/user/update' => 'api/user/update',
     'api/user/info' => 'api/user/info',
     'api/user/selectconfig' => 'api/user/selectconfig',
+    'api/user/pwdupdate' => 'api/user/pwdupdate',
+    'api/user/pwdreset' => 'api/user/pwdreset',
 
 
     'api/organization/add' => 'api/organization/add',
