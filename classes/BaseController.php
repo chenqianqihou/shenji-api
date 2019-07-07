@@ -233,4 +233,21 @@ class BaseController extends Controller {
         $dists = Yii::$app->params['districts'];
         return json_decode( $dists,true);
     }
+
+    protected function getDistrictRervMap( $provinceid = 0) {
+        $dists = Yii::$app->params['districts'];
+        $distArr = json_decode( $dists,true);
+        ksort( $distArr );
+        $res = ['100000' => ['name'=>'中国','id'=>'100000','parent'=> []]];
+        foreach( $distArr as $k=>$v ){
+            if( intval($k) != 100000 && ( intval($k) < $provinceid || abs(intval($k) - $provinceid) >= 10000 ) ){
+                continue;    
+            }
+            ksort($v);
+            foreach( $v as $vk=>$vv){
+                $res[$vk] = ['name'=>$vv,'id'=>$vk,'parent'=> $res[$k]];    
+            }    
+        }
+        return $res;
+    }
 } 
