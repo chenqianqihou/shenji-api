@@ -156,6 +156,12 @@ class UserService
         foreach ($techtitleInfo as $one) {
             $techtitleList[$one['id']] = $one['name'];
         }
+        $roleDao = new RoleDao();
+        $roleList = [];
+        $roleAllInfo = $roleDao->queryAll();
+        foreach ($roleAllInfo as $one) {
+            $roleList[$one['id']] = $one['name'];
+        }
         $selectConfig = [
             'sex' => UserDao::$sex,
             'type' => UserDao::$type,
@@ -166,6 +172,7 @@ class UserService
             'position' => UserDao::$position,
             'expertise' => $expertiseList,
             'techtitle' => $techtitleList,
+            'role' => $roleList,
         ];
         return $selectConfig;
     }

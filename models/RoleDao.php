@@ -62,4 +62,15 @@ class RoleDao extends ActiveRecord{
         $ret = $stmt->queryAll();
         return $ret;
     }
+
+    public function queryAll() {
+        $sql=sprintf('SELECT * FROM %s',
+            self::tableName()
+        );
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->execute();
+        $ret = $stmt->queryAll();
+        return $ret;
+    }
 }
