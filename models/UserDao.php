@@ -212,7 +212,7 @@ class UserDao extends ActiveRecord{
                 self::tableName()
             );
         }
-        $sql = $sql . " limit $start, $length";
+        $sql = $sql . " order by ctime desc limit $start, $length";
         $stmt = self::getDb()->createCommand($sql);
         $stmt->prepare();
         if ($type != "") {
