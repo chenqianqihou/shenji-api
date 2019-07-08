@@ -181,14 +181,26 @@ class OrganizationController extends BaseController
         $organService = new OrganizationService();
            
         $result = [];
-        //中介列表
-        $onelist = $organService->getOrganizationListByType(1);
+        $distinct = $this->getDistrictRervMap( 520000 );
+
+        //机关机构
+        $threelist = $organService->getOrganizationListByType(3);
+        $threeres = [];
+        foreach( $threelist as $tr ){
+            $regnum = $tr['regnum'];    
+            if( !isset($threeres[$regnum]) ){
+                $threeres[$regnum] = [
+                    'distinct'=> $distinct[$regnum],
+                    'list'=>[]
+                ];    
+            }
+            $threeres[$regnum]['list'][] = $tr;    
+        }
         $result[] = [
-            'type' => 1,
-            'list' => $onelist
+            'type' => 3,
+            'list' => $threeres
         ];
 
-        $distinct = $this->getDistrictRervMap( 520000 );
         //内审机构
         $twolist = $organService->getOrganizationListByType(2);
         $twores = [];
@@ -207,22 +219,11 @@ class OrganizationController extends BaseController
             'list' => $twores
         ];
 
-        //机关机构
-        $threelist = $organService->getOrganizationListByType(3);
-        $threeres = [];
-        foreach( $threelist as $tr ){
-            $regnum = $tr['regnum'];    
-            if( !isset($threeres[$regnum]) ){
-                $threeres[$regnum] = [
-                    'distinct'=> $distinct[$regnum],
-                    'list'=>[]
-                ];    
-            }
-            $threeres[$regnum]['list'][] = $tr;    
-        }
+        //中介列表
+        $onelist = $organService->getOrganizationListByType(1);
         $result[] = [
-            'type' => 3,
-            'list' => $threeres
+            'type' => 1,
+            'list' => $onelist
         ];
 
 
