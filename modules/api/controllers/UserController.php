@@ -276,8 +276,14 @@ class UserController extends BaseController
             }
             $trainDao = new TrainDao();
             $trainArr = $train;
-            foreach ($trainArr as $train) {
-                $trainDao->addTrain($pid, $train);
+            if (is_array($trainArr)) {
+                foreach ($trainArr as $train) {
+                    $trainDao->addTrain($pid, $train);
+                }
+            }else {
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'train is error');
+                $ret = $this->outputJson('', $error);
+                return $ret;
             }
             //录入数据
             //todo 添加事务
@@ -292,9 +298,15 @@ class UserController extends BaseController
             $qualificationDao = new QualificationDao();
             $qualificationArr = $qualification;
             $curTime = date('Y-m-d H:i:s');
-            foreach ($qualificationArr as $one) {
-                $one['time'] = date('Y-m-d', $one['time']);
-                $qualificationDao->addQualification($pid, $one['info'], $one['time']);
+            if (is_array($qualificationArr)) {
+                foreach ($qualificationArr as $one) {
+                    $one['time'] = date('Y-m-d', $one['time']);
+                    $qualificationDao->addQualification($pid, $one['info'], $one['time']);
+                }
+            }else {
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'qualification is error');
+                $ret = $this->outputJson('', $error);
+                return $ret;
             }
             $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, '', $level, $phone, $email,
                 $passwd, $cardid, $address, $education, $school, $major, $political, 0,
