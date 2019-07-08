@@ -30,9 +30,9 @@ class UserDao extends ActiveRecord{
 
     //人员类别
     public static $typeToName = [
-        "审计机关" => 1,
+        "审计机关" => 3,
         "内审机构" => 2,
-        "中介机构" => 3,
+        "中介机构" => 1,
     ];
     
     //学历
