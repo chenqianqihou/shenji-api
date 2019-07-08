@@ -23,9 +23,9 @@ class UserDao extends ActiveRecord{
 
     //人员类别
     public static $type = [
-        1 => "审计机关",
+        1 => "中介机构",
         2 => "内审机构",
-        3 => "中介机构",
+        3 => "审计机关",
     ];
 
     //人员类别
