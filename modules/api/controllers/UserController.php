@@ -552,7 +552,7 @@ class UserController extends BaseController
             $workbegin = $this->getParam('workbegin', '');
             $auditbegin = $this->getParam('auditbegin', '');
             //校验审计机构的其他信息
-            if (!isset(UserDao::$positionToName[$position])) {
+            if (!isset(UserDao::$position[$position])) {
                 $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'position is error');
                 $ret = $this->outputJson('', $error);
                 return $ret;
