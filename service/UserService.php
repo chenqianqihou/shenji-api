@@ -121,7 +121,11 @@ class UserService
             $type = "";
             $organid = "";
         }elseif ($organization == 2) {
-            if (empty($type) || !isset(UserDao::$type[$type])) {
+            $type = intval($type);
+            if (empty($type)) {
+                return $data;
+            }
+            if (!isset(UserDao::$type[$type])) {
                 return $data;
             }
             $organid = "";
