@@ -583,6 +583,11 @@ class UserController extends BaseController
             //先删除，再重新插入
             $trainDao = new TrainDao();
             $trainDao->deleteTrain($pid);
+            if (!is_array($train)) {
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'train is error');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
             foreach ($train as $oneTrain) {
                 $trainDao->addTrain($pid, $oneTrain);
             }
@@ -601,6 +606,11 @@ class UserController extends BaseController
             $qualificationDao->deleteQualification($pid);
             $qualificationArr = $qualification;
             $curTime = date('Y-m-d H:i:s');
+            if (!is_array($qualificationArr)) {
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'qualification is error');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
             foreach ($qualificationArr as $one) {
                 $one['time'] = date('Y-m-d', $one['time']);
                 $qualificationDao->addQualification($pid, $one['info'], $one['time']);
