@@ -260,8 +260,8 @@ class UserController extends BaseController
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
-            $workbegin = date('Y-m-d H:i:s', $workbegin);
-            $auditbegin = date('Y-m-d H:i:s', $auditbegin);
+            $workbegin = date('Y-m-d H:i:s', intval($workbegin));
+            $auditbegin = date('Y-m-d H:i:s', intval($auditbegin));
             //todo 判断techtitle ID是否存在
             $techtitleDao = new TechtitleDao();
             $techtitleIdArr = explode(',', $techtitle);
@@ -276,14 +276,16 @@ class UserController extends BaseController
             }
             $trainDao = new TrainDao();
             $trainArr = $train;
-            if (is_array($trainArr)) {
-                foreach ($trainArr as $train) {
-                    $trainDao->addTrain($pid, $train);
+            if ($train) {
+                if (is_array($trainArr)) {
+                    foreach ($trainArr as $train) {
+                        $trainDao->addTrain($pid, $train);
+                    }
+                }else {
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'train is error');
+                    $ret = $this->outputJson('', $error);
+                    return $ret;
                 }
-            }else {
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'train is error');
-                $ret = $this->outputJson('', $error);
-                return $ret;
             }
             //录入数据
             //todo 添加事务
@@ -583,13 +585,15 @@ class UserController extends BaseController
             //先删除，再重新插入
             $trainDao = new TrainDao();
             $trainDao->deleteTrain($pid);
-            if (!is_array($train)) {
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'train is error');
-                $ret = $this->outputJson('', $error);
-                return $ret;
-            }
-            foreach ($train as $oneTrain) {
-                $trainDao->addTrain($pid, $oneTrain);
+            if ($train) {
+                if (!is_array($train)) {
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'train is error');
+                    $ret = $this->outputJson('', $error);
+                    return $ret;
+                }
+                foreach ($train as $oneTrain) {
+                    $trainDao->addTrain($pid, $oneTrain);
+                }
             }
             //更新数据
             //todo 添加事务
