@@ -251,13 +251,13 @@ class UserController extends BaseController
         $pid = 'sj' . $namePinyin;
         //判断用户名是否存在
         $userService = new UserService();
-        $i = 1;
+        $i = 0;
         $unique = false;
         while ($i < 10) {
-            $pid = 'sj' . $namePinyin . '0' . $i;
             $peopleInfo = $userService->getPeopleInfo($pid);
             if ($peopleInfo) {
                 $i++;
+                $pid = 'sj' . $namePinyin . '0' . $i;
             }else {
                 $unique = true;
                 break;
