@@ -208,7 +208,7 @@ class UserController extends BaseController
         $major = $this->getParam('major', '');
         $political = $this->getParam('political', '');
         $location = $this->getParam('location', '');
-        $level = $this->getParam('level', '');
+        $level = intval($this->getParam('level', ''));
         $comment = $this->getParam('comment', '');
         $role = $this->getParam('role', '');
         $position = $this->getParam('position', '');
@@ -507,7 +507,7 @@ class UserController extends BaseController
         $major = $this->getParam('major', '');
         $political = $this->getParam('political', '');
         $location = $this->getParam('location', '');
-        $level = $this->getParam('level', '');
+        $level = intval($this->getParam('level', ''));
         $comment = $this->getParam('comment', '');
         $role = $this->getParam('role', '');
         $position = $this->getParam('position', '');
