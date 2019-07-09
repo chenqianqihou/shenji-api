@@ -266,13 +266,19 @@ class UserController extends BaseController
             $techtitleDao = new TechtitleDao();
             $techtitleIdArr = explode(',', $techtitle);
             foreach ($techtitleIdArr as $tid) {
-                $techtitleDao->addPeopletitle($pid, $tid);
+                $tid = intval($tid);
+                if ($tid) {
+                    $techtitleDao->addPeopletitle($pid, $tid);
+                }
             }
             //todo 判断expertise ID是否存在
             $expertiseDao = new ExpertiseDao();
             $expertiseIdArr = explode(',', $expertise);
             foreach ($expertiseIdArr as $eid) {
-                $expertiseDao->addPeopleExpertise($pid, $eid);
+                $eid = intval($eid);
+                if ($eid) {
+                    $expertiseDao->addPeopleExpertise($pid, $eid);
+                }
             }
             $trainDao = new TrainDao();
             $trainArr = $train;
@@ -574,6 +580,10 @@ class UserController extends BaseController
             $techtitleDao->deletePeopletitle($pid);
             $techtitleIdArr = explode(',', $techtitle);
             foreach ($techtitleIdArr as $tid) {
+                $tid = intval($tid);
+                if ($tid) {
+                    $techtitleDao->addPeopletitle($pid, $tid);
+                }
                 $techtitleDao->addPeopletitle($pid, $tid);
             }
             //todo 判断expertise ID是否存在
@@ -582,7 +592,10 @@ class UserController extends BaseController
             $expertiseDao->deletePeopleExpertise($pid);
             $expertiseIdArr = explode(',', $expertise);
             foreach ($expertiseIdArr as $eid) {
-                $expertiseDao->addPeopleExpertise($pid, $eid);
+                $eid = intval($eid);
+                if ($eid) {
+                    $expertiseDao->addPeopleExpertise($pid, $eid);
+                }
             }
             //先删除，再重新插入
             $trainDao = new TrainDao();
