@@ -5,12 +5,14 @@ namespace app\modules\api\controllers;
 use app\classes\BaseController;
 use app\classes\ErrorDict;
 use app\classes\Log;
+use app\classes\Pinyin;
 use app\models\ExpertiseDao;
 use app\models\QualificationDao;
 use app\models\RoleDao;
 use app\models\TechtitleDao;
 use app\models\TrainDao;
 use app\models\UserDao;
+use app\service\OrganizationService;
 use app\service\UserService;
 use Yii;
 use \Lcobucci\JWT\Builder;
@@ -196,137 +198,173 @@ class UserController extends BaseController
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
-        $type = $this->getParam('type', '');
+        $type = intval($this->getParam('type', 0));
         $name = $this->getParam('name', '');
         $cardid = $this->getParam('cardid', '');
-        $sex = $this->getParam('sex', '');
+        $sex = intval($this->getParam('sex', 0));
         $phone = $this->getParam('phone', '');
         $email = $this->getParam('email', '');
         $address = $this->getParam('address', '');
-        $education = $this->getParam('education', '');
+        $education = intval($this->getParam('education', 0));
         $school = $this->getParam('school', '');
         $major = $this->getParam('major', '');
-        $political = $this->getParam('political', '');
+        $political = intval($this->getParam('political', 0));
         $location = $this->getParam('location', '');
-        $level = intval($this->getParam('level', ''));
+        $level = intval($this->getParam('level', 0));
         $comment = $this->getParam('comment', '');
-        $role = $this->getParam('role', '');
-        $position = $this->getParam('position', '');
-        $organization = $this->getParam('organization', '');
-        //todo 判断机构是否存在
+        $role = intval($this->getParam('role', 0));
+        $position = intval($this->getParam('position', 0));
+        $organization = intval($this->getParam('organization', 0));
+        $organService = new OrganizationService();
+        $organInfo = $organService->getOrganizationInfo($organization);
+        if (!$organInfo) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属机构填写错误');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
         //校验基本信息
         //todo 校验手机号、邮箱、身份证号是否已存在
         if (!isset(UserDao::$type[$type])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'type is error');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '人员类型填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if (!isset(UserDao::$sex[$sex])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'sex is error');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '性别填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if (!isset(UserDao::$education[$education])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'education is error');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '学历填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if (!isset(UserDao::$political[$political])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'political is error');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '政治面貌填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
-        $no = rand(10000, 20000);
-        $pid = 'sj' . $no;
-        $passwd = md5('12345678');
-        $userService = new UserService();
-        //不同审计人员类别，填写不同的数据
-        if ($type == UserDao::$typeToName['审计机关']) {
-            $department = $this->getParam('department', '');
-            $nature = $this->getParam('nature', '');
-            $techtitle = $this->getParam('techtitle', '');
-            $expertise = $this->getParam('expertise', '');
-            $train = $this->getParam('train', '');
-            $workbegin = $this->getParam('workbegin', '');
-            $auditbegin = $this->getParam('auditbegin', '');
-            //校验审计机构的其他信息
-            if (!isset(UserDao::$position[$position])) {
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'position is error');
-                $ret = $this->outputJson('', $error);
-                return $ret;
-            }
-            if (!isset(UserDao::$nature[$nature])) {
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'nature is error');
-                $ret = $this->outputJson('', $error);
-                return $ret;
-            }
-            $workbegin = date('Y-m-d H:i:s', intval($workbegin));
-            $auditbegin = date('Y-m-d H:i:s', intval($auditbegin));
-            //todo 判断techtitle ID是否存在
-            $techtitleDao = new TechtitleDao();
-            $techtitleIdArr = explode(',', $techtitle);
-            foreach ($techtitleIdArr as $tid) {
-                $tid = intval($tid);
-                if ($tid) {
-                    $techtitleDao->addPeopletitle($pid, $tid);
-                }
-            }
-            //todo 判断expertise ID是否存在
-            $expertiseDao = new ExpertiseDao();
-            $expertiseIdArr = explode(',', $expertise);
-            foreach ($expertiseIdArr as $eid) {
-                $eid = intval($eid);
-                if ($eid) {
-                    $expertiseDao->addPeopleExpertise($pid, $eid);
-                }
-            }
-            $trainDao = new TrainDao();
-            $trainArr = $train;
-            if ($train) {
-                if (is_array($trainArr)) {
-                    foreach ($trainArr as $train) {
-                        $trainDao->addTrain($pid, $train);
-                    }
-                }else {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'train is error');
-                    $ret = $this->outputJson('', $error);
-                    return $ret;
-                }
-            }
-            //录入数据
-            //todo 添加事务
-            $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, $department, $level, $phone, $email,
-                $passwd, $cardid, $address, $education, $school, $major, $political, $nature,
-                '', '', $position, $location, $workbegin, $auditbegin, $comment);
-
-        }else {
-            $specialties = $this->getParam('specialties', '');
-            $qualification = $this->getParam('qualification', '');
-            $achievements = $this->getParam('achievements', '');
-            $qualificationDao = new QualificationDao();
-            $qualificationArr = $qualification;
-            $curTime = date('Y-m-d H:i:s');
-            if ($qualificationArr) {
-                if (is_array($qualificationArr)) {
-                    foreach ($qualificationArr as $one) {
-                        $one['time'] = date('Y-m-d', $one['time']);
-                        $qualificationDao->addQualification($pid, $one['info'], $one['time']);
-                    }
-                }else {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'qualification is error');
-                    $ret = $this->outputJson('', $error);
-                    return $ret;
-                }
-            }
-            $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, '', $level, $phone, $email,
-                $passwd, $cardid, $address, $education, $school, $major, $political, 0,
-                $specialties, $achievements, $position, $location, $curTime, $curTime, $comment);
+        $namePinyin = Pinyin::utf8_to($name);
+        if ($namePinyin == "") {
+            $namePinyin = rand(10000, 20000);
         }
-        //todo role id 是否准确
-        $roleDao = new RoleDao();
-        $roleIdArr = explode(',', $role);
-        foreach ($roleIdArr as $rid) {
-            $roleDao->addPeopleRole($pid, $rid);
+        $pid = 'sj' . $namePinyin;
+        //判断用户名是否存在
+        $userService = new UserService();
+        $i = 1;
+        $unique = false;
+        while ($i < 10) {
+            $pid = 'sj' . $namePinyin . '0' . $i;
+            $peopleInfo = $userService->getPeopleInfo($pid);
+            if ($peopleInfo) {
+                $i++;
+            }else {
+                $unique = true;
+                break;
+            }
+        }
+        if (!$unique) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户名重复01-09已分配完成，不在分配，请联系管理员处理');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+        $passwd = md5('12345678');
+        $tr = Yii::$app->get('db')->beginTransaction();
+        try {
+            //不同审计人员类别，填写不同的数据
+            if ($type == UserDao::$typeToName['审计机关']) {
+                $department = $this->getParam('department', '');
+                $nature = intval($this->getParam('nature', 0));
+                $techtitle = $this->getParam('techtitle', '');
+                $expertise = $this->getParam('expertise', '');
+                $train = $this->getParam('train', '');
+                $workbegin = $this->getParam('workbegin', '');
+                $auditbegin = $this->getParam('auditbegin', '');
+                //校验审计机构的其他信息
+                if (!isset(UserDao::$position[$position])) {
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '现任职务填写错误');
+                    $ret = $this->outputJson('', $error);
+                    return $ret;
+                }
+                if (!isset(UserDao::$nature[$nature])) {
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '岗位性质填写错误');
+                    $ret = $this->outputJson('', $error);
+                    return $ret;
+                }
+                $workbegin = date('Y-m-d H:i:s', intval($workbegin));
+                $auditbegin = date('Y-m-d H:i:s', intval($auditbegin));
+                //todo 判断techtitle ID是否存在
+                $techtitleDao = new TechtitleDao();
+                $techtitleIdArr = explode(',', $techtitle);
+                foreach ($techtitleIdArr as $tid) {
+                    $tid = intval($tid);
+                    if ($tid) {
+                        $techtitleDao->addPeopletitle($pid, $tid);
+                    }
+                }
+                //todo 判断expertise ID是否存在
+                $expertiseDao = new ExpertiseDao();
+                $expertiseIdArr = explode(',', $expertise);
+                foreach ($expertiseIdArr as $eid) {
+                    $eid = intval($eid);
+                    if ($eid) {
+                        $expertiseDao->addPeopleExpertise($pid, $eid);
+                    }
+                }
+                $trainDao = new TrainDao();
+                $trainArr = $train;
+                if ($train) {
+                    if (is_array($trainArr)) {
+                        foreach ($trainArr as $train) {
+                            $trainDao->addTrain($pid, $train);
+                        }
+                    }else {
+                        $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '业务培训情况填写错误');
+                        $ret = $this->outputJson('', $error);
+                        return $ret;
+                    }
+                }
+                //录入数据
+                $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, $department, $level, $phone, $email,
+                    $passwd, $cardid, $address, $education, $school, $major, $political, $nature,
+                    '', '', $position, $location, $workbegin, $auditbegin, $comment);
+
+            }else {
+                $specialties = $this->getParam('specialties', '');
+                $qualification = $this->getParam('qualification', '');
+                $achievements = $this->getParam('achievements', '');
+                $qualificationDao = new QualificationDao();
+                $qualificationArr = $qualification;
+                $curTime = date('Y-m-d H:i:s');
+                if ($qualificationArr) {
+                    if (is_array($qualificationArr)) {
+                        foreach ($qualificationArr as $one) {
+                            $one['time'] = date('Y-m-d', $one['time']);
+                            $qualificationDao->addQualification($pid, $one['info'], $one['time']);
+                        }
+                    }else {
+                        $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '专业技术资质信息填写错误');
+                        $ret = $this->outputJson('', $error);
+                        return $ret;
+                    }
+                }
+                $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, '', $level, $phone, $email,
+                    $passwd, $cardid, $address, $education, $school, $major, $political, 0,
+                    $specialties, $achievements, $position, $location, $curTime, $curTime, $comment);
+            }
+            //todo role id 是否准确
+            $roleDao = new RoleDao();
+            $roleIdArr = explode(',', $role);
+            foreach ($roleIdArr as $rid) {
+                $roleDao->addPeopleRole($pid, $rid);
+            }
+            $tr->commit();
+        }catch (Exception $e) {
+            $tr->rollBack();
+            Log::addLogNode('addException', serialize($e->errorInfo));
+            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
+            $ret = $this->outputJson('', $error);
+            return $ret;
         }
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson('', $error);
@@ -501,152 +539,157 @@ class UserController extends BaseController
             return $ret;
         }
         $pid = $this->getParam('pid', '');
-        $type = $this->getParam('type', '');
+        $type = intval($this->getParam('type', 0));
         $name = $this->getParam('name', '');
         $cardid = $this->getParam('cardid', '');
-        $sex = $this->getParam('sex', '');
+        $sex = intval($this->getParam('sex', 0));
         $phone = $this->getParam('phone', '');
         $email = $this->getParam('email', '');
         $address = $this->getParam('address', '');
-        $education = $this->getParam('education', '');
+        $education = intval($this->getParam('education', 0));
         $school = $this->getParam('school', '');
         $major = $this->getParam('major', '');
-        $political = $this->getParam('political', '');
+        $political = intval($this->getParam('political', 0));
         $location = $this->getParam('location', '');
-        $level = intval($this->getParam('level', ''));
+        $level = intval($this->getParam('level', 0));
         $comment = $this->getParam('comment', '');
-        $role = $this->getParam('role', '');
+        $role = intval($this->getParam('role', 0));
         $position = $this->getParam('position', '');
-        $organization = $this->getParam('organization', '');
-        //todo 判断机构是否存在
+        $organization = intval($this->getParam('organization', 0));
+        $organService = new OrganizationService();
+        $organInfo = $organService->getOrganizationInfo($organization);
+        if (!$organInfo) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属机构填写错误');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
         //校验基本信息
         //todo 校验手机号、邮箱、身份证号是否已存在
         if (!isset(UserDao::$type[$type])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'type is error');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '人员类型填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if (!isset(UserDao::$sex[$sex])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'sex is error');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '性别填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if (!isset(UserDao::$education[$education])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'education is error');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '学历填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if (!isset(UserDao::$political[$political])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'political is error');
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-        if (!isset(UserDao::$political[$political])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'political is error');
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-        if (!isset(UserDao::$political[$political])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'political is error');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '政治面貌填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         $userService = new UserService();
-        //不同审计人员类别，填写不同的数据
-        if ($type == UserDao::$typeToName['审计机关']) {
-            $department = $this->getParam('department', '');
-            $nature = $this->getParam('nature', '');
-            $techtitle = $this->getParam('techtitle', '');
-            $expertise = $this->getParam('expertise', '');
-            $train = $this->getParam('train', '');
-            $workbegin = $this->getParam('workbegin', '');
-            $auditbegin = $this->getParam('auditbegin', '');
-            //校验审计机构的其他信息
-            if (!isset(UserDao::$position[$position])) {
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'position is error');
-                $ret = $this->outputJson('', $error);
-                return $ret;
-            }
-            if (!isset(UserDao::$nature[$nature])) {
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'nature is error');
-                $ret = $this->outputJson('', $error);
-                return $ret;
-            }
-            $workbegin = date('Y-m-d H:i:s', $workbegin);
-            $auditbegin = date('Y-m-d H:i:s', $auditbegin);
-            //todo 判断techtitle ID是否存在
-            //先删除，再重新插入
-            $techtitleDao = new TechtitleDao();
-            $techtitleDao->deletePeopletitle($pid);
-            $techtitleIdArr = explode(',', $techtitle);
-            foreach ($techtitleIdArr as $tid) {
-                $tid = intval($tid);
-                if ($tid) {
+        $tr = Yii::$app->get('db')->beginTransaction();
+        try {
+            //不同审计人员类别，填写不同的数据
+            if ($type == UserDao::$typeToName['审计机关']) {
+                $department = $this->getParam('department', '');
+                $nature = intval($this->getParam('nature', 0));
+                $techtitle = $this->getParam('techtitle', '');
+                $expertise = $this->getParam('expertise', '');
+                $train = $this->getParam('train', '');
+                $workbegin = $this->getParam('workbegin', '');
+                $auditbegin = $this->getParam('auditbegin', '');
+                //校验审计机构的其他信息
+                if (!isset(UserDao::$position[$position])) {
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '现任职务填写错误');
+                    $ret = $this->outputJson('', $error);
+                    return $ret;
+                }
+                if (!isset(UserDao::$nature[$nature])) {
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '岗位性质填写错误');
+                    $ret = $this->outputJson('', $error);
+                    return $ret;
+                }
+                $workbegin = date('Y-m-d H:i:s', $workbegin);
+                $auditbegin = date('Y-m-d H:i:s', $auditbegin);
+                //todo 判断techtitle ID是否存在
+                //先删除，再重新插入
+                $techtitleDao = new TechtitleDao();
+                $techtitleDao->deletePeopletitle($pid);
+                $techtitleIdArr = explode(',', $techtitle);
+                foreach ($techtitleIdArr as $tid) {
+                    $tid = intval($tid);
+                    if ($tid) {
+                        $techtitleDao->addPeopletitle($pid, $tid);
+                    }
                     $techtitleDao->addPeopletitle($pid, $tid);
                 }
-                $techtitleDao->addPeopletitle($pid, $tid);
-            }
-            //todo 判断expertise ID是否存在
-            //先删除，再重新插入
-            $expertiseDao = new ExpertiseDao();
-            $expertiseDao->deletePeopleExpertise($pid);
-            $expertiseIdArr = explode(',', $expertise);
-            foreach ($expertiseIdArr as $eid) {
-                $eid = intval($eid);
-                if ($eid) {
-                    $expertiseDao->addPeopleExpertise($pid, $eid);
+                //todo 判断expertise ID是否存在
+                //先删除，再重新插入
+                $expertiseDao = new ExpertiseDao();
+                $expertiseDao->deletePeopleExpertise($pid);
+                $expertiseIdArr = explode(',', $expertise);
+                foreach ($expertiseIdArr as $eid) {
+                    $eid = intval($eid);
+                    if ($eid) {
+                        $expertiseDao->addPeopleExpertise($pid, $eid);
+                    }
                 }
-            }
-            //先删除，再重新插入
-            $trainDao = new TrainDao();
-            $trainDao->deleteTrain($pid);
-            if ($train) {
-                if (!is_array($train)) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'train is error');
-                    $ret = $this->outputJson('', $error);
-                    return $ret;
+                //先删除，再重新插入
+                $trainDao = new TrainDao();
+                $trainDao->deleteTrain($pid);
+                if ($train) {
+                    if (!is_array($train)) {
+                        $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '业务培训情况填写错误');
+                        $ret = $this->outputJson('', $error);
+                        return $ret;
+                    }
+                    foreach ($train as $oneTrain) {
+                        $trainDao->addTrain($pid, $oneTrain);
+                    }
                 }
-                foreach ($train as $oneTrain) {
-                    $trainDao->addTrain($pid, $oneTrain);
-                }
-            }
-            //更新数据
-            //todo 添加事务
-            $userService->updatePeopleInfo($pid, $name, $sex, $type, $organization, $department, $level, $phone, $email,
-                $cardid, $address, $education, $school, $major, $political, $nature,
-                '', '', $position, $location, $workbegin, $auditbegin, $comment);
+                //更新数据
+                $userService->updatePeopleInfo($pid, $name, $sex, $type, $organization, $department, $level, $phone, $email,
+                    $cardid, $address, $education, $school, $major, $political, $nature,
+                    '', '', $position, $location, $workbegin, $auditbegin, $comment);
 
-        }else {
-            $specialties = $this->getParam('specialties', '');
-            $qualification = $this->getParam('qualification', '');
-            $achievements = $this->getParam('achievements', '');
-            //先删除，后添加
-            $qualificationDao = new QualificationDao();
-            $qualificationDao->deleteQualification($pid);
-            $qualificationArr = $qualification;
-            $curTime = date('Y-m-d H:i:s');
-            if ($qualificationArr) {
-                if (!is_array($qualificationArr)) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'qualification is error');
-                    $ret = $this->outputJson('', $error);
-                    return $ret;
+            }else {
+                $specialties = $this->getParam('specialties', '');
+                $qualification = $this->getParam('qualification', '');
+                $achievements = $this->getParam('achievements', '');
+                //先删除，后添加
+                $qualificationDao = new QualificationDao();
+                $qualificationDao->deleteQualification($pid);
+                $qualificationArr = $qualification;
+                $curTime = date('Y-m-d H:i:s');
+                if ($qualificationArr) {
+                    if (!is_array($qualificationArr)) {
+                        $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '专业技术资质信息填写错误');
+                        $ret = $this->outputJson('', $error);
+                        return $ret;
+                    }
+                    foreach ($qualificationArr as $one) {
+                        $one['time'] = date('Y-m-d', $one['time']);
+                        $qualificationDao->addQualification($pid, $one['info'], $one['time']);
+                    }
                 }
-                foreach ($qualificationArr as $one) {
-                    $one['time'] = date('Y-m-d', $one['time']);
-                    $qualificationDao->addQualification($pid, $one['info'], $one['time']);
-                }
+                $userService->updatePeopleInfo($pid, $name, $sex, $type, $organization, '', $level, $phone, $email,
+                    $cardid, $address, $education, $school, $major, $political, 0,
+                    $specialties, $achievements, $position, $location, $curTime, $curTime, $comment);
             }
-            $userService->updatePeopleInfo($pid, $name, $sex, $type, $organization, '', $level, $phone, $email,
-                $cardid, $address, $education, $school, $major, $political, 0,
-                $specialties, $achievements, $position, $location, $curTime, $curTime, $comment);
-        }
-        //todo role id 是否准确
-        //先删除，后添加
-        $roleDao = new RoleDao();
-        $roleDao->deletePeopleRole($pid);
-        $roleIdArr = explode(',', $role);
-        foreach ($roleIdArr as $rid) {
-            $roleDao->addPeopleRole($pid, $rid);
+            //todo role id 是否准确
+            //先删除，后添加
+            $roleDao = new RoleDao();
+            $roleDao->deletePeopleRole($pid);
+            $roleIdArr = explode(',', $role);
+            foreach ($roleIdArr as $rid) {
+                $roleDao->addPeopleRole($pid, $rid);
+            }
+            $tr->commit();
+        }catch (Exception $e) {
+            $tr->rollBack();
+            Log::addLogNode('addException', serialize($e->errorInfo));
+            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
+            $ret = $this->outputJson('', $error);
+            return $ret;
         }
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson('', $error);

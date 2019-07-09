@@ -143,6 +143,7 @@ class UserService
         }
         $start = $length * ($page - 1);
         $userList = $userDao->queryPeopleList($type, $organid, $query, $start, $length);
+        $roleDao = new RoleDao();
         foreach ($userList as $user) {
             $one = [];
             $one['name'] = $user['name'];
@@ -151,6 +152,14 @@ class UserService
             $one['type'] = $user['type'];
             $one['level'] = $user['level'];
             $one['location'] = $user['location'];
+            $roleList = [];
+            $roleInfo = $roleDao->queryByPid($user['pid']);
+            if ($roleInfo) {
+                foreach ($roleInfo as $role) {
+                    $roleList[] = $role['id'];
+                }
+            }
+            $one['role'] = $roleList;
             $list[] = $one;
         }
         $userDao = new UserDao();
