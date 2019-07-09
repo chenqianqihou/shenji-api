@@ -132,6 +132,9 @@ class UserService
         }else {
             $type = "";
             $organid = intval($organid);
+            if (empty($organid)) {
+                return $data;
+            }
         }
         $userDao = new UserDao();
         $page = intval($page);

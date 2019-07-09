@@ -218,7 +218,7 @@ class UserDao extends ActiveRecord{
         if ($type != "") {
             $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
         }elseif ($organid != "") {
-            $stmt->bindParam(':organid', $type, \PDO::PARAM_INT);
+            $stmt->bindParam(':organid', $organid, \PDO::PARAM_INT);
         }
         $stmt->execute();
         $ret = $stmt->queryAll();
