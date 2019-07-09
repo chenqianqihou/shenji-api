@@ -300,15 +300,17 @@ class UserController extends BaseController
             $qualificationDao = new QualificationDao();
             $qualificationArr = $qualification;
             $curTime = date('Y-m-d H:i:s');
-            if (is_array($qualificationArr)) {
-                foreach ($qualificationArr as $one) {
-                    $one['time'] = date('Y-m-d', $one['time']);
-                    $qualificationDao->addQualification($pid, $one['info'], $one['time']);
+            if ($qualificationArr) {
+                if (is_array($qualificationArr)) {
+                    foreach ($qualificationArr as $one) {
+                        $one['time'] = date('Y-m-d', $one['time']);
+                        $qualificationDao->addQualification($pid, $one['info'], $one['time']);
+                    }
+                }else {
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'qualification is error');
+                    $ret = $this->outputJson('', $error);
+                    return $ret;
                 }
-            }else {
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'qualification is error');
-                $ret = $this->outputJson('', $error);
-                return $ret;
             }
             $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, '', $level, $phone, $email,
                 $passwd, $cardid, $address, $education, $school, $major, $political, 0,
@@ -610,14 +612,16 @@ class UserController extends BaseController
             $qualificationDao->deleteQualification($pid);
             $qualificationArr = $qualification;
             $curTime = date('Y-m-d H:i:s');
-            if (!is_array($qualificationArr)) {
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'qualification is error');
-                $ret = $this->outputJson('', $error);
-                return $ret;
-            }
-            foreach ($qualificationArr as $one) {
-                $one['time'] = date('Y-m-d', $one['time']);
-                $qualificationDao->addQualification($pid, $one['info'], $one['time']);
+            if ($qualificationArr) {
+                if (!is_array($qualificationArr)) {
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'qualification is error');
+                    $ret = $this->outputJson('', $error);
+                    return $ret;
+                }
+                foreach ($qualificationArr as $one) {
+                    $one['time'] = date('Y-m-d', $one['time']);
+                    $qualificationDao->addQualification($pid, $one['info'], $one['time']);
+                }
             }
             $userService->updatePeopleInfo($pid, $name, $sex, $type, $organization, '', $level, $phone, $email,
                 $cardid, $address, $education, $school, $major, $political, 0,
