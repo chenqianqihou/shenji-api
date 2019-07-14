@@ -148,13 +148,18 @@ class OrganizationController extends BaseController
     public function actionDelete()
     {
         $this->defineMethod = 'POST';
-        $this->defineParams = array ();
+        $this->defineParams = array (
+            'oid' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
         if (false === $this->check()) {
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
         $organService = new OrganizationService();
-        foreach( $this->getParams() as $oid ){
+        foreach( $this->getParam('oid') as $oid ){
             if( ! is_numeric($oid) ){
                 continue;    
             }    

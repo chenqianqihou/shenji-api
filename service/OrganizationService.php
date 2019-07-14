@@ -303,7 +303,8 @@ class OrganizationService
 
             return $result;
         }
-
+        
+        /*
         if( empty($params['retiree']) || !is_numeric($params['retiree']) || $params['retiree'] < 0 ){
             $result = [
                 'res' => false,
@@ -323,6 +324,7 @@ class OrganizationService
 
             return $result;
         }
+        */
 
         if( empty($params['contactor']) ){
             $result = [
@@ -369,6 +371,16 @@ class OrganizationService
                 'res' => false,
                 'key' => 'officeaddress',
                 'message' => 'officeaddress can not be null'
+            ];
+
+            return $result;
+        }
+
+        if( empty($params['qualiaudit']) || !in_array($params['qualiaudit'],[1,2] ) ){
+            $result = [
+                'res' => false,
+                'key' => 'qualiaudit',
+                'message' => 'qualiaudit error!'
             ];
 
             return $result;
