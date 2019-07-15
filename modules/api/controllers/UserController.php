@@ -717,6 +717,16 @@ class UserController extends BaseController
         return $ret;
     }
 
+    //个人信息
+    public function actionMy() {
+        $pid = $this->data['ID'];
+        $userService = new UserService();
+        $userInfo = $userService->getUserInfo($pid);
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($userInfo, $error);
+        return $ret;
+    }
+
     //查询列表
     public function actionList() {
         $this->defineMethod = 'POST';
