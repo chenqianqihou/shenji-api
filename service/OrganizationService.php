@@ -184,7 +184,7 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['regtime']) || strtotime( $params['regtime'] ) > time() ){
+        if( empty($params['regtime']) || $params['regtime']  > time() ){
             $result = [
                 'res' => false,
                 'key' => 'regtime',
@@ -194,7 +194,7 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['regnum']) || !is_numeric($params['regnum'])){
+        if( empty($params['regnum']) ){
             $result = [
                 'res' => false,
                 'key' => 'regnum',
@@ -244,7 +244,7 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['workbegin']) || strtotime($params['workbegin']) > time() ){
+        if( empty($params['workbegin']) || $params['workbegin'] > time() ){
             $result = [
                 'res' => false,
                 'key' => 'workbegin',
@@ -356,7 +356,7 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['officenum']) || !is_numeric($params['officenum']) ){
+        if( empty($params['officenum']) ){
             $result = [
                 'res' => false,
                 'key' => 'officenum',
