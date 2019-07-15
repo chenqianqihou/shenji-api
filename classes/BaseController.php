@@ -121,7 +121,7 @@ class BaseController extends Controller {
     }
 
     protected function noLogin() {
-        $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户未登录');
+        $error = ErrorDict::getError(ErrorDict::ERR_NO_LOGIN, '用户未登录', '请您先登录');
         $ret = $this->outputJson('', $error);
         Yii::$app->response->data = $ret;
         Yii::$app->end();
