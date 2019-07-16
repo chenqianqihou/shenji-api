@@ -190,38 +190,44 @@ class OrganizationController extends BaseController
 
         //机关机构
         $threelist = $organService->getOrganizationListByType(3);
-        $threeres = [];
         foreach( $threelist as $tr ){
             $regnum = $tr['regnum'];    
-            if( !isset($threeres[$regnum]) ){
-                $threeres[$regnum] = [
-                    'distinct'=> $distinct[$regnum],
-                    'list'=>[]
-                ];    
+            $r1 = intval($regnum / 100) * 100;
+            if( $regnum == $distinct['id']){
+                $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'child','data'=>$tr];
+            } else {
+                if(isset($distinct['list'][$regnum])){
+                    $distinct['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'child','data'=>$tr];
+                } else {
+                    $distinct['list'][$r1]['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'child','data'=>$tr];
+                }
             }
-            $threeres[$regnum]['list'][] = $tr;    
         }
         $result[] = [
             'type' => 3,
-            'list' => $threeres
+            'list' => $distinct
         ];
 
         //内审机构
+        $distinct = $this->getDistrictRervMap( 520000 );
         $twolist = $organService->getOrganizationListByType(2);
-        $twores = [];
         foreach( $twolist as $tr ){
             $regnum = $tr['regnum'];    
-            if( !isset($twores[$regnum]) ){
-                $twores[$regnum] = [
-                    'distinct'=> $distinct[$regnum],
-                    'list'=>[]
-                ];    
+            $r1 = intval($regnum / 100) * 100;
+            if( $regnum == $distinct['id']){
+                $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'child','data'=>$tr];
+            } else {
+                if(isset($distinct['list'][$regnum])){
+                    $distinct['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'child','data'=>$tr];
+                } else {
+                    $distinct['list'][$r1]['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'child','data'=>$tr];
+                }
             }
-            $twores[$regnum]['list'][] = $tr;    
         }
+
         $result[] = [
             'type' => 2,
-            'list' => $twores
+            'list' => $distinct
         ];
 
         //中介列表

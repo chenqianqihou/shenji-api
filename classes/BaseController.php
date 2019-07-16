@@ -136,9 +136,9 @@ class BaseController extends Controller {
      */
     public function outputJson($data, $error, $statusCode = 200) {
         $ret = array(
-            'error' => $error,
-            'data'  => $data,
-        );
+                'error' => $error,
+                'data'  => $data,
+                );
 
         // 如果返回的状态码不是成功的，打印错误日志
         if (isset($error['returnCode']) && $error['returnCode'] != ErrorDict::SUCCESS) {
@@ -234,20 +234,50 @@ class BaseController extends Controller {
         return json_decode( $dists,true);
     }
 
+    /*
+       protected function getDistrictRervMap( $provinceid = 0) {
+       $dists = Yii::$app->params['districts'];
+       $distArr = json_decode( $dists,true);
+       ksort( $distArr );
+       $res = ['100000' => ['name'=>'中国','id'=>'100000','parent'=> []]];
+       foreach( $distArr as $k=>$v ){
+       if( intval($k) != 100000 && ( intval($k) < $provinceid || abs(intval($k) - $provinceid) >= 10000 ) ){
+       continue;    
+       }
+       ksort($v);
+       foreach( $v as $vk=>$vv){
+       $res[$vk] = ['name'=>$vv,'id'=>$vk,'parent'=> $res[$k]];    
+       }    
+       }
+       return $res;
+       }
+     */
+
     protected function getDistrictRervMap( $provinceid = 0) {
         $dists = Yii::$app->params['districts'];
+
         $distArr = json_decode( $dists,true);
-        ksort( $distArr );
-        $res = ['100000' => ['name'=>'中国','id'=>'100000','parent'=> []]];
+        krsort( $distArr );
+        //$res = ['100000' => ['name'=>'中国','id'=>'100000','type'=>'parent','data'=> [],'list'=>[] ]];
+        $res = [];
+
         foreach( $distArr as $k=>$v ){
-            if( intval($k) != 100000 && ( intval($k) < $provinceid || abs(intval($k) - $provinceid) >= 10000 ) ){
-                continue;    
+            krsort($v);
+            if( !isset($res[$k]) ){
+                $res[$k] =  ['name'=>'','id'=>$k,'type'=>'parent','data'=> [],'list'=>[] ];
             }
-            ksort($v);
             foreach( $v as $vk=>$vv){
-                $res[$vk] = ['name'=>$vv,'id'=>$vk,'parent'=> $res[$k]];    
-            }    
+                if( isset($res[$vk]) ){
+                    $res[$vk]['name'] = $vv;
+                }else{
+                    $res[$vk] =  ['name'=>$vv,'id'=>$vk,'type'=>'parent','data'=> [],'list'=>[] ];
+                }
+                $res[$k]['list'][$vk] = $res[$vk];
+                unset( $res[$vk] );
+            }
         }
-        return $res;
+
+        return $res['100000']['list'][$provinceid];
     }
+
 } 
