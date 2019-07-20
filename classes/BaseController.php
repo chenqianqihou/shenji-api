@@ -260,7 +260,18 @@ class BaseController extends Controller {
         krsort( $distArr );
         //$res = ['100000' => ['name'=>'中国','id'=>'100000','type'=>'parent','data'=> [],'list'=>[] ]];
         $res = [];
-
+        foreach( $distArr['100000'] as $k=>$v ){
+            if( !isset($res[$k]) ){
+                $res[$k] =  ['name'=>$v,'id'=>$k,'type'=>'parent','data'=> [],'list'=>[] ];
+            }
+            if( !isset($distArr[$k]) ){
+                continue;    
+            }
+            foreach( $distArr[$k] as $vk=>$vv){
+                $res[$k]['list'][$vk] =  ['name'=>$vv,'id'=>$vk,'type'=>'parent','data'=> [],'list'=>[] ];
+            }
+        }
+        /*
         foreach( $distArr as $k=>$v ){
             krsort($v);
             if( !isset($res[$k]) ){
@@ -276,8 +287,9 @@ class BaseController extends Controller {
                 unset( $res[$vk] );
             }
         }
+        */
 
-        return $res['100000']['list'][$provinceid];
+        return $res[$provinceid];
     }
 
 } 
