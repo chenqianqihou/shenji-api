@@ -239,16 +239,29 @@ class OrganizationController extends BaseController
 
         //机关机构
         $threelist = $organService->getOrganizationListByType(3);
+        $useParArr = [];
+        foreach( $threelist as $tk=>$tr ){
+            $parid = $tr['parentid'];
+            if($parid > 0){
+                if( !isset($useParArr[$parid])){
+                    $useParArr[$parid] = [];    
+                }
+                $useParArr[$parid][$tr['id']] = $tr;
+                unset( $threelist[$tk] );
+            }
+        }
         foreach( $threelist as $tr ){
             $regnum = $tr['regnum'];    
             $r1 = intval($regnum / 100) * 100;
+
+            $usePList = isset( $useParArr[$tr['id']]) ? $useParArr[$tr['id']] : [];
             if( $regnum == $distinct['id']){
-                $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>[]];
+                $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
             } else {
                 if(isset($distinct['list'][$regnum])){
-                    $distinct['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>[]];
+                    $distinct['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
                 } else {
-                    $distinct['list'][$r1]['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>[]];
+                    $distinct['list'][$r1]['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
                 }
             }
         }
@@ -260,16 +273,29 @@ class OrganizationController extends BaseController
         //内审机构
         $distinct = $this->getDistrictRervMap( 520000 );
         $twolist = $organService->getOrganizationListByType(2);
+        $useParArr = [];
+        foreach( $twolist as $tk=>$tr ){
+            $parid = $tr['parentid'];
+            if($parid > 0){
+                if( !isset($useParArr[$parid])){
+                    $useParArr[$parid] = [];    
+                }
+                $useParArr[$parid][$tr['id']] = $tr;
+                unset( $twolist[$tk] );
+            }
+        }
+
         foreach( $twolist as $tr ){
             $regnum = $tr['regnum'];    
             $r1 = intval($regnum / 100) * 100;
+            $usePList = isset( $useParArr[$tr['id']]) ? $useParArr[$tr['id']] : [];
             if( $regnum == $distinct['id']){
-                $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>[]];
+                $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
             } else {
                 if(isset($distinct['list'][$regnum])){
-                    $distinct['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>[]];
+                    $distinct['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
                 } else {
-                    $distinct['list'][$r1]['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>[]];
+                    $distinct['list'][$r1]['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
                 }
             }
         }
