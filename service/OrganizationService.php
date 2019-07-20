@@ -387,6 +387,7 @@ class OrganizationService
             return $result;
         }
 
+/*
         if( empty($params['qualiaudit']) || !in_array($params['qualiaudit'],[1,2] ) ){
             $result = [
                 'res' => false,
@@ -396,6 +397,7 @@ class OrganizationService
 
             return $result;
         }
+        */
 
         return $result;
     }
