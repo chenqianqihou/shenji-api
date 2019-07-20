@@ -233,9 +233,13 @@ class OrganizationController extends BaseController
 
         //中介列表
         $onelist = $organService->getOrganizationListByType(1);
+        $oneres = [];
+        foreach( $onelist as $one){
+            $oneres[ $one['id'] ] = ['id'=>$one['id'],'name'=>$one['name'],'type'=>'child','data'=>$one];
+        }
         $result[] = [
             'type' => 1,
-            'list' => $onelist
+            'list' => ['name'=>'中介','id'=>1,'type'=>'parent','data'=>[],'list'=>$oneres]
         ];
 
 
