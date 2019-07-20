@@ -66,6 +66,9 @@ class BaseController extends Controller {
      * @throws \yii\web\BadRequestHttpException
      */
     public function beforeAction($action) {
+        //for debug
+        return parent::beforeAction( $action );
+
         $this->beginTime = microtime(true);
         $url = Yii::$app->request->getPathInfo();
         if ($url == 'api/user/login') {

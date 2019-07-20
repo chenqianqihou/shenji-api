@@ -13,6 +13,7 @@ return [
     'api/user/pwdreset' => 'api/user/pwdreset',
     'api/user/updaterole' => 'api/user/updaterole',
     'api/user/my' => 'api/user/my',
+    'api/user/organsexcel' => 'api/user/organsexcel',
 
     'api/organization/add' => 'api/organization/add',
     'api/organization/multiadd' => 'api/organization/multiadd',
