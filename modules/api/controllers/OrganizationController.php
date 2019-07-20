@@ -40,6 +40,54 @@ class OrganizationController extends BaseController
         return $ret;
     }
 
+    public function actionAddbyname()
+    {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'pid' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'name' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $pid = $this->getParam('pid');
+        $name = $this->getParam('name');
+
+        $organService = new OrganizationService();
+        //检查pid是否存在
+        $porgancount = $organService->getOrganizationCount( $pid );
+        if( $porgancount <= 0 ){
+            $error = ErrorDict::getError(ErrorDict::G_PARAM);
+            $error['returnMessage'] = '母机构不存在';
+            $ret = $this->outputJson([], $error);
+            return $ret;
+        }
+        $porgan = $organService->getOrganizationInfo( $pid );
+        unset( $porgan['id']);
+        unset( $porgan['ctime']);
+        unset( $porgan['utime']);
+        $porgan['name'] = $name;
+        $porgan['parentid'] = $pid;
+
+        $addres = $organService->insertOrganization( $porgan );
+        if( !$addres['res']){
+            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
+            $ret = $this->outputJson($addres, $error);
+            return $ret;
+        }
+
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($addres, $error);
+        return $ret;
+    }
+
     public function actionMultiadd()
     {
         $this->defineMethod = 'POST';
@@ -195,12 +243,12 @@ class OrganizationController extends BaseController
             $regnum = $tr['regnum'];    
             $r1 = intval($regnum / 100) * 100;
             if( $regnum == $distinct['id']){
-                $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'child','data'=>$tr];
+                $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>[]];
             } else {
                 if(isset($distinct['list'][$regnum])){
-                    $distinct['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'child','data'=>$tr];
+                    $distinct['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>[]];
                 } else {
-                    $distinct['list'][$r1]['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'child','data'=>$tr];
+                    $distinct['list'][$r1]['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>[]];
                 }
             }
         }
@@ -216,12 +264,12 @@ class OrganizationController extends BaseController
             $regnum = $tr['regnum'];    
             $r1 = intval($regnum / 100) * 100;
             if( $regnum == $distinct['id']){
-                $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'child','data'=>$tr];
+                $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>[]];
             } else {
                 if(isset($distinct['list'][$regnum])){
-                    $distinct['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'child','data'=>$tr];
+                    $distinct['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>[]];
                 } else {
-                    $distinct['list'][$r1]['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'child','data'=>$tr];
+                    $distinct['list'][$r1]['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>[]];
                 }
             }
         }
@@ -235,7 +283,7 @@ class OrganizationController extends BaseController
         $onelist = $organService->getOrganizationListByType(1);
         $oneres = [];
         foreach( $onelist as $one){
-            $oneres[ $one['id'] ] = ['id'=>$one['id'],'name'=>$one['name'],'type'=>'child','data'=>$one];
+            $oneres[ $one['id'] ] = ['id'=>$one['id'],'name'=>$one['name'],'type'=>'parent','data'=>$one,'list'=>[]];
         }
         $result[] = [
             'type' => 1,

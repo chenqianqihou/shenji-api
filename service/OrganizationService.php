@@ -8,6 +8,11 @@ use app\models\UserDao;
 class OrganizationService
 {
 
+    // 查询机构数量
+    public function getOrganizationCount($oid) {
+        return OrganizationDao::find()->where(['id' => $oid])->count();
+    }
+
     // 查询机构信息
     public function getOrganizationInfo($oid) {
         return OrganizationDao::find()->where(['id' => $oid])->asArray()->one();
@@ -94,6 +99,9 @@ class OrganizationService
         $organDao->contactnumber = $params['contactnumber'];
         $organDao->officenum = $params['officenum'];
         $organDao->officeaddress = $params['officeaddress'];
+        if( isset($params['parentid'] )){
+            $organDao->parentid = $params['parentid'];
+        }
         $res = $organDao->save();
         
         return [
@@ -134,6 +142,9 @@ class OrganizationService
         $organDao->contactnumber = $params['contactnumber'];
         $organDao->officenum = $params['officenum'];
         $organDao->officeaddress = $params['officeaddress'];
+        if( isset($params['parentid'] )){
+            $organDao->parentid = $params['parentid'];
+        }
         $res = $organDao->save();
         
         return [

@@ -15,6 +15,7 @@ return [
     'api/user/my' => 'api/user/my',
 
     'api/organization/add' => 'api/organization/add',
+    'api/organization/addbyname' => 'api/organization/addbyname',
     'api/organization/multiadd' => 'api/organization/multiadd',
     'api/organization/info' => 'api/organization/info',
     'api/organization/update' => 'api/organization/update',
