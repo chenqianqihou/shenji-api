@@ -155,12 +155,14 @@ class OrganizationController extends BaseController
         $params = $this->getParams();
 
         $organService = new OrganizationService();
+        /*
         $checkres = $organService->checkParams( $params );
         if( !$checkres['res']){
             $error = ErrorDict::getError(ErrorDict::G_PARAM);
             $ret = $this->outputJson($checkres, $error);
             return $ret;
         }
+        */
 
         $updres = $organService->updateOrganization( $params );
         if( !$updres['res']){

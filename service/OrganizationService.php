@@ -113,13 +113,13 @@ class OrganizationService
 
     //修改机构
     public function updateOrganization( $params = []) {
-        $checkres = $this->checkParams($params);
-        if( !$checkres['res'] ){
-            return $checkres;    
-        }
-
         $oid = $params['id'];
         $organDao = OrganizationDao::find()->where(['id' => $oid])->one();
+        unset( $params['id']);
+        foreach( $params as $pk=>$pv){
+            $organDao->$pk = $pv;    
+        }
+        /*
         $organDao->name = $params['name'];
         $organDao->otype = $params['otype'];
         $organDao->deputy = $params['deputy'];
@@ -142,6 +142,7 @@ class OrganizationService
         $organDao->contactnumber = $params['contactnumber'];
         $organDao->officenum = $params['officenum'];
         $organDao->officeaddress = $params['officeaddress'];
+        */
         if( isset($params['parentid'] )){
             $organDao->parentid = $params['parentid'];
         }
