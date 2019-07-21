@@ -127,12 +127,39 @@ class AuditGroupDao extends ActiveRecord{
     //查询某个项目的审计组信息
     public function queryByID($projid) {
         $sql=sprintf('SELECT a.status, p.groupid, p.roletype, p.islock, people.* FROM %s as a, peopleproject as p, people 
-            WHERE a.id = p.groupid and people.id = a.pid and projid = :projid',
+            WHERE a.id = p.groupid and people.id = p.pid and projid = :projid',
             self::tableName()
         );
         $stmt = self::getDb()->createCommand($sql);
         $stmt->prepare();
         $stmt->bindParam(':projid', $projid, \PDO::PARAM_INT);
+        $stmt->execute();
+        $ret = $stmt->queryAll();
+        return $ret;
+    }
+
+    //查询某个用户在哪些审计组
+    public function queryGroupList($pid) {
+        $sql=sprintf('SELECT a.status, p.groupid, p.roletype, p.islock, people.* FROM %s as a, peopleproject as p, people 
+            WHERE a.id = p.groupid and people.id = p.pid and a.pid = :pid',
+            self::tableName()
+        );
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':pid', $pid, \PDO::PARAM_STR);
+        $stmt->execute();
+        $ret = $stmt->queryAll();
+        return $ret;
+    }
+
+    //查询用户正在参与的审计组数量
+    public function queryUnEndGroupCount() {
+        $sql=sprintf('SELECT people.pid, count(1) as c FROM %s as a, peopleproject as p, people 
+            WHERE a.id = p.groupid and people.id = p.pid and status != %d group by people.pid',
+            self::tableName(), ProjectDao::$statusToName['项目结束']
+        );
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
         $stmt->execute();
         $ret = $stmt->queryAll();
         return $ret;

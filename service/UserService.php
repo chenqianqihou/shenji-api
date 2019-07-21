@@ -3,6 +3,7 @@
 namespace app\service;
 
 use app\classes\Log;
+use app\models\AuditGroupDao;
 use app\models\ExpertiseDao;
 use app\models\OrganizationDao;
 use app\models\QualificationDao;
@@ -143,20 +144,43 @@ class UserService
         }
         $start = $length * ($page - 1);
         $userList = $userDao->queryPeopleList($type, $organid, $query, $start, $length);
+        $organizationService = new OrganizationService();
+        $organizationInfo = [];
+        $allOrganization = $organizationService->getAllOrganization();
+        foreach ($allOrganization as $one) {
+            $organizationInfo[$one['id']] = $one['name'];
+        }
+        $auditGroupDao = new AuditGroupDao();
+        $groupCount = [];
+        $groupCountInfo = $auditGroupDao->queryUnEndGroupCount();
+        foreach ($groupCountInfo as $one) {
+            $groupCount[$one['pid']] = $one['c'];
+        }
         $roleDao = new RoleDao();
         foreach ($userList as $user) {
             $one = [];
             $one['name'] = $user['name'];
             $one['pid'] = $user['pid'];
             $one['sex'] = $user['sex'];
-            $one['type'] = $user['type'];
-            $one['level'] = $user['level'];
-            $one['location'] = $user['location'];
+            $one['organization'] = isset($organizationInfo[$user['organid']]) ? $organizationInfo[$user['organid']] : '';
+            $one['department'] = isset($organizationInfo[$user['department']]) ? $organizationInfo[$user['department']] : '';
+            if (isset($groupCount[$user['id']])) {
+                $projectnum = $groupCount[$user['id']];
+            }else {
+                $projectnum = 0;
+            }
+            if ($projectnum > 0) {
+                $status = 1; //在点
+            }else {
+                $status = 2; //不在点
+            }
+            $one['status'] = $status;
+            $one['projectnum'] = $projectnum;
             $roleList = [];
             $roleInfo = $roleDao->queryByPid($user['pid']);
             if ($roleInfo) {
                 foreach ($roleInfo as $role) {
-                    $roleList[] = $role['id'];
+                    $roleList[] = $role['rid'];
                 }
             }
             $one['role'] = $roleList;

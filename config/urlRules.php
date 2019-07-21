@@ -25,9 +25,10 @@ return [
     'api/organization/delete' => 'api/organization/delete',
     'api/organization/list' => 'api/organization/list',
     'api/organization/users' => 'api/organization/users',
+    'api/organization/departs' => 'api/organization/departs',
 
     'api/project/create' => 'api/project/create',
-    'api/project/typeconfig' => 'api/project/typeconfig',
+    'api/project/selectconfig' => 'api/project/selectconfig',
     'api/project/list' => 'api/project/list',
     'api/project/update' => 'api/project/update',
     'api/project/delete' => 'api/project/delete',
@@ -41,5 +42,4 @@ return [
     'api/auditgroup/delete' => 'api/auditgroup/delete',
     'api/auditgroup/unlock' => 'api/auditgroup/unlock',
     'api/auditgroup/updatestatus' => 'api/auditgroup/updatestatus',
-
 ];

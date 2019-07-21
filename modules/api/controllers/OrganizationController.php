@@ -347,4 +347,13 @@ class OrganizationController extends BaseController
         return $ret;
     }
 
+    public function actionDeparts(){
+        $this->defineMethod = 'GET';
+        $organService = new OrganizationService();
+        $organList = $organService->getDeparts();
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($organList, $error);
+        return $ret;
+    }
+
 }

@@ -111,7 +111,7 @@ class UserDao extends ActiveRecord{
         $stmt->bindParam(':sex', $sex, \PDO::PARAM_INT);
         $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
         $stmt->bindParam(':organid', $organId, \PDO::PARAM_INT);
-        $stmt->bindParam(':department', $department, \PDO::PARAM_STR);
+        $stmt->bindParam(':department', $department, \PDO::PARAM_INT);
         $stmt->bindParam(':level', $level, \PDO::PARAM_INT);
         $stmt->bindParam(':phone', $phone, \PDO::PARAM_STR);
         $stmt->bindParam(':email', $email, \PDO::PARAM_STR);
@@ -154,7 +154,7 @@ class UserDao extends ActiveRecord{
         $stmt->bindParam(':sex', $sex, \PDO::PARAM_INT);
         $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
         $stmt->bindParam(':organid', $organId, \PDO::PARAM_INT);
-        $stmt->bindParam(':department', $department, \PDO::PARAM_STR);
+        $stmt->bindParam(':department', $department, \PDO::PARAM_INT);
         $stmt->bindParam(':level', $level, \PDO::PARAM_INT);
         $stmt->bindParam(':phone', $phone, \PDO::PARAM_STR);
         $stmt->bindParam(':email', $email, \PDO::PARAM_STR);

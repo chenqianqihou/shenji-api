@@ -276,13 +276,25 @@ class UserController extends BaseController
         try {
             //不同审计人员类别，填写不同的数据
             if ($type == UserDao::$typeToName['审计机关']) {
-                $department = $this->getParam('department', '');
+                $department = intval($this->getParam('department', 0));
                 $nature = intval($this->getParam('nature', 0));
                 $techtitle = $this->getParam('techtitle', '');
                 $expertise = $this->getParam('expertise', '');
                 $train = $this->getParam('train', '');
                 $workbegin = $this->getParam('workbegin', '');
                 $auditbegin = $this->getParam('auditbegin', '');
+                //校验所属部门信息
+                $organInfo = $organService->getOrganizationInfo($department);
+                if (!$organInfo) {
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属部门填写错误');
+                    $ret = $this->outputJson('', $error);
+                    return $ret;
+                }
+                if ($organInfo['parentid'] != $organization) {
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属部门不在所属机构下');
+                    $ret = $this->outputJson('', $error);
+                    return $ret;
+                }
                 //校验审计机构的其他信息
                 if (!isset(UserDao::$position[$position])) {
                     $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '现任职务填写错误');
@@ -593,13 +605,25 @@ class UserController extends BaseController
         try {
             //不同审计人员类别，填写不同的数据
             if ($type == UserDao::$typeToName['审计机关']) {
-                $department = $this->getParam('department', '');
+                $department = $this->getParam('department', 0);
                 $nature = intval($this->getParam('nature', 0));
                 $techtitle = $this->getParam('techtitle', '');
                 $expertise = $this->getParam('expertise', '');
                 $train = $this->getParam('train', '');
                 $workbegin = $this->getParam('workbegin', '');
                 $auditbegin = $this->getParam('auditbegin', '');
+                //校验所属部门信息
+                $organInfo = $organService->getOrganizationInfo($department);
+                if (!$organInfo) {
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属部门填写错误');
+                    $ret = $this->outputJson('', $error);
+                    return $ret;
+                }
+                if ($organInfo['parentid'] != $organization) {
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属部门不在所属机构下');
+                    $ret = $this->outputJson('', $error);
+                    return $ret;
+                }
                 //校验审计机构的其他信息
                 if (!isset(UserDao::$position[$position])) {
                     $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '现任职务填写错误');
@@ -623,7 +647,6 @@ class UserController extends BaseController
                     if ($tid) {
                         $techtitleDao->addPeopletitle($pid, $tid);
                     }
-                    $techtitleDao->addPeopletitle($pid, $tid);
                 }
                 //todo 判断expertise ID是否存在
                 //先删除，再重新插入
@@ -689,6 +712,7 @@ class UserController extends BaseController
             $tr->commit();
         }catch (Exception $e) {
             $tr->rollBack();
+            var_dump($e);
             Log::addLogNode('addException', serialize($e->errorInfo));
             $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
             $ret = $this->outputJson('', $error);

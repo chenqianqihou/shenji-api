@@ -718,103 +718,14 @@ class ProjectController extends BaseController
         return $ret;
     }
 
-    //用户属性下拉选配置
     public function actionSelectconfig() {
-        $userService = new UserService();
-        $selectConfig = $userService->getSelectConfig();
+        $data = [];
+        $organizationService = new OrganizationService();
+        $organList = $organizationService->getDeparts();
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
-        $ret = $this->outputJson($selectConfig, $error);
+        $data['organlist'] = $organList;
+        $ret = $this->outputJson($data, $error);
         return $ret;
-    }
-
-    //修改用户密码
-    public function actionPwdupdate()
-    {
-        $this->defineMethod = 'POST';
-        $this->defineParams = array (
-            'old' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
-            'new' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
-        );
-        if (false === $this->check()) {
-            $ret = $this->outputJson(array(), $this->err);
-            return $ret;
-        }
-        $old = $this->getParam('old', '');
-        $new = $this->getParam('new', '');
-        $pid = $this->data['ID'];
-        $salt = '';
-        $old = md5($old . $salt);
-        $new = md5($new . $salt);
-        $userService = new UserService();
-        $userInfo = $userService->getPeopleInfo($pid);
-        if (!$userInfo) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-        if ($old != $userInfo['passwd']) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'old password is error');
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-        $userDao = new UserDao();
-        $ret = $userDao->updatePassword($pid, $new);
-        if ($ret) {
-            $error = ErrorDict::getError(ErrorDict::SUCCESS);
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }else {
-            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-    }
-
-    //重置密码
-    public function actionPwdreset()
-    {
-        $this->defineMethod = 'POST';
-        $this->defineParams = array (
-            'pid' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
-        );
-        if (false === $this->check()) {
-            $ret = $this->outputJson(array(), $this->err);
-            return $ret;
-        }
-        $pid = $this->getParam('pid', '');
-        $salt = '';
-        $passwd = md5("12345678" . $salt);
-        $userDao = new UserDao();
-        $userInfo = $userDao->queryByID($pid);
-        if (!$userInfo) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-        if ($userInfo['passwd'] == $passwd) {
-            $error = ErrorDict::getError(ErrorDict::SUCCESS);
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-        $ret = $userDao->updatePassword($pid, $passwd);
-        if ($ret) {
-            $error = ErrorDict::getError(ErrorDict::SUCCESS);
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }else {
-            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
     }
 
     //修改角色

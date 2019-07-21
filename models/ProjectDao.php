@@ -24,6 +24,15 @@ class ProjectDao extends ActiveRecord{
         5 => "项目结束",
     ];
 
+    //项目阶段
+    public static $statusToName = [
+        "计划阶段" => 1,
+        "实施阶段" => 2,
+        "审理阶段" => 3,
+        "报告阶段" => 4,
+        "项目结束" => 5,
+    ];
+
     //项目层级
     public static $projlevel = [
         1 => "省厅统一组织",
