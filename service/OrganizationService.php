@@ -111,6 +111,28 @@ class OrganizationService
         ];
     }
 
+    //获取departs
+    public function getDeparts(){
+        $organs = OrganizationDao::find()->where('parentid <= 0')->asArray()->all();  
+        $departs = OrganizationDao::find()->where('parentid > 0')->asArray()->all();
+
+        $organDict = [];
+        foreach( $organs as $ov){
+            $organDict[$ov['id']] = $ov;   
+            $organDict[$ov['id']]['departments'] = [];   
+        }
+
+        $departDict = [];
+        foreach( $departs as $dv){
+            $pid = $dv['parentid'];
+            if( isset($organDict[$pid]) ){
+                $organDict[$pid]['departments'][] = $dv;
+            }
+        }
+
+        return $organDict;
+    }
+
     //修改机构
     public function updateOrganization( $params = []) {
         $oid = $params['id'];

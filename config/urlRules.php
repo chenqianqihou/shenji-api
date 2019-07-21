@@ -25,4 +25,5 @@ return [
     'api/organization/delete' => 'api/organization/delete',
     'api/organization/list' => 'api/organization/list',
     'api/organization/users' => 'api/organization/users',
+    'api/organization/departs' => 'api/organization/departs',
 ];
