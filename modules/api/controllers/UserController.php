@@ -215,7 +215,7 @@ class UserController extends BaseController
         $location = $this->getParam('location', '');
         $level = intval($this->getParam('level', 0));
         $comment = $this->getParam('comment', '');
-        $role = intval($this->getParam('role', 0));
+        $role = $this->getParam('role', '');
         $position = intval($this->getParam('position', 0));
         $organization = intval($this->getParam('organization', 0));
         $organService = new OrganizationService();
@@ -568,7 +568,7 @@ class UserController extends BaseController
         $location = $this->getParam('location', '');
         $level = intval($this->getParam('level', 0));
         $comment = $this->getParam('comment', '');
-        $role = intval($this->getParam('role', 0));
+        $role = $this->getParam('role', "");
         $position = $this->getParam('position', '');
         $organization = intval($this->getParam('organization', 0));
         $organService = new OrganizationService();
