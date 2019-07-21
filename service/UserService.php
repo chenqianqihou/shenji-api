@@ -87,6 +87,7 @@ class UserService
                     $qualificationArr[] = $q;
                 }
                 $userInfo['qualification'] = $qualificationArr;
+                $userInfo['workbegin'] = strtotime($userInfo['workbegin']);
                 unset($userInfo['department']);
                 unset($userInfo['techtitle']);
                 unset($userInfo['expertise']);
