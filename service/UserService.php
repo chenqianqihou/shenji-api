@@ -91,7 +91,6 @@ class UserService
                 unset($userInfo['techtitle']);
                 unset($userInfo['expertise']);
                 unset($userInfo['train']);
-                unset($userInfo['workbegin']);
                 unset($userInfo['auditbegin']);
                 unset($userInfo['nature']);
             }

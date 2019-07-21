@@ -218,6 +218,7 @@ class UserController extends BaseController
         $role = $this->getParam('role', '');
         $position = intval($this->getParam('position', 0));
         $organization = intval($this->getParam('organization', 0));
+        $workbegin = $this->getParam('workbegin', '');
         $organService = new OrganizationService();
         $organInfo = $organService->getOrganizationInfo($organization);
         if (!$organInfo) {
@@ -281,7 +282,6 @@ class UserController extends BaseController
                 $techtitle = $this->getParam('techtitle', '');
                 $expertise = $this->getParam('expertise', '');
                 $train = $this->getParam('train', '');
-                $workbegin = $this->getParam('workbegin', '');
                 $auditbegin = $this->getParam('auditbegin', '');
                 //校验所属部门信息
                 $organInfo = $organService->getOrganizationInfo($department);
@@ -363,9 +363,10 @@ class UserController extends BaseController
                         return $ret;
                     }
                 }
+                $workbegin = date('Y-m-d H:i:s', intval($workbegin));
                 $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, 0, $level, $phone, $email,
                     $passwd, $cardid, $address, $education, $school, $major, $political, 0,
-                    $specialties, $achievements, $position, $location, $curTime, $curTime, $comment);
+                    $specialties, $achievements, $position, $location, $workbegin, $curTime, $comment);
             }
             //todo role id 是否准确
             $roleDao = new RoleDao();
@@ -571,6 +572,7 @@ class UserController extends BaseController
         $role = $this->getParam('role', "");
         $position = $this->getParam('position', '');
         $organization = intval($this->getParam('organization', 0));
+        $workbegin = $this->getParam('workbegin', '');
         $organService = new OrganizationService();
         $organInfo = $organService->getOrganizationInfo($organization);
         if (!$organInfo) {
@@ -610,7 +612,6 @@ class UserController extends BaseController
                 $techtitle = $this->getParam('techtitle', '');
                 $expertise = $this->getParam('expertise', '');
                 $train = $this->getParam('train', '');
-                $workbegin = $this->getParam('workbegin', '');
                 $auditbegin = $this->getParam('auditbegin', '');
                 //校验所属部门信息
                 $organInfo = $organService->getOrganizationInfo($department);
@@ -697,9 +698,10 @@ class UserController extends BaseController
                         $qualificationDao->addQualification($pid, $one['info'], $one['time']);
                     }
                 }
+                $workbegin = date('Y-m-d H:i:s', $workbegin);
                 $userService->updatePeopleInfo($pid, $name, $sex, $type, $organization, 0, $level, $phone, $email,
                     $cardid, $address, $education, $school, $major, $political, 0,
-                    $specialties, $achievements, $position, $location, $curTime, $curTime, $comment);
+                    $specialties, $achievements, $position, $location, $workbegin, $curTime, $comment);
             }
             //todo role id 是否准确
             //先删除，后添加
