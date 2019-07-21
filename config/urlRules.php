@@ -23,4 +23,21 @@ return [
     'api/organization/delete' => 'api/organization/delete',
     'api/organization/list' => 'api/organization/list',
     'api/organization/users' => 'api/organization/users',
+
+    'api/project/create' => 'api/project/create',
+    'api/project/typeconfig' => 'api/project/typeconfig',
+    'api/project/list' => 'api/project/list',
+    'api/project/update' => 'api/project/update',
+    'api/project/delete' => 'api/project/delete',
+    'api/project/info' => 'api/project/info',
+    'api/project/updatestatus' => 'api/project/updatestatus',
+    'api/project/auditinfo' => 'api/project/auditinfo',
+    'api/project/listselect' => 'api/project/listselect',
+
+    'api/auditgroup/add' => 'api/auditgroup/add',
+    'api/auditgroup/updaterole' => 'api/auditgroup/updaterole',
+    'api/auditgroup/delete' => 'api/auditgroup/delete',
+    'api/auditgroup/unlock' => 'api/auditgroup/unlock',
+    'api/auditgroup/updatestatus' => 'api/auditgroup/updatestatus',
+
 ];
