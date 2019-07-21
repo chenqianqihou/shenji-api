@@ -363,7 +363,7 @@ class UserController extends BaseController
                         return $ret;
                     }
                 }
-                $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, '', $level, $phone, $email,
+                $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, 0, $level, $phone, $email,
                     $passwd, $cardid, $address, $education, $school, $major, $political, 0,
                     $specialties, $achievements, $position, $location, $curTime, $curTime, $comment);
             }
@@ -697,7 +697,7 @@ class UserController extends BaseController
                         $qualificationDao->addQualification($pid, $one['info'], $one['time']);
                     }
                 }
-                $userService->updatePeopleInfo($pid, $name, $sex, $type, $organization, '', $level, $phone, $email,
+                $userService->updatePeopleInfo($pid, $name, $sex, $type, $organization, 0, $level, $phone, $email,
                     $cardid, $address, $education, $school, $major, $political, 0,
                     $specialties, $achievements, $position, $location, $curTime, $curTime, $comment);
             }
