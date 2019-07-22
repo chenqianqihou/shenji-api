@@ -4,7 +4,6 @@ namespace app\modules\api\controllers;
 
 use app\classes\BaseController;
 use app\classes\ErrorDict;
-use app\classes\Util;
 use app\classes\Log;
 use app\classes\Pinyin;
 use app\models\ExpertiseDao;
@@ -19,73 +18,11 @@ use Yii;
 use \Lcobucci\JWT\Builder;
 use \Lcobucci\JWT\Signer\Hmac\Sha256;
 use yii\db\Exception;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 
-class UserController extends BaseController
+class ProjectController extends BaseController
 {
 
-    //用户登陆
-    public function actionLogin()
-    {
-        $this->defineMethod = 'POST';
-        $this->defineParams = array (
-            'account' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
-            'pwd' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
-        );
-        if (false === $this->check()) {
-            $ret = $this->outputJson(array(), $this->err);
-            return $ret;
-        }
-        $account = $this->getParam('account', '');
-        $pwd = $this->getParam('pwd', '');
-        $salt = '';
-        $pwd = md5($pwd . $salt);
-        $userService = new UserService();
-        $userInfo = $userService->getPeopleInfo($account);
-        if (!$userInfo) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-        if ($pwd != $userInfo['passwd']) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'sorry, account or password error.');
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-        $builder = new Builder();
-        $signer  = new Sha256();
-        $secret = Yii::$app->params['secret'];
-        //设置header和payload，以下的字段都可以自定义
-        $builder->setIssuer("shenji") //发布者
-            ->setAudience("shenji") //接收者
-            ->setId("abc", true) //对当前token设置的标识
-            ->setIssuedAt(time()) //token创建时间
-            ->setExpiration(time() + 3600*24) //过期时间
-            ->setNotBefore(time() + 5) //当前时间在这个时间前，token不能使用
-            ->set('ID', $userInfo['pid'])
-            ->set('name', $userInfo['name']); //自定义数据
-        //设置签名
-        $builder->sign($signer, $secret);
-        //获取加密后的token，转为字符串
-        $token = (string)$builder->getToken();
-        $returnInfo = [
-            'token' => $token,
-        ];
-        $error = ErrorDict::getError(ErrorDict::SUCCESS);
-        $ret = $this->outputJson($returnInfo, $error);
-        return $ret;
-    }
-
-    //新建人员
-    public function actionAdd()
+    public function actionCreate()
     {
         $this->defineMethod = 'POST';
         $this->defineParams = array (
@@ -216,10 +153,9 @@ class UserController extends BaseController
         $location = $this->getParam('location', '');
         $level = intval($this->getParam('level', 0));
         $comment = $this->getParam('comment', '');
-        $role = $this->getParam('role', '');
+        $role = intval($this->getParam('role', 0));
         $position = intval($this->getParam('position', 0));
         $organization = intval($this->getParam('organization', 0));
-        $workbegin = $this->getParam('workbegin', '');
         $organService = new OrganizationService();
         $organInfo = $organService->getOrganizationInfo($organization);
         if (!$organInfo) {
@@ -278,24 +214,13 @@ class UserController extends BaseController
         try {
             //不同审计人员类别，填写不同的数据
             if ($type == UserDao::$typeToName['审计机关']) {
-                $department = intval($this->getParam('department', 0));
+                $department = $this->getParam('department', '');
                 $nature = intval($this->getParam('nature', 0));
                 $techtitle = $this->getParam('techtitle', '');
                 $expertise = $this->getParam('expertise', '');
                 $train = $this->getParam('train', '');
+                $workbegin = $this->getParam('workbegin', '');
                 $auditbegin = $this->getParam('auditbegin', '');
-                //校验所属部门信息
-                $organInfo = $organService->getOrganizationInfo($department);
-                if (!$organInfo) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属部门填写错误');
-                    $ret = $this->outputJson('', $error);
-                    return $ret;
-                }
-                if ($organInfo['parentid'] != $organization) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属部门不在所属机构下');
-                    $ret = $this->outputJson('', $error);
-                    return $ret;
-                }
                 //校验审计机构的其他信息
                 if (!isset(UserDao::$position[$position])) {
                     $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '现任职务填写错误');
@@ -364,10 +289,9 @@ class UserController extends BaseController
                         return $ret;
                     }
                 }
-                $workbegin = date('Y-m-d H:i:s', intval($workbegin));
-                $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, 0, $level, $phone, $email,
+                $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, '', $level, $phone, $email,
                     $passwd, $cardid, $address, $education, $school, $major, $political, 0,
-                    $specialties, $achievements, $position, $location, $workbegin, $curTime, $comment);
+                    $specialties, $achievements, $position, $location, $curTime, $curTime, $comment);
             }
             //todo role id 是否准确
             $roleDao = new RoleDao();
@@ -388,12 +312,11 @@ class UserController extends BaseController
         return $ret;
     }
 
-    //删除人员
     public function actionDelete()
     {
         $this->defineMethod = 'POST';
         $this->defineParams = array (
-            'pid' => array (
+            'id' => array (
                 'require' => true,
                 'checker' => 'noCheck',
             ),
@@ -402,9 +325,7 @@ class UserController extends BaseController
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
-        $pidArr = $this->getParam('pid', '');
-        $successPid = [];
-        $failPid = [];
+        $idArr = $this->getParam('id', '');
         $userService = new UserService();
         foreach ($pidArr as $pid) {
             //todo 当人员还有项目时，不可删除
@@ -570,10 +491,9 @@ class UserController extends BaseController
         $location = $this->getParam('location', '');
         $level = intval($this->getParam('level', 0));
         $comment = $this->getParam('comment', '');
-        $role = $this->getParam('role', "");
+        $role = intval($this->getParam('role', 0));
         $position = $this->getParam('position', '');
         $organization = intval($this->getParam('organization', 0));
-        $workbegin = $this->getParam('workbegin', '');
         $organService = new OrganizationService();
         $organInfo = $organService->getOrganizationInfo($organization);
         if (!$organInfo) {
@@ -608,24 +528,13 @@ class UserController extends BaseController
         try {
             //不同审计人员类别，填写不同的数据
             if ($type == UserDao::$typeToName['审计机关']) {
-                $department = $this->getParam('department', 0);
+                $department = $this->getParam('department', '');
                 $nature = intval($this->getParam('nature', 0));
                 $techtitle = $this->getParam('techtitle', '');
                 $expertise = $this->getParam('expertise', '');
                 $train = $this->getParam('train', '');
+                $workbegin = $this->getParam('workbegin', '');
                 $auditbegin = $this->getParam('auditbegin', '');
-                //校验所属部门信息
-                $organInfo = $organService->getOrganizationInfo($department);
-                if (!$organInfo) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属部门填写错误');
-                    $ret = $this->outputJson('', $error);
-                    return $ret;
-                }
-                if ($organInfo['parentid'] != $organization) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属部门不在所属机构下');
-                    $ret = $this->outputJson('', $error);
-                    return $ret;
-                }
                 //校验审计机构的其他信息
                 if (!isset(UserDao::$position[$position])) {
                     $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '现任职务填写错误');
@@ -649,6 +558,7 @@ class UserController extends BaseController
                     if ($tid) {
                         $techtitleDao->addPeopletitle($pid, $tid);
                     }
+                    $techtitleDao->addPeopletitle($pid, $tid);
                 }
                 //todo 判断expertise ID是否存在
                 //先删除，再重新插入
@@ -699,10 +609,9 @@ class UserController extends BaseController
                         $qualificationDao->addQualification($pid, $one['info'], $one['time']);
                     }
                 }
-                $workbegin = date('Y-m-d H:i:s', $workbegin);
-                $userService->updatePeopleInfo($pid, $name, $sex, $type, $organization, 0, $level, $phone, $email,
+                $userService->updatePeopleInfo($pid, $name, $sex, $type, $organization, '', $level, $phone, $email,
                     $cardid, $address, $education, $school, $major, $political, 0,
-                    $specialties, $achievements, $position, $location, $workbegin, $curTime, $comment);
+                    $specialties, $achievements, $position, $location, $curTime, $curTime, $comment);
             }
             //todo role id 是否准确
             //先删除，后添加
@@ -715,7 +624,6 @@ class UserController extends BaseController
             $tr->commit();
         }catch (Exception $e) {
             $tr->rollBack();
-            var_dump($e);
             Log::addLogNode('addException', serialize($e->errorInfo));
             $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
             $ret = $this->outputJson('', $error);
@@ -810,103 +718,14 @@ class UserController extends BaseController
         return $ret;
     }
 
-    //用户属性下拉选配置
     public function actionSelectconfig() {
-        $userService = new UserService();
-        $selectConfig = $userService->getSelectConfig();
+        $data = [];
+        $organizationService = new OrganizationService();
+        $organList = $organizationService->getDeparts();
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
-        $ret = $this->outputJson($selectConfig, $error);
+        $data['organlist'] = $organList;
+        $ret = $this->outputJson($data, $error);
         return $ret;
-    }
-
-    //修改用户密码
-    public function actionPwdupdate()
-    {
-        $this->defineMethod = 'POST';
-        $this->defineParams = array (
-            'old' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
-            'new' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
-        );
-        if (false === $this->check()) {
-            $ret = $this->outputJson(array(), $this->err);
-            return $ret;
-        }
-        $old = $this->getParam('old', '');
-        $new = $this->getParam('new', '');
-        $pid = $this->data['ID'];
-        $salt = '';
-        $old = md5($old . $salt);
-        $new = md5($new . $salt);
-        $userService = new UserService();
-        $userInfo = $userService->getPeopleInfo($pid);
-        if (!$userInfo) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-        if ($old != $userInfo['passwd']) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'old password is error');
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-        $userDao = new UserDao();
-        $ret = $userDao->updatePassword($pid, $new);
-        if ($ret) {
-            $error = ErrorDict::getError(ErrorDict::SUCCESS);
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }else {
-            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-    }
-
-    //重置密码
-    public function actionPwdreset()
-    {
-        $this->defineMethod = 'POST';
-        $this->defineParams = array (
-            'pid' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
-        );
-        if (false === $this->check()) {
-            $ret = $this->outputJson(array(), $this->err);
-            return $ret;
-        }
-        $pid = $this->getParam('pid', '');
-        $salt = '';
-        $passwd = md5("12345678" . $salt);
-        $userDao = new UserDao();
-        $userInfo = $userDao->queryByID($pid);
-        if (!$userInfo) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-        if ($userInfo['passwd'] == $passwd) {
-            $error = ErrorDict::getError(ErrorDict::SUCCESS);
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
-        $ret = $userDao->updatePassword($pid, $passwd);
-        if ($ret) {
-            $error = ErrorDict::getError(ErrorDict::SUCCESS);
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }else {
-            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
     }
 
     //修改角色
@@ -946,361 +765,6 @@ class UserController extends BaseController
             $ret = $this->outputJson('', $error);
             return $ret;
         }
-        $error = ErrorDict::getError(ErrorDict::SUCCESS);
-        $ret = $this->outputJson('', $error);
-        return $ret;
-    }
-
-    public function actionOrgansexcel() {
-        $this->defineMethod = 'GET';
-
-        $userService = new UserService();
-        $selectConfig = $userService->getSelectConfig();
-
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load(APP_PATH."/static/jiguanrenyuanluru.xlsx");
-
-        //教育学历
-        $ddedu = [];
-        foreach( $selectConfig['education'] as $ek=>$ev){
-            $ddedu[] = $ek.':'.$ev;    
-        }
-        $ddedustr = join(',',$ddedu);
-        $ddedustr = ' ,'.$ddedustr;
-
-        //政治面貌
-        $politicalarr = [];
-        foreach( $selectConfig['political'] as $pk=>$pv){
-            $politicalarr[] = $pk.':'.$pv;    
-        }
-        $politicalstr = join(',',$politicalarr);
-        $politicalstr = ' ,'.$politicalstr;
-
-        //现任职务
-        $positionarr = [];
-        foreach( $selectConfig['position'] as $pk=>$pv){
-            $positionarr[] = $pk.':'.$pv;    
-        }
-        $positionstr = join(',',$positionarr);
-        $positionstr = ' ,'.$positionstr;
-
-        //人员类型
-        $typearr = [];
-        foreach( $selectConfig['type'] as $tk=>$tv) {
-            $typearr[] = $tk.':'.$tv;    
-        }
-        $typestr = join(',',$typearr);
-        $typestr = ' ,'.$typestr;
-
-        //岗位性质
-        $naturearr = [];
-        foreach( $selectConfig['nature'] as $tk=>$tv) {
-            $naturearr[] = $tk.':'.$tv;    
-        }
-        $naturestr = join(',',$naturearr);
-        $naturestr = ' ,'.$naturestr;
-
-        //专业技术职称
-        $techtitlestr = join(' / ', $selectConfig['techtitle']);
-
-        //审计特长
-        $expertisestr = join(' / ', $selectConfig['expertise']);
-
-        //角色配置
-        $rolestr = join(' / ',$selectConfig['role']);
-
-
-        $organService = new OrganizationService();
-        $organList = $organService->getOrganizationListByType(3);
-        foreach( $organList as $ok=>$ov){
-            $spreadsheet->setActiveSheetIndex(0)->setCellValue('ZZ'.($ok+1), $ov['id'].':'.$ov['name']);
-        }
-
-        $ss = 2;
-        $se = 1100;
-        
-        for($ss = 2; $ss < 1000;$ss++){
-
-            $validation = $spreadsheet->getActiveSheet()->getCell('R'.$ss)->getDataValidation();
-            $validation->setType(DataValidation::TYPE_WHOLE);
-            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-            $validation->setAllowBlank(true);
-            $validation->setShowInputMessage(true);
-            $validation->setPromptTitle('专业技术职称 录入');
-            $validation->setPrompt('专业技术职称 输入格式和可选内容为："'.$techtitlestr.'"');
-
-            $validation = $spreadsheet->getActiveSheet()->getCell('S'.$ss)->getDataValidation();
-            $validation->setType(DataValidation::TYPE_WHOLE);
-            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-            $validation->setAllowBlank(true);
-            $validation->setShowInputMessage(true);
-            $validation->setPromptTitle('审计特长 录入');
-            $validation->setPrompt('审计特长输入格式和可选内容为："'.$expertisestr.'"');
-
-            $validation = $spreadsheet->getActiveSheet()->getCell('X'.$ss)->getDataValidation();
-            $validation->setType(DataValidation::TYPE_WHOLE);
-            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-            $validation->setAllowBlank(true);
-            $validation->setShowInputMessage(true);
-            $validation->setPromptTitle('角色配置 录入');
-            $validation->setPrompt('角色配置 输入格式和可选内容为："'.$rolestr.'"');
-
-    
-            $validation = $spreadsheet->getActiveSheet()->getCell('F'.$ss)->getDataValidation();
-            $validation->setType(DataValidation::TYPE_LIST);
-            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-            $validation->setAllowBlank(true);
-            $validation->setShowInputMessage(true);
-            $validation->setShowErrorMessage(true);
-            $validation->setShowDropDown(true);
-            $validation->setErrorTitle('Input error');
-            $validation->setError('Value is not in list.');
-            $validation->setPromptTitle('Pick from list');
-            $validation->setPrompt('Please pick a value from the drop-down list.');
-            $validation->setFormula1('"'.$ddedustr.'"'); 
-
-            $validation = $spreadsheet->getActiveSheet()->getCell('I'.$ss)->getDataValidation();
-            $validation->setType(DataValidation::TYPE_LIST);
-            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-            $validation->setAllowBlank(true);
-            $validation->setShowInputMessage(true);
-            $validation->setShowErrorMessage(true);
-            $validation->setShowDropDown(true);
-            $validation->setErrorTitle('Input error');
-            $validation->setError('Value is not in list.');
-            $validation->setPromptTitle('Pick from list');
-            $validation->setPrompt('Please pick a value from the drop-down list.');
-            $validation->setFormula1('"'.$politicalstr.'"'); 
-
-            $validation = $spreadsheet->getActiveSheet()->getCell('P'.$ss)->getDataValidation();
-            $validation->setType(DataValidation::TYPE_LIST);
-            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-            $validation->setAllowBlank(true);
-            $validation->setShowInputMessage(true);
-            $validation->setShowErrorMessage(true);
-            $validation->setShowDropDown(true);
-            $validation->setErrorTitle('Input error');
-            $validation->setError('Value is not in list.');
-            $validation->setPromptTitle('Pick from list');
-            $validation->setPrompt('Please pick a value from the drop-down list.');
-            $validation->setFormula1('"'.$positionstr.'"'); 
-
-            $validation = $spreadsheet->getActiveSheet()->getCell('M'.$ss)->getDataValidation();
-            $validation->setType(DataValidation::TYPE_LIST);
-            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-            $validation->setAllowBlank(true);
-            $validation->setShowInputMessage(true);
-            $validation->setShowErrorMessage(true);
-            $validation->setShowDropDown(true);
-            $validation->setErrorTitle('Input error');
-            $validation->setError('Value is not in list.');
-            $validation->setPromptTitle('Pick from list');
-            $validation->setPrompt('Please pick a value from the drop-down list.');
-            $validation->setFormula1('"'.$typestr.'"'); 
-
-
-            $validation = $spreadsheet->getActiveSheet()->getCell('N'.$ss)->getDataValidation();
-            $validation->setType(DataValidation::TYPE_LIST);
-            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-            $validation->setAllowBlank(true);
-            $validation->setShowInputMessage(true);
-            $validation->setShowErrorMessage(true);
-            $validation->setShowDropDown(true);
-            $validation->setErrorTitle('Input error');
-            $validation->setError('Value is not in list.');
-            $validation->setPromptTitle('Pick from list');
-            $validation->setPrompt('Please pick a value from the drop-down list.');
-            $validation->setFormula1('=$ZZ$1:$ZZ$'.count($organList)); 
-
-            $validation = $spreadsheet->getActiveSheet()->getCell('Q'.$ss)->getDataValidation();
-            $validation->setType(DataValidation::TYPE_LIST);
-            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
-            $validation->setAllowBlank(true);
-            $validation->setShowInputMessage(true);
-            $validation->setShowErrorMessage(true);
-            $validation->setShowDropDown(true);
-            $validation->setErrorTitle('Input error');
-            $validation->setError('Value is not in list.');
-            $validation->setPromptTitle('Pick from list');
-            $validation->setPrompt('Please pick a value from the drop-down list.');
-            $validation->setFormula1('"'.$naturestr.'"'); 
-
-
-            $spreadsheet->getActiveSheet()->getStyle('U'.$ss) 
-                ->getNumberFormat() 
-                ->setFormatCode( 
-                        \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_YYYYMMDD2
-                        ); 
-            $validation = $spreadsheet->getActiveSheet()->getCell('U'.$ss)->getDataValidation();
-            $validation->setType(DataValidation::TYPE_DATE);
-            $validation->setErrorStyle(DataValidation::STYLE_STOP);
-            $validation->setAllowBlank(true);
-            $validation->setShowInputMessage(true);
-            $validation->setShowErrorMessage(true);
-            $validation->setShowDropDown(true);
-            $validation->setErrorTitle('Input error');
-            $validation->setError('请输入正确的日期格式 ‘2019-06-12’');
-            $validation->setPromptTitle('Allowed input');
-            $validation->setPrompt('请输入正确的日期格式 ‘2019-06-12’');
-
-            $spreadsheet->getActiveSheet()->getStyle('V'.$ss) 
-                ->getNumberFormat() 
-                ->setFormatCode( 
-                        \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_YYYYMMDD2
-                        ); 
-            $validation = $spreadsheet->getActiveSheet()->getCell('V'.$ss)->getDataValidation();
-            $validation->setType(DataValidation::TYPE_DATE);
-            $validation->setErrorStyle(DataValidation::STYLE_STOP);
-            $validation->setAllowBlank(true);
-            $validation->setShowInputMessage(true);
-            $validation->setShowErrorMessage(true);
-            $validation->setShowDropDown(true);
-            $validation->setErrorTitle('Input error');
-            $validation->setError('请输入正确的日期格式 ‘2019-06-12’');
-            $validation->setPromptTitle('Allowed input');
-            $validation->setPrompt('请输入正确的日期格式 ‘2019-06-12’');
-
-        }
-
-        // Redirect output to a client’s web browser (Xlsx)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="审计机关人员导入.xlsx"');
-        header('Cache-Control: max-age=0');
-        // If you're serving to IE 9, then the following may be needed
-        header('Cache-Control: max-age=1');
-        // If you're serving to IE over SSL, then the following may be needed
-        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
-        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-        header('Pragma: public'); // HTTP/1.0
-
-        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-        $writer->save('php://output');
-        Yii::$app->end();
-    }
-
-    public function actionOrgansexcelupload() {
-        if( empty($_FILES['file']) ){  
-            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }  
-
-
-        $userService = new UserService();
-        $selectConfig = $userService->getSelectConfig();
-
-        $districts = $this->getDistricts();
-
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($_FILES['file']['tmp_name']);
-        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
-        unset( $sheetData[1]);
-        
-        $insertData = [];
-        foreach( $sheetData as $data) {
-            $tmpdata = [];
-            $tmpdata['type'] = 1; //永远是审计机关;
-            $tmpdata['name'] = $data['A'];
-            $tmpdata['cardid'] = $data['B'];
-            if( !Util::checkIdCard( $data['B'] )) {
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['B'].' 身份证号格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
-            }
-            $tmpdata['sex'] = Util::getSexByIdcard($data['B']);
-            $tmpdata['phone'] = $data['C'];
-            $tmpdata['email'] = $data['D'];
-            $tmpdata['address'] = $data['E'];
-            $tmpdata['education'] = explode(':',$data['F'])[0];
-            if( empty($tmpdata['education']) || !isset( $selectConfig['education'][$tmpdata['education']] ) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['F'].' 学历格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
-            }
-            $tmpdata['school'] = $data['G'];
-            $tmpdata['major'] = $data['H'];
-            $tmpdata['political'] = explode(':',$data['I'])[0];
-            if( empty($tmpdata['political']) || !isset( $selectConfig['political'][$tmpdata['political']] ) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['I'].' 政治面貌格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
-            }
-            $shen = explode('_',$data['J']);
-            if( count($shen) != 3 || !isset( $districts[$shen[1]] )){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['J'].' 地区格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
-            }
-            $shi = explode('_',$data['K']);
-            if( count($shi) != 3 || !isset( $districts[$shi[1]] )){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['K'].' 地区格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
-            }
-            $qu = explode('_',$data['L']);
-            if( count($qu) != 3 ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['L'].' 地区格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
-            }
-            $shenstr = $shen[1];
-            $shistr = $shi[1];
-            $qustr = $qu[1];
-            $tmpdata['location'] = "$shenstr,$shistr,$qustr";
-            $tmpdata['organization'] = explode(':',$data['N'])[0];
-            //$tmpdata[''] = $data['O'];
-            $tmpdata['position'] = explode(':',$data['P'])[0];
-            if( empty($tmpdata['position']) || !isset( $selectConfig['position'][$tmpdata['position']] ) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['P'].' 职务格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
-            }
-            $tmpdata['nature'] = explode(':',$data['Q'])[0];
-            if( empty($tmpdata['nature']) || !isset( $selectConfig['nature'][$tmpdata['nature']] ) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['Q'].' 岗位性质格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
-            }
-            $tmpdata['techtitle'] = [];
-            $techtitleArr = explode('/',$data['R']);
-            $techDict = array_flip( $selectConfig['techtitle'] );
-            foreach( $techtitleArr as $tv ){
-                $tv = trim( $tv );
-                if( isset($techDict[$tv]) ){
-                    $tmpdata['techtitle'][] = $techDict[$tv];    
-                }
-            }
-
-            $tmpdata['expertise'] = [];
-            $expertiseArr = explode('/',$data['S']);
-            $expertiseDict = array_flip( $selectConfig['expertise'] );
-            foreach( $expertiseArr as $tv ){
-                $tv = trim( $tv );
-                if( isset($expertiseDict[$tv]) ){
-                    $tmpdata['expertise'][] = $expertiseDict[$tv];    
-                }
-            }
-            $tmpdata['train'] = json_encode([$data['T']]);
-            $tmpdata['workbegin'] = strtotime($data['U']);
-            $tmpdata['auditbegin'] = strtotime($data['V']);
-            $tmpdata['comment'] = $data['W'];
-            $tmpdata['role'] = [];
-            $roleArr = explode('/',$data['X']);
-            $roleDict = array_flip( $selectConfig['role'] );
-            foreach( $roleArr as $tv ){
-                $tv = trim( $tv );
-                if( isset($roleDict[$tv]) ){
-                    $tmpdata['role'][] = $roleDict[$tv];    
-                }
-            }
-            $insertData[] = $tmpdata;
-        }
-
-        /**---------begin insert-----------**/
-
-
-            /*********** code ************/
-
-
-        /**---------end insert-----------**/
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson('', $error);
         return $ret;

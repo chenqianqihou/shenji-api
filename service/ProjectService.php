@@ -3,9 +3,9 @@
 namespace app\service;
 
 use app\classes\Log;
-use app\models\AuditGroupDao;
 use app\models\ExpertiseDao;
 use app\models\OrganizationDao;
+use app\models\ProjectDao;
 use app\models\QualificationDao;
 use app\models\RoleDao;
 use app\models\TechtitleDao;
@@ -15,15 +15,15 @@ use yii\web\User;
 use Yii;
 use yii\db\Exception;
 
-class UserService
+class ProjectService
 {
-    public function AddPeopleInfo($pid, $name, $sex, $type, $organId, $department, $level, $phone, $email,
-                                  $passwd, $cardid, $address, $education, $school, $major, $political, $nature,
-                                  $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment) {
-        $userDao = new UserDao();
-        $ret = $userDao->addPeople($pid, $name, $sex, $type, $organId, $department, $level, $phone, $email,
-            $passwd, $cardid, $address, $education, $school, $major, $political, $nature,
-            $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment);
+    public function createProject($status, $projectnum, $name, $projyear, $plantime, $projdesc,
+                                  $projorgan, $projtype, $projlevel, $leadorgan,
+                                  $leadernum, $auditornum, $masternum) {
+        $projectDao = new ProjectDao();
+        $ret = $projectDao->addProject($status, $projectnum, $name, $projyear, $plantime, $projdesc,
+            $projorgan, $projtype, $projlevel, $leadorgan,
+            $leadernum, $auditornum, $masternum);
         return $ret;
     }
 
@@ -87,11 +87,11 @@ class UserService
                     $qualificationArr[] = $q;
                 }
                 $userInfo['qualification'] = $qualificationArr;
-                $userInfo['workbegin'] = strtotime($userInfo['workbegin']);
                 unset($userInfo['department']);
                 unset($userInfo['techtitle']);
                 unset($userInfo['expertise']);
                 unset($userInfo['train']);
+                unset($userInfo['workbegin']);
                 unset($userInfo['auditbegin']);
                 unset($userInfo['nature']);
             }
@@ -144,43 +144,20 @@ class UserService
         }
         $start = $length * ($page - 1);
         $userList = $userDao->queryPeopleList($type, $organid, $query, $start, $length);
-        $organizationService = new OrganizationService();
-        $organizationInfo = [];
-        $allOrganization = $organizationService->getAllOrganization();
-        foreach ($allOrganization as $one) {
-            $organizationInfo[$one['id']] = $one['name'];
-        }
-        $auditGroupDao = new AuditGroupDao();
-        $groupCount = [];
-        $groupCountInfo = $auditGroupDao->queryUnEndGroupCount();
-        foreach ($groupCountInfo as $one) {
-            $groupCount[$one['pid']] = $one['c'];
-        }
         $roleDao = new RoleDao();
         foreach ($userList as $user) {
             $one = [];
             $one['name'] = $user['name'];
             $one['pid'] = $user['pid'];
             $one['sex'] = $user['sex'];
-            $one['organization'] = isset($organizationInfo[$user['organid']]) ? $organizationInfo[$user['organid']] : '';
-            $one['department'] = isset($organizationInfo[$user['department']]) ? $organizationInfo[$user['department']] : '';
-            if (isset($groupCount[$user['id']])) {
-                $projectnum = $groupCount[$user['id']];
-            }else {
-                $projectnum = 0;
-            }
-            if ($projectnum > 0) {
-                $status = 1; //在点
-            }else {
-                $status = 2; //不在点
-            }
-            $one['status'] = $status;
-            $one['projectnum'] = $projectnum;
+            $one['type'] = $user['type'];
+            $one['level'] = $user['level'];
+            $one['location'] = $user['location'];
             $roleList = [];
             $roleInfo = $roleDao->queryByPid($user['pid']);
             if ($roleInfo) {
                 foreach ($roleInfo as $role) {
-                    $roleList[] = $role['rid'];
+                    $roleList[] = $role['id'];
                 }
             }
             $one['role'] = $roleList;
