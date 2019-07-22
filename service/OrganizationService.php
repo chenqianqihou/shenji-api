@@ -253,14 +253,9 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['regaddress']) ){
-            $result = [
-                'res' => false,
-                'key' => 'regaddress',
-                'message' => 'regaddress can not be null!'
-            ];
 
-            return $result;
+        if( empty($params['regaddress']) ){
+            $params['regaddress'] = '-';
         }
 
         if( empty($params['category']) ){
@@ -283,7 +278,7 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['capital']) || $params['capital'] < 0 ){
+        if( !isset($params['capital']) || $params['capital'] < 0 ){
             $result = [
                 'res' => false,
                 'key' => 'capital',
@@ -303,7 +298,7 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['costeng']) || !is_numeric($params['costeng']) || $params['costeng'] < 0 ){
+        if( !isset($params['costeng']) || !is_numeric($params['costeng']) || $params['costeng'] < 0 ){
             $result = [
                 'res' => false,
                 'key' => 'costeng',
@@ -313,7 +308,7 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['coster']) || !is_numeric($params['coster']) || $params['coster'] < 0 ){
+        if( !isset($params['coster']) || !is_numeric($params['coster']) || $params['coster'] < 0 ){
             $result = [
                 'res' => false,
                 'key' => 'coster',
@@ -323,7 +318,7 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['accountant']) || !is_numeric($params['accountant']) || $params['accountant'] < 0 ){
+        if( !isset($params['accountant']) || !is_numeric($params['accountant']) || $params['accountant'] < 0 ){
             $result = [
                 'res' => false,
                 'key' => 'accountant',
@@ -333,7 +328,7 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['highlevel']) || !is_numeric($params['highlevel']) || $params['highlevel'] < 0 ){
+        if( !isset($params['highlevel']) || !is_numeric($params['highlevel']) || $params['highlevel'] < 0 ){
             $result = [
                 'res' => false,
                 'key' => 'highlevel',
@@ -343,7 +338,7 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['midlevel']) || !is_numeric($params['midlevel']) || $params['midlevel'] < 0 ){
+        if( !isset($params['midlevel']) || !is_numeric($params['midlevel']) || $params['midlevel'] < 0 ){
             $result = [
                 'res' => false,
                 'key' => 'midlevel',
@@ -395,7 +390,7 @@ class OrganizationService
             return $result;
         }
 
-        if( empty($params['contactnumber']) || !is_numeric($params['contactnumber']) ){
+        if( !isset($params['contactnumber']) || !is_numeric($params['contactnumber']) ){
             $result = [
                 'res' => false,
                 'key' => 'contactnumber',
@@ -416,13 +411,7 @@ class OrganizationService
         }
 
         if( empty($params['officeaddress']) ){
-            $result = [
-                'res' => false,
-                'key' => 'officeaddress',
-                'message' => 'officeaddress can not be null'
-            ];
-
-            return $result;
+            $params['officeaddress'] = '-';
         }
 
 /*
