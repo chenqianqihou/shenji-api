@@ -16,6 +16,7 @@ return [
     'api/user/organsexcel' => 'api/user/organsexcel',
     'api/user/organsexcelupload' => 'api/user/organsexcelupload',
     'api/user/thirdpartexcel' => 'api/user/thirdpartexcel',
+    'api/user/thirdpartexcelupload' => 'api/user/thirdpartexcelupload',
 
     'api/organization/add' => 'api/organization/add',
     'api/organization/addbyname' => 'api/organization/addbyname',

@@ -1305,4 +1305,189 @@ class UserController extends BaseController
         $ret = $this->outputJson('', $error);
         return $ret;
     }
+
+    public function actionThirdpartexcel() {
+        $this->defineMethod = 'GET';
+
+        $userService = new UserService();
+        $selectConfig = $userService->getSelectConfig();
+
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load(APP_PATH."/static/thirdrenyuanluru.xlsx");
+
+        //教育学历
+        $ddedu = [];
+        foreach( $selectConfig['education'] as $ek=>$ev){
+            $ddedu[] = $ek.':'.$ev;    
+        }
+        $ddedustr = join(',',$ddedu);
+        $ddedustr = ' ,'.$ddedustr;
+
+        //政治面貌
+        $politicalarr = [];
+        foreach( $selectConfig['political'] as $pk=>$pv){
+            $politicalarr[] = $pk.':'.$pv;    
+        }
+        $politicalstr = join(',',$politicalarr);
+        $politicalstr = ' ,'.$politicalstr;
+
+        //现任职务
+        $positionarr = [];
+        foreach( $selectConfig['position'] as $pk=>$pv){
+            $positionarr[] = $pk.':'.$pv;    
+        }
+        $positionstr = join(',',$positionarr);
+        $positionstr = ' ,'.$positionstr;
+
+        //人员类型
+        $typearr = [];
+        foreach( $selectConfig['type'] as $tk=>$tv) {
+            $typearr[] = $tk.':'.$tv;    
+        }
+        unset( $typearr[2] );
+        $typestr = join(',',$typearr);
+        $typestr = ' ,'.$typestr;
+
+        //岗位性质
+        $naturearr = [];
+        foreach( $selectConfig['nature'] as $tk=>$tv) {
+            $naturearr[] = $tk.':'.$tv;    
+        }
+        $naturestr = join(',',$naturearr);
+        $naturestr = ' ,'.$naturestr;
+
+        //专业技术职称
+        $techtitlestr = join(' / ', $selectConfig['techtitle']);
+
+        //审计特长
+        $expertisestr = join(' / ', $selectConfig['expertise']);
+
+        //角色配置
+        $rolestr = join(' / ',$selectConfig['role']);
+
+
+        $organService = new OrganizationService();
+        $organList1 = $organService->getOrganizationListByType(1);
+        $organList2 = $organService->getOrganizationListByType(2);
+        $organList = array_merge($organList1,$organList2);
+        foreach( $organList as $ok=>$ov){
+            $spreadsheet->setActiveSheetIndex(0)->setCellValue('ZZ'.($ok+1), $ov['id'].':'.$ov['name']);
+        }
+
+        $ss = 2;
+        $se = 1100;
+        
+        for($ss = 2; $ss < 1000;$ss++){
+            $validation = $spreadsheet->getActiveSheet()->getCell('V'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_WHOLE);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setPromptTitle('角色配置 录入');
+            $validation->setPrompt('角色配置 输入格式和可选内容为："'.$rolestr.'"');
+
+    
+            $validation = $spreadsheet->getActiveSheet()->getCell('F'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list.');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a value from the drop-down list.');
+            $validation->setFormula1('"'.$ddedustr.'"'); 
+
+            $validation = $spreadsheet->getActiveSheet()->getCell('I'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list.');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a value from the drop-down list.');
+            $validation->setFormula1('"'.$politicalstr.'"'); 
+
+            $validation = $spreadsheet->getActiveSheet()->getCell('M'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list.');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a value from the drop-down list.');
+            $validation->setFormula1('"'.$typestr.'"'); 
+
+
+            $validation = $spreadsheet->getActiveSheet()->getCell('N'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list.');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a value from the drop-down list.');
+            $validation->setFormula1('=$ZZ$1:$ZZ$'.count($organList)); 
+
+            $spreadsheet->getActiveSheet()->getStyle('P'.$ss) 
+                ->getNumberFormat() 
+                ->setFormatCode( 
+                        \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_YYYYMMDD2
+                        ); 
+            $validation = $spreadsheet->getActiveSheet()->getCell('P'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_DATE);
+            $validation->setErrorStyle(DataValidation::STYLE_STOP);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('请输入正确的日期格式 ‘2019-06-12’');
+            $validation->setPromptTitle('Allowed input');
+            $validation->setPrompt('请输入正确的日期格式 ‘2019-06-12’');
+
+            $spreadsheet->getActiveSheet()->getStyle('S'.$ss) 
+                ->getNumberFormat() 
+                ->setFormatCode( 
+                        \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_YYYYMMDD2
+                        ); 
+            $validation = $spreadsheet->getActiveSheet()->getCell('S'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_DATE);
+            $validation->setErrorStyle(DataValidation::STYLE_STOP);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('请输入正确的日期格式 ‘2019-06-12’');
+            $validation->setPromptTitle('Allowed input');
+            $validation->setPrompt('请输入正确的日期格式 ‘2019-06-12’');
+
+        }
+
+        // Redirect output to a client’s web browser (Xlsx)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="内审中介人员导入.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        Yii::$app->end();
+    }
 }

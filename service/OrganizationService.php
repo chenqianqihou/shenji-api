@@ -20,7 +20,7 @@ class OrganizationService
 
     // 根据type查询机构信息
     public function getOrganizationListByType($otype) {
-        return OrganizationDao::find()->where(['otype' => $otype])->asArray()->all();
+        return OrganizationDao::find()->where(['otype' => $otype])->andWhere('parentid=0')->asArray()->all();
     }
 
     // 查询机构列表
