@@ -724,6 +724,7 @@ class ProjectController extends BaseController
         $organList = $organizationService->getDeparts();
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $data['organlist'] = $organList;
+        $data['type'] = Yii::$app->params['project_type'];
         $ret = $this->outputJson($data, $error);
         return $ret;
     }

@@ -67,7 +67,7 @@ class BaseController extends Controller {
      */
     public function beforeAction($action) {
         //for debug
-        //return parent::beforeAction( $action );
+        return parent::beforeAction( $action );
 
         $this->beginTime = microtime(true);
         $url = Yii::$app->request->getPathInfo();
