@@ -248,7 +248,7 @@ class OrganizationController extends BaseController
                 if( !isset($useParArr[$parid])){
                     $useParArr[$parid] = [];    
                 }
-                $useParArr[$parid][$tr['id']] = $tr;
+                $useParArr[$parid][$tr['id']] = ['id'=>$tr['id'],'name'=>$tr['name'],'type'=>'child','data'=>$tr,'list'=>[]];
                 unset( $threelist[$tk] );
             }
         }
@@ -283,7 +283,7 @@ class OrganizationController extends BaseController
                 if( !isset($useParArr[$parid])){
                     $useParArr[$parid] = [];    
                 }
-                $useParArr[$parid][$tr['id']] = $tr;
+                $useParArr[$parid][$tr['id']] = ['id'=>$tr['id'],'name'=>$tr['name'],'type'=>'child','data'=>$tr,'list'=>[]];
                 unset( $twolist[$tk] );
             }
         }
