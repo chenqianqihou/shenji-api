@@ -184,6 +184,7 @@ class UserService
                 }
             }
             $one['role'] = $roleList;
+            $one['type'] = intval($user['sex']);
             $list[] = $one;
         }
         $userDao = new UserDao();
