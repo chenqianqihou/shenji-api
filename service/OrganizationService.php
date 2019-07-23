@@ -19,7 +19,10 @@ class OrganizationService
     }
 
     // 根据type查询机构信息
-    public function getOrganizationListByType($otype) {
+    public function getOrganizationListByType($otype,$isparent = true) {
+        if( $isparent ){
+            return OrganizationDao::find()->where(['otype' => $otype])->asArray()->all();
+        }
         return OrganizationDao::find()->where(['otype' => $otype])->andWhere('parentid=0')->asArray()->all();
     }
 
@@ -93,7 +96,7 @@ class OrganizationService
         $organDao->highlevel = $params['highlevel'];
         $organDao->midlevel = $params['midlevel'];
         $organDao->retiree = $params['retiree'];
-        $organDao->parttimers = $params['parttimers'];
+        $organDao->parttimers = isset($params['parttimers']) ? $params['parttimers'] : 0;
         $organDao->contactor = $params['contactor'];
         $organDao->contactphone = $params['contactphone'];
         $organDao->contactnumber = $params['contactnumber'];
@@ -150,9 +153,9 @@ class OrganizationService
 
     //修改机构
     public function updateOrganization( $params = []) {
-        $oid = $params['id'];
+        $oid = $params['oid'];
         $organDao = OrganizationDao::find()->where(['id' => $oid])->one();
-        unset( $params['id']);
+        unset( $params['oid']);
         foreach( $params as $pk=>$pv){
             $organDao->$pk = $pv;    
         }

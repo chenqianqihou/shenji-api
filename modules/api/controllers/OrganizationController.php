@@ -143,7 +143,7 @@ class OrganizationController extends BaseController
     {
         $this->defineMethod = 'POST';
         $this->defineParams = array (
-            'id' => array (
+            'oid' => array (
                 'require' => true,
                 'checker' => 'noCheck',
             ),
@@ -248,13 +248,14 @@ class OrganizationController extends BaseController
                 if( !isset($useParArr[$parid])){
                     $useParArr[$parid] = [];    
                 }
-                $useParArr[$parid][$tr['id']] = $tr;
+                $useParArr[$parid][$tr['id']] = ['id'=>$tr['id'],'name'=>$tr['name'],'type'=>'child','data'=>$tr,'list'=>[]];
                 unset( $threelist[$tk] );
             }
         }
         foreach( $threelist as $tr ){
-            $regnum = $tr['regnum'];    
-            $r1 = intval($regnum / 100) * 100;
+            $regnum = trim($tr['regnum'],',');    
+            $regArr = explode(',', $regnum);
+            $r1 = intval($regArr[count($regArr)-1] / 100) * 100;
 
             $usePList = isset( $useParArr[$tr['id']]) ? $useParArr[$tr['id']] : [];
             if( $regnum == $distinct['id']){
@@ -267,6 +268,7 @@ class OrganizationController extends BaseController
                 }
             }
         }
+
         $result[] = [
             'type' => 3,
             'list' => $distinct
@@ -282,14 +284,15 @@ class OrganizationController extends BaseController
                 if( !isset($useParArr[$parid])){
                     $useParArr[$parid] = [];    
                 }
-                $useParArr[$parid][$tr['id']] = $tr;
+                $useParArr[$parid][$tr['id']] = ['id'=>$tr['id'],'name'=>$tr['name'],'type'=>'child','data'=>$tr,'list'=>[]];
                 unset( $twolist[$tk] );
             }
         }
 
         foreach( $twolist as $tr ){
-            $regnum = $tr['regnum'];    
-            $r1 = intval($regnum / 100) * 100;
+            $regnum = trim($tr['regnum'],',');    
+            $regArr = explode(',', $regnum);
+            $r1 = intval($regArr[count($regArr)-1] / 100) * 100;
             $usePList = isset( $useParArr[$tr['id']]) ? $useParArr[$tr['id']] : [];
             if( $regnum == $distinct['id']){
                 $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];

@@ -1012,7 +1012,7 @@ class UserController extends BaseController
 
 
         $organService = new OrganizationService();
-        $organList = $organService->getOrganizationListByType(3);
+        $organList = $organService->getOrganizationListByType(3,false);
         foreach( $organList as $ok=>$ov){
             $spreadsheet->setActiveSheetIndex(0)->setCellValue('ZZ'.($ok+1), $ov['id'].':'.$ov['name']);
         }
@@ -1201,6 +1201,9 @@ class UserController extends BaseController
             $tmpdata = [];
             $tmpdata['type'] = 1; //永远是审计机关;
             $tmpdata['name'] = $data['A'];
+            if( empty($tmpdata['name']) ){
+                continue;    
+            }
             $tmpdata['cardid'] = $data['B'];
             if( !Util::checkIdCard( $data['B'] )) {
                 $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['B'].' 身份证号格式错误！');
@@ -1381,8 +1384,8 @@ class UserController extends BaseController
 
 
         $organService = new OrganizationService();
-        $organList1 = $organService->getOrganizationListByType(1);
-        $organList2 = $organService->getOrganizationListByType(2);
+        $organList1 = $organService->getOrganizationListByType(1,false);
+        $organList2 = $organService->getOrganizationListByType(2,false);
         $organList = array_merge($organList1,$organList2);
         foreach( $organList as $ok=>$ov){
             $spreadsheet->setActiveSheetIndex(0)->setCellValue('ZZ'.($ok+1), $ov['id'].':'.$ov['name']);
@@ -1505,4 +1508,108 @@ class UserController extends BaseController
         $writer->save('php://output');
         Yii::$app->end();
     }
+
+    public function actionThirdpartexcelupload() {
+        if( empty($_FILES['file']) ){  
+            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }  
+
+
+        $userService = new UserService();
+        $selectConfig = $userService->getSelectConfig();
+
+        $districts = $this->getDistricts();
+
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($_FILES['file']['tmp_name']);
+        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+        unset( $sheetData[1]);
+        
+        $insertData = [];
+        foreach( $sheetData as $data) {
+            $tmpdata = [];
+            $tmpdata['name'] = $data['A'];
+            if( empty($tmpdata['name']) ){
+                continue;    
+            }
+            $tmpdata['cardid'] = $data['B'];
+            if( !Util::checkIdCard( $data['B'] )) {
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['B'].' 身份证号格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $tmpdata['sex'] = Util::getSexByIdcard($data['B']);
+            $tmpdata['phone'] = $data['C'];
+            $tmpdata['email'] = $data['D'];
+            $tmpdata['address'] = $data['E'];
+            $tmpdata['education'] = explode(':',$data['F'])[0];
+            if( empty($tmpdata['education']) || !isset( $selectConfig['education'][$tmpdata['education']] ) ){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['F'].' 学历格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $tmpdata['school'] = $data['G'];
+            $tmpdata['major'] = $data['H'];
+            $tmpdata['political'] = explode(':',$data['I'])[0];
+            if( empty($tmpdata['political']) || !isset( $selectConfig['political'][$tmpdata['political']] ) ){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['I'].' 政治面貌格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $shen = explode('_',$data['J']);
+            if( count($shen) != 3 || !isset( $districts[$shen[1]] )){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['J'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $shi = explode('_',$data['K']);
+            if( count($shi) != 3 || !isset( $districts[$shi[1]] )){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['K'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $qu = explode('_',$data['L']);
+            if( count($qu) != 3 ){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['L'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $shenstr = $shen[1];
+            $shistr = $shi[1];
+            $qustr = $qu[1];
+            $tmpdata['location'] = "$shenstr,$shistr,$qustr";
+            $tmpdata['type'] = explode(':',$data['M'])[0];
+            $tmpdata['organization'] = explode(':',$data['N'])[0];
+            $tmpdata['position'] = $data['O'];
+            $tmpdata['workbegin'] = strtotime($data['P']);
+            $tmpdata['specialties'] = $data['Q'];
+            $tmpdata['qualification'] = [ ['info'=>$data['R'],'time'=>$data['S']] ];
+            $tmpdata['achievements'] = $data['T'];
+
+            $tmpdata['comment'] = $data['U'];
+            $tmpdata['role'] = [];
+            $roleArr = explode('/',$data['V']);
+            $roleDict = array_flip( $selectConfig['role'] );
+            foreach( $roleArr as $tv ){
+                $tv = trim( $tv );
+                if( isset($roleDict[$tv]) ){
+                    $tmpdata['role'][] = $roleDict[$tv];    
+                }
+            }
+            $insertData[] = $tmpdata;
+        }
+
+        /**---------begin insert-----------**/
+
+
+            /*********** code ************/
+
+
+        /**---------end insert-----------**/
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson('', $error);
+        return $ret;
+    }
+
 }
