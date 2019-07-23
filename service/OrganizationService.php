@@ -85,7 +85,7 @@ class OrganizationService
         $organDao->deputy = $params['deputy'];
         $organDao->regtime = $params['regtime'];
         $organDao->regnum = $params['regnum'];
-        $organDao->regaddress = $params['regaddress'];
+        $organDao->regaddress = isset($params['regaddress']) ? $params['regaddress'] : '-';
         $organDao->category = $params['category'];
         $organDao->level = $params['level'];
         $organDao->capital = $params['capital'];
@@ -95,13 +95,13 @@ class OrganizationService
         $organDao->accountant = $params['accountant'];
         $organDao->highlevel = $params['highlevel'];
         $organDao->midlevel = $params['midlevel'];
-        $organDao->retiree = $params['retiree'];
+        $organDao->retiree = isset($params['retiree']) ? $params['retiree'] : '-';
         $organDao->parttimers = isset($params['parttimers']) ? $params['parttimers'] : 0;
         $organDao->contactor = $params['contactor'];
         $organDao->contactphone = $params['contactphone'];
         $organDao->contactnumber = $params['contactnumber'];
         $organDao->officenum = $params['officenum'];
-        $organDao->officeaddress = $params['officeaddress'];
+        $organDao->officeaddress = isset($params['officeaddress']) ? $params['officeaddress'] : '-';
         if( isset($params['parentid'] )){
             $organDao->parentid = $params['parentid'];
         }
