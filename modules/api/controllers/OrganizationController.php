@@ -143,7 +143,7 @@ class OrganizationController extends BaseController
     {
         $this->defineMethod = 'POST';
         $this->defineParams = array (
-            'id' => array (
+            'oid' => array (
                 'require' => true,
                 'checker' => 'noCheck',
             ),
@@ -253,8 +253,9 @@ class OrganizationController extends BaseController
             }
         }
         foreach( $threelist as $tr ){
-            $regnum = $tr['regnum'];    
-            $r1 = intval($regnum / 100) * 100;
+            $regnum = trim($tr['regnum'],',');    
+            $regArr = explode(',', $regnum);
+            $r1 = intval($regArr[count($regArr)-1] / 100) * 100;
 
             $usePList = isset( $useParArr[$tr['id']]) ? $useParArr[$tr['id']] : [];
             if( $regnum == $distinct['id']){
@@ -289,8 +290,9 @@ class OrganizationController extends BaseController
         }
 
         foreach( $twolist as $tr ){
-            $regnum = $tr['regnum'];    
-            $r1 = intval($regnum / 100) * 100;
+            $regnum = trim($tr['regnum'],',');    
+            $regArr = explode(',', $regnum);
+            $r1 = intval($regArr[count($regArr)-1] / 100) * 100;
             $usePList = isset( $useParArr[$tr['id']]) ? $useParArr[$tr['id']] : [];
             if( $regnum == $distinct['id']){
                 $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
