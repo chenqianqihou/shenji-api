@@ -1010,7 +1010,7 @@ class UserController extends BaseController
 
 
         $organService = new OrganizationService();
-        $organList = $organService->getOrganizationListByType(3);
+        $organList = $organService->getOrganizationListByType(3,false);
         foreach( $organList as $ok=>$ov){
             $spreadsheet->setActiveSheetIndex(0)->setCellValue('ZZ'.($ok+1), $ov['id'].':'.$ov['name']);
         }
@@ -1369,8 +1369,8 @@ class UserController extends BaseController
 
 
         $organService = new OrganizationService();
-        $organList1 = $organService->getOrganizationListByType(1);
-        $organList2 = $organService->getOrganizationListByType(2);
+        $organList1 = $organService->getOrganizationListByType(1,false);
+        $organList2 = $organService->getOrganizationListByType(2,false);
         $organList = array_merge($organList1,$organList2);
         foreach( $organList as $ok=>$ov){
             $spreadsheet->setActiveSheetIndex(0)->setCellValue('ZZ'.($ok+1), $ov['id'].':'.$ov['name']);

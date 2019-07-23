@@ -267,6 +267,7 @@ class OrganizationController extends BaseController
                 }
             }
         }
+
         $result[] = [
             'type' => 3,
             'list' => $distinct
