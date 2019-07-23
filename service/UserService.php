@@ -14,6 +14,7 @@ use app\models\UserDao;
 use yii\web\User;
 use Yii;
 use yii\db\Exception;
+use app\classes\Pinyin;
 
 class UserService
 {
@@ -255,5 +256,203 @@ class UserService
             'role' => $roleList,
         ];
         return $selectConfig;
+    }
+
+    /**
+     * 添加人员信息(审计机关/内审、中介)
+     *
+     * @param $params
+     * @return mixed
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function addNewUser($params, $type) {
+
+        // 参数校验
+        if(!array_key_exists($type, UserDao::$type)){
+            return false;
+        }
+        $needed = [
+            "name", "cardid", "sex", "phone", "email", "address",
+            "education", "school", "major", "political", "location", "level",
+            "comment", "role", "position", "organization", "workbegin",
+        ];
+        $sjneeded = [
+            "department", "nature", "techtitle", "expertise", "train", "auditbegin"
+        ];
+        $thirdNeeded = [
+            "specialties", "qualification", "achievements"
+        ];
+        if($type == UserDao::$typeToName['审计机关']){
+            $needed = array_merge($needed, $sjneeded);
+        }else{
+            $needed = array_merge($needed, $thirdNeeded);
+        }
+        foreach ($needed as $e) {
+            if (!in_array($e, $params)) {
+                return false;
+            }
+        }
+
+
+        $type = intval($type);
+        $name = $params['name'];
+        $cardid = $params['cardid'];
+        $sex = intval($params['sex']);
+        $phone = $params['phone'];
+        $email = $params['email'];
+        $address = $params['address'];
+        $education = intval($params['education']);
+        $school = $params['school'];
+        $major = $params['major'];
+        $political = intval($params['political']);
+        $location = $params['location'];
+        $level = intval($params['level']);
+        $comment = $params['comment'];
+        $role = $params['role'];
+        $position = intval($params['position']);
+        $organization = intval($params['organization']);
+        $workbegin = $params['workbegin'];
+        $organService = new OrganizationService();
+        $organInfo = $organService->getOrganizationInfo($organization);
+        if (!$organInfo) {
+            return false;
+        }
+        //校验基本信息
+        //todo 校验手机号、邮箱、身份证号是否已存在
+        if (!isset(UserDao::$type[$type])) {
+            return false;
+        }
+        if (!isset(UserDao::$sex[$sex])) {
+            return false;
+        }
+        if (!isset(UserDao::$education[$education])) {
+            return false;
+        }
+        if (!isset(UserDao::$political[$political])) {
+            return false;
+        }
+        $namePinyin = Pinyin::utf8_to($name);
+        if ($namePinyin == "") {
+            $namePinyin = rand(10000, 20000);
+        }
+        $pid = 'sj' . $namePinyin;
+        //判断用户名是否存在
+        $userService = new UserService();
+        $i = 0;
+        $unique = false;
+        while ($i < 10) {
+            $peopleInfo = $userService->getPeopleInfo($pid);
+            if ($peopleInfo) {
+                $i++;
+                $pid = 'sj' . $namePinyin . '0' . $i;
+            }else {
+                $unique = true;
+                break;
+            }
+        }
+        if (!$unique) {
+            return false;
+        }
+        $passwd = md5('12345678');
+        $tr = Yii::$app->get('db')->beginTransaction();
+        try {
+            //不同审计人员类别，填写不同的数据
+            if ($type == UserDao::$typeToName['审计机关']) {
+                $department = intval($params['department']);
+                $nature = intval($params['nature']);
+                $techtitle = $params['techtitle'];
+                $expertise = $params['expertise'];
+                $train = $params['train'];
+                $auditbegin = $params['auditbegin'];
+                //校验所属部门信息
+                $organInfo = $organService->getOrganizationInfo($department);
+                if (!$organInfo) {
+                   return false;
+                }
+                if ($organInfo['parentid'] != $organization) {
+                   return false;
+                }
+                //校验审计机构的其他信息
+                if (!isset(UserDao::$position[$position])) {
+                   return false;
+                }
+                if (!isset(UserDao::$nature[$nature])) {
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '岗位性质填写错误');
+                    $ret = $this->outputJson('', $error);
+                    return $ret;
+                }
+                $workbegin = date('Y-m-d H:i:s', intval($workbegin));
+                $auditbegin = date('Y-m-d H:i:s', intval($auditbegin));
+                //todo 判断techtitle ID是否存在
+                $techtitleDao = new TechtitleDao();
+                $techtitleIdArr = explode(',', $techtitle);
+                foreach ($techtitleIdArr as $tid) {
+                    $tid = intval($tid);
+                    if ($tid) {
+                        $techtitleDao->addPeopletitle($pid, $tid);
+                    }
+                }
+                //todo 判断expertise ID是否存在
+                $expertiseDao = new ExpertiseDao();
+                $expertiseIdArr = explode(',', $expertise);
+                foreach ($expertiseIdArr as $eid) {
+                    $eid = intval($eid);
+                    if ($eid) {
+                        $expertiseDao->addPeopleExpertise($pid, $eid);
+                    }
+                }
+                $trainDao = new TrainDao();
+                $trainArr = $train;
+                if ($train) {
+                    if (is_array($trainArr)) {
+                        foreach ($trainArr as $train) {
+                            $trainDao->addTrain($pid, $train);
+                        }
+                    }else {
+                        $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '业务培训情况填写错误');
+                        $ret = $this->outputJson('', $error);
+                        return $ret;
+                    }
+                }
+                //录入数据
+                $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, $department, $level, $phone, $email,
+                    $passwd, $cardid, $address, $education, $school, $major, $political, $nature,
+                    '', '', $position, $location, $workbegin, $auditbegin, $comment);
+
+            }else {
+                $specialties = $params['specialties'];
+                $qualification = $params['qualification'];
+                $achievements = $params['achievements'];
+                $qualificationDao = new QualificationDao();
+                $qualificationArr = $qualification;
+                $curTime = date('Y-m-d H:i:s');
+                if ($qualificationArr) {
+                    if (is_array($qualificationArr)) {
+                        foreach ($qualificationArr as $one) {
+                            $one['time'] = date('Y-m-d', $one['time']);
+                            $qualificationDao->addQualification($pid, $one['info'], $one['time']);
+                        }
+                    }else {
+                        return false;
+                    }
+                }
+                $workbegin = date('Y-m-d H:i:s', intval($workbegin));
+                $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, 0, $level, $phone, $email,
+                    $passwd, $cardid, $address, $education, $school, $major, $political, 0,
+                    $specialties, $achievements, $position, $location, $workbegin, $curTime, $comment);
+            }
+            //todo role id 是否准确
+            $roleDao = new RoleDao();
+            $roleIdArr = explode(',', $role);
+            foreach ($roleIdArr as $rid) {
+                $roleDao->addPeopleRole($pid, $rid);
+            }
+            $tr->commit();
+        }catch (Exception $e) {
+            $tr->rollBack();
+            Log::addLogNode('addException', serialize($e->errorInfo));
+            return false;
+        }
+        return true;
     }
 }

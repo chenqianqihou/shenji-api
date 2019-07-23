@@ -1300,22 +1300,11 @@ class UserController extends BaseController
         }
 
 
-        $transaction = UserDao::getDb()->beginTransaction();
-        try {
-            $organization = new UserDao();
-            foreach($insertData as $key => $attributes) {
-                $model = clone $organization;
-                $model->setAttributes($attributes);
-                if (!$model->save()){
-                    $transaction->rollBack();
-                    return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
-                }
-            }
-
-            $transaction->commit();
-        } catch (\Exception $e){
-            $transaction->rollBack();
-            return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
+        foreach($insertData as $attributes) {
+            $type = $attributes['type'];
+            unset($attributes['type']);
+            $user = new UserService();
+            $user->addNewUser($attributes, $type);
         }
 
 
@@ -1600,13 +1589,13 @@ class UserController extends BaseController
             $insertData[] = $tmpdata;
         }
 
-        /**---------begin insert-----------**/
+        foreach($insertData as $attributes) {
+            $type = $attributes['type'];
+            unset($attributes['type']);
+            $user = new UserService();
+            $user->addNewUser($attributes, $type);
+        }
 
-
-            /*********** code ************/
-
-
-        /**---------end insert-----------**/
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson('', $error);
         return $ret;
