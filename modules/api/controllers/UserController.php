@@ -8,6 +8,7 @@ use app\classes\Util;
 use app\classes\Log;
 use app\classes\Pinyin;
 use app\models\ExpertiseDao;
+use app\models\OrganizationDao;
 use app\models\QualificationDao;
 use app\models\RoleDao;
 use app\models\TechtitleDao;
@@ -22,6 +23,7 @@ use yii\db\Exception;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
+use yii\debug\models\search\User;
 
 class UserController extends BaseController
 {
@@ -1297,13 +1299,26 @@ class UserController extends BaseController
             $insertData[] = $tmpdata;
         }
 
-        /**---------begin insert-----------**/
+
+        $transaction = UserDao::getDb()->beginTransaction();
+        try {
+            $organization = new UserDao();
+            foreach($insertData as $key => $attributes) {
+                $model = clone $organization;
+                $model->setAttributes($attributes);
+                if (!$model->save()){
+                    $transaction->rollBack();
+                    return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
+                }
+            }
+
+            $transaction->commit();
+        } catch (\Exception $e){
+            $transaction->rollBack();
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
+        }
 
 
-            /*********** code ************/
-
-
-        /**---------end insert-----------**/
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson('', $error);
         return $ret;
