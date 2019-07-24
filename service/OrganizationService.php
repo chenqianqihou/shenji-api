@@ -31,7 +31,10 @@ class OrganizationService
         $res = OrganizationDao::find()->where(1);
         if( $otype > 0 ){
             $res = $res->andWhere(['otype'=>$otype]);    
+        }else{
+            $res = $res->andWhere('otype != 3');    
         }
+
         if( trim($keyword) != '' ){
             $res = $res->andWhere(['like', 'name', $keyword]);    
         }
