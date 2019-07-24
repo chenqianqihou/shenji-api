@@ -1194,11 +1194,7 @@ class UserController extends BaseController
 
         $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($_FILES['file']['tmp_name']);
         $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
-        var_dump($sheetData);
-        exit();
         unset( $sheetData[1]);
-        var_dump($sheetData);
-        exit();
         
         $insertData = [];
         foreach( $sheetData as $data) {
