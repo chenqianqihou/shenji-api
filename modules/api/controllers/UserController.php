@@ -1180,11 +1180,11 @@ class UserController extends BaseController
     }
 
     public function actionOrgansexcelupload() {
-        if( empty($_FILES['file']) ){  
+        if( empty($_FILES["file"]) ){
             $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
             $ret = $this->outputJson('', $error);
             return $ret;
-        }  
+        }
 
 
         $userService = new UserService();
@@ -1194,7 +1194,11 @@ class UserController extends BaseController
 
         $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($_FILES['file']['tmp_name']);
         $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+        var_dump($sheetData);
+        exit();
         unset( $sheetData[1]);
+        var_dump($sheetData);
+        exit();
         
         $insertData = [];
         foreach( $sheetData as $data) {
@@ -1499,7 +1503,9 @@ class UserController extends BaseController
     }
 
     public function actionThirdpartexcelupload() {
-        if( empty($_FILES['file']) ){  
+        if( empty($_FILES['file']) ){
+            var_dump("kong");
+
             $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
             $ret = $this->outputJson('', $error);
             return $ret;
