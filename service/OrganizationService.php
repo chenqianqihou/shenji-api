@@ -157,9 +157,14 @@ class OrganizationService
     //修改机构
     public function updateOrganization( $params = []) {
         $oid = $params['oid'];
+        $organModel = new OrganizationDao();
+        $attrs = $organModel->attributes();
         $organDao = OrganizationDao::find()->where(['id' => $oid])->one();
         unset( $params['oid']);
         foreach( $params as $pk=>$pv){
+            if( !in_array($pk,$attrs) ){
+                continue;    
+            }
             $organDao->$pk = $pv;    
         }
         /*
