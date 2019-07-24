@@ -1500,8 +1500,6 @@ class UserController extends BaseController
 
     public function actionThirdpartexcelupload() {
         if( empty($_FILES['file']) ){
-            var_dump("kong");
-
             $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
             $ret = $this->outputJson('', $error);
             return $ret;
