@@ -4,6 +4,7 @@ namespace app\modules\api\controllers;
 
 use app\classes\BaseController;
 use app\classes\ErrorDict;
+use app\models\UserDao;
 use app\service\OrganizationService;
 use Yii;
 
@@ -354,6 +355,31 @@ class OrganizationController extends BaseController
         $this->defineMethod = 'GET';
         $organService = new OrganizationService();
         $organList = $organService->getDeparts();
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($organList, $error);
+        return $ret;
+    }
+
+    public function actionListbytype() {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'type' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $otype = intval($this->getParam('type', 0));
+        if (!isset(UserDao::$type[$otype])) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+        $organizationService = new OrganizationService();
+        $organList = $organizationService->getDepartsByType($otype);
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($organList, $error);
         return $ret;

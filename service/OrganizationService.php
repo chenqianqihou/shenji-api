@@ -123,7 +123,7 @@ class OrganizationService
 
     //获取departs
     public function getDeparts(){
-        $organs = OrganizationDao::find()->where('parentid <= 0')->asArray()->all();  
+        $organs = OrganizationDao::find()->where('parentid <= 0')->asArray()->all();
         $departs = OrganizationDao::find()->where('parentid > 0')->asArray()->all();
 //        var_dump($organs);
 //        var_dump($departs);
@@ -133,6 +133,39 @@ class OrganizationService
         foreach( $organs as $ov){
             $organDict[$ov['id']]['info'] = $ov;
             $organDict[$ov['id']]['departments'] = [];   
+        }
+        foreach( $departs as $dv){
+            $pid = $dv['parentid'];
+            if( isset($organDict[$pid]) ){
+                $organDict[$pid]['departments'][] = $dv;
+            }
+        }
+        foreach ($organDict as $id => $dict) {
+            $organ['id'] = $id;
+            $organ['name'] = $dict['info']['name'];
+            $organ['partment'] = [];
+            foreach ($dict['departments'] as $one) {
+                $tmp = [];
+                $tmp[$one['id']] = $one['name'];
+                $organ['partment'][] = $tmp;
+            }
+            $organList[] = $organ;
+        }
+        return $organList;
+    }
+
+    //获取某种类型的组织结构信息
+    public function getDepartsByType($type){
+        $organs = OrganizationDao::find()->where('parentid <= 0 and otype = :otype', [':otype' => $type])->asArray()->all();
+        $departs = OrganizationDao::find()->where('parentid > 0 and otype = :otype', [':otype' => $type])->asArray()->all();
+//        var_dump($organs);
+//        var_dump($departs);
+
+        $organDict = [];
+        $organList = [];
+        foreach( $organs as $ov){
+            $organDict[$ov['id']]['info'] = $ov;
+            $organDict[$ov['id']]['departments'] = [];
         }
         foreach( $departs as $dv){
             $pid = $dv['parentid'];
