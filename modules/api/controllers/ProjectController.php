@@ -7,6 +7,7 @@ use app\classes\ErrorDict;
 use app\classes\Log;
 use app\classes\Pinyin;
 use app\models\ExpertiseDao;
+use app\models\OrganizationDao;
 use app\models\ProjectDao;
 use app\models\QualificationDao;
 use app\models\RoleDao;
@@ -464,27 +465,6 @@ class ProjectController extends BaseController
         return $ret;
     }
 
-    //用户信息
-    public function actionInfo() {
-        $this->defineMethod = 'POST';
-        $this->defineParams = array (
-            'account' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
-        );
-        if (false === $this->check()) {
-            $ret = $this->outputJson(array(), $this->err);
-            return $ret;
-        }
-        $pid = $this->getParam('account');
-        $userService = new UserService();
-        $userInfo = $userService->getUserInfo($pid);
-        $error = ErrorDict::getError(ErrorDict::SUCCESS);
-        $ret = $this->outputJson($userInfo, $error);
-        return $ret;
-    }
-
     //个人信息
     public function actionMy() {
         $pid = $this->data['ID'];
@@ -604,6 +584,7 @@ class ProjectController extends BaseController
     /**
      * 项目编辑页详情接口
      *
+     * @return array
      */
     public function actionEditinfo() {
         $this->defineMethod = 'GET';
@@ -628,6 +609,69 @@ class ProjectController extends BaseController
 
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($data, $error);
+        return $ret;
+    }
+
+
+    /**
+     * 项目详情接口
+     *
+     * @return array
+     */
+    public function actionInfo() {
+        $this->defineMethod = 'GET';
+        $this->defineParams = array (
+            'id' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $id = intval($this->getParam('id', 0));
+        $projectDao = new ProjectDao();
+        $data = $projectDao->queryByID($id);
+        if(!$data){
+            $error = ErrorDict::getError(ErrorDict::G_PARAM);
+            $ret = $this->outputJson("", $error);
+            return $ret;
+        }
+        $ret['head'] = [
+            'projectnum' => $data['projectnum'],
+            'projyear' => $data['projyear'],
+            'projtype' => $data['projtype'],
+            'projlevel' => $projectDao->getProjectLevelMsg($data['projlevel']),
+            'leadernum' => $data['leadernum'],
+            'auditornum' => $data['auditornum'],
+            'masternum' => $data['masternum'],
+            'plantime' => $data['plantime'],
+        ];
+        $orgDao = new OrganizationDao();
+        $org = $orgDao::find()
+            ->where(['id' => $data['leadorgan']])->one();
+        $ret['head']['leadorgan'] = $org['name'] ?? "";
+
+
+        $org = $orgDao::find()
+            ->where(['id' => $data['projorgan']])->one();
+        $ret['head']['projorgan'] = $org['name'] ?? "";
+
+        $ret['basic'] = [
+            'projdesc' => $data['projdesc'],
+            'projstart' => $data['projstart'],
+            'projauditcontent' => $data['projauditcontent'],
+        ];
+
+        //todo
+        // 1、牵扯到状态的
+        // 2、审计组
+
+
+
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($ret, $error);
         return $ret;
     }
 }

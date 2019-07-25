@@ -41,6 +41,21 @@ class ProjectDao extends ActiveRecord{
         4 => "县级",
     ];
 
+    /**
+     * 获取项目层级
+     *
+     * @param $level
+     * @return bool|mixed
+     */
+    public function getProjectLevelMsg($level) {
+        if(!array_key_exists($level, static::$projlevel)) {
+            return false;
+        }
+        return static::$projlevel[$level];
+    }
+
+
+
     public function addProject($status, $projectnum, $name, $projyear, $plantime, $projdesc,
                                $projorgan, $projtype, $projlevel, $leadorgan,
                                $leadernum, $auditornum, $masternum) {
