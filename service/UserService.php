@@ -18,6 +18,20 @@ use app\classes\Pinyin;
 
 class UserService
 {
+    //工作状态
+    public static $jobStatus = [
+        1 => "在点",
+        2 => "不在点",
+        3 => "-",
+    ];
+
+    //工作状态
+    public static $jobStatusToName = [
+        "在点" => 1,
+        "不在点" => 2,
+        "-" => 3,
+    ];
+
     public function AddPeopleInfo($pid, $name, $sex, $type, $organId, $department, $level, $phone, $email,
                                   $passwd, $cardid, $address, $education, $school, $major, $political, $nature,
                                   $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment) {
@@ -254,6 +268,7 @@ class UserService
             'expertise' => $expertiseList,
             'techtitle' => $techtitleList,
             'role' => $roleList,
+            'status' => UserService::$jobStatus
         ];
         return $selectConfig;
     }
@@ -454,5 +469,16 @@ class UserService
             return false;
         }
         return true;
+    }
+
+    //查询人员是否在点
+    public function peopleJobStatus($pid) {
+        $auditGroupDao = new AuditGroupDao();
+        $groupInfo = $auditGroupDao->queryJoinGroup($pid);
+        if (count($groupInfo) > 0) {
+            return UserService::$jobStatusToName['在点'];
+        }else {
+            return UserService::$jobStatusToName['不在点'];
+        }
     }
 }

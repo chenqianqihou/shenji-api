@@ -165,6 +165,33 @@ class AuditGroupDao extends ActiveRecord{
         return $ret;
     }
 
+    //查询用户正在参与的审计组（项目未结束，人员锁定中）
+    public function queryJoinGroup($pid) {
+        $sql=sprintf('SELECT a.status, p.* as c FROM %s as a, peopleproject as p 
+            WHERE a.id = p.groupid and pid = :pid and status != %d and islock = %d',
+            self::tableName(), ProjectDao::$statusToName['项目结束'], AuditGroupDao::$isLockName['锁定']
+        );
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':pid', $pid, \PDO::PARAM_STR);
+        $stmt->execute();
+        $ret = $stmt->queryAll();
+        return $ret;
+    }
+
+    //查询所有在点状态的人员列表
+    public function queryAllJobPeople() {
+        $sql=sprintf('SELECT a.status, p.* as c FROM %s as a, peopleproject as p 
+            WHERE a.id = p.groupid and status != %d and islock = %d',
+            self::tableName(), ProjectDao::$statusToName['项目结束'], AuditGroupDao::$isLockName['锁定']
+        );
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->execute();
+        $ret = $stmt->queryAll();
+        return $ret;
+    }
+
     public function deletePeopleProject($groupid, $pid) {
         $sql=sprintf('DELETE FROM %s WHERE groupid = :groupid and pid = :pid', self::tableName());
         $stmt = self::getDb()->createCommand($sql);

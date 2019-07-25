@@ -154,6 +154,7 @@ class BaseController extends Controller {
         Yii::$app->response->statusCode = $statusCode;
         Yii::$app->response->format = Response::FORMAT_JSON;
         Yii::$app->response->headers->add('Access-Control-Allow-Origin', '*');
+        Yii::$app->response->headers->add('Access-Control-Allow-Headers', 'content-type,AUTHORIZATION');
         Yii::$app->response->headers->add('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE');
         return $ret;
     }
