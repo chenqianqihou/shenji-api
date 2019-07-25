@@ -29,6 +29,7 @@ return [
     'api/organization/users' => 'api/organization/users',
     'api/organization/departs' => 'api/organization/departs',
     'api/organization/listbytype' => 'api/organization/listbytype',
+    'api/organization/subordinate' => 'api/organization/subordinate',
 
     'api/project/create' => 'api/project/create',
     'api/project/selectconfig' => 'api/project/selectconfig',
