@@ -779,6 +779,10 @@ class UserController extends BaseController
                 'require' => false,
                 'checker' => 'noCheck',
             ),
+            'status' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
             'length' => array (
                 'require' => true,
                 'checker' => 'noCheck',
@@ -798,6 +802,7 @@ class UserController extends BaseController
         $type = $this->getParam('type', '');
         $organid = $this->getParam('organid', '');
         $query = $this->getParam('query', '');
+        $status = $this->getParam('status', '');
         $length = $this->getParam('length');
         $page = $this->getParam('page');
         if (!in_array($organization, $organizationArr)) {
