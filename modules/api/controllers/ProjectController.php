@@ -674,4 +674,48 @@ class ProjectController extends BaseController
         $ret = $this->outputJson($ret, $error);
         return $ret;
     }
+
+    /**
+     * 变更审计信息接口
+     *
+     * @return array
+     */
+    public function actionAuditinfo() {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'id' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'projstart' => array (
+                'require' => true,
+                'checker' => 'isDateValid',
+            ),
+            'projauditcontent' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $id = intval($this->getParam('id', 0));
+        $projstart = $this->getParam('projstart', '');
+        $projauditcontent = $this->getParam('projauditcontent', '');
+
+
+        $projectDao = new ProjectDao();
+        $data = $projectDao->queryByID($id);
+        if(!$data){
+            $error = ErrorDict::getError(ErrorDict::G_PARAM);
+            $ret = $this->outputJson("", $error);
+            return $ret;
+        }
+        $projectDao->updateAuditContent($id, $projstart, $projauditcontent);
+
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson('', $error);
+        return $ret;
+    }
 }
