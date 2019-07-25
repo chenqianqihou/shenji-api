@@ -359,4 +359,77 @@ class OrganizationController extends BaseController
         return $ret;
     }
 
+    //获取机构的下属机构和部门
+    public function actionSubordinate()
+    {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'organid' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $organid = intval($this->getParam('organid'));
+
+        $organService = new OrganizationService();
+        $organCount = $organService->getOrganizationCount( $organid);
+        if( $organCount <=0){
+            $error = ErrorDict::getError(ErrorDict::G_PARAM,"$organid 此机构不存在");
+            $ret = $this->outputJson("$organid is not exists!", $error);
+            return $ret;
+        }
+        $organInfo = $organService->getOrganizationInfo( $organid );
+        $objnum = $organInfo['regnum'];
+
+        //机关机构
+        $distinct = $this->getDistrictRervMap( 520000 );
+        $threelist = $organService->getOrganizationListByType(3);
+        $useParArr = [];
+        foreach( $threelist as $tk=>$tr ){
+            $parid = $tr['parentid'];
+            if($parid > 0){
+                if( !isset($useParArr[$parid])){
+                    $useParArr[$parid] = [];    
+                }
+                $useParArr[$parid][$tr['id']] = ['id'=>$tr['id'],'name'=>$tr['name'],'type'=>'child','data'=>$tr,'list'=>[]];
+                unset( $threelist[$tk] );
+            }
+        }
+        foreach( $threelist as $tr ){
+            $regnum = trim($tr['regnum'],',');    
+            $regArr = explode(',', $regnum);
+            $r1 = intval($regArr[count($regArr)-1] / 100) * 100;
+
+            $usePList = isset( $useParArr[$tr['id']]) ? $useParArr[$tr['id']] : [];
+            if( $regnum == $distinct['id']){
+                $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
+            } else {
+                if(isset($distinct['list'][$regnum])){
+                    $distinct['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
+                } else {
+                    $distinct['list'][$r1]['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
+                }
+            }
+        }
+
+        $result = [];
+        if($objnum == '520000'){
+            $result = $distinct;
+        } else {
+            if( isset($distinct['list'][$objnum]) && isset($distinct['list'][$objnum]['list'][$organid]) ){
+                $result = $distinct['list'][$objnum]['list'][$organid];
+            } else {
+                $result = ['id'=>$organInfo['id'],'name'=>$organInfo['name'],'type'=>'child','data'=>$organInfo,'list'=>[]];    
+            }   
+        }
+
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($result, $error);
+        return $ret;
+    }
+
 }
