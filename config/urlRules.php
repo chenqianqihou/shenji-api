@@ -38,6 +38,7 @@ return [
     'api/project/updatestatus' => 'api/project/updatestatus',
     'api/project/auditinfo' => 'api/project/auditinfo',
     'api/project/listselect' => 'api/project/listselect',
+    'api/project/editinfo' => 'api/project/editinfo',
 
     'api/auditgroup/add' => 'api/auditgroup/add',
     'api/auditgroup/updaterole' => 'api/auditgroup/updaterole',

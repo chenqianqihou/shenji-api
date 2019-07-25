@@ -600,4 +600,34 @@ class ProjectController extends BaseController
         $ret = $this->outputJson('', $error);
         return $ret;
     }
+
+    /**
+     * 项目编辑页详情接口
+     *
+     */
+    public function actionEditinfo() {
+        $this->defineMethod = 'GET';
+        $this->defineParams = array (
+            'id' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $id = intval($this->getParam('id', 0));
+        $project = new ProjectDao();
+        $data = $project->queryByID($id);
+        if(!$data){
+            $error = ErrorDict::getError(ErrorDict::G_PARAM);
+            $ret = $this->outputJson("", $error);
+            return $ret;
+        }
+
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($data, $error);
+        return $ret;
+    }
 }
