@@ -718,4 +718,48 @@ class ProjectController extends BaseController
         $ret = $this->outputJson('', $error);
         return $ret;
     }
+
+
+
+    /**
+     * 项目列表查询下拉选接口
+     *
+     * @return array
+     */
+    public function actionListselect() {
+        $data = [
+            'projyear' => ["2018","2019","2020"], //项目年度
+            'projlevel' => [
+                [ '1' => '省厅统一组织'],
+                [ '2' => '市州本级'],
+                [ '3' => '市州统一组织' ],
+                [ '4' => '县级']
+            ],
+            'medium' => [
+                [ '1' => '无需审核'],
+                [ '2' => '待提审'],
+                [ '3' => '待审核'],
+                [ '4' => '审核通过'],
+                [ '5' => '审核未通过'],
+            ],
+            'internal' => [
+                [ '1' => "无需审核"],
+                [ '2' => '待提审'],
+                [ '3' => '审核通过'],
+                [ '4' => '审核通过'],
+                [ '5' => '审核未通过'],
+            ],
+            'projstage' => [
+                [ '1' => '计划阶段'],
+                [ '2' => '实施阶段'],
+                [ '3' => '审理阶段'],
+                [ '4' => '报告阶段'],
+                [ '5' => '项目结束']
+            ]
+        ];
+
+        return $this->outputJson($data, ErrorDict::getError(ErrorDict::SUCCESS));
+
+    }
+
 }

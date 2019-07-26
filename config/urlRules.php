@@ -42,6 +42,7 @@ return [
     'api/project/listselect' => 'api/project/listselect',
     'api/project/editinfo' => 'api/project/editinfo',
     'api/project/info' => 'api/project/info',
+    'api/project/listselect' => 'api/project/listselect',
 
     'api/auditgroup/add' => 'api/auditgroup/add',
     'api/auditgroup/updaterole' => 'api/auditgroup/updaterole',
