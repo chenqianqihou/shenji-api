@@ -5,6 +5,7 @@ namespace app\service;
 use app\classes\Log;
 use app\models\ExpertiseDao;
 use app\models\OrganizationDao;
+use app\models\PeopleProjectDao;
 use app\models\ProjectDao;
 use app\models\QualificationDao;
 use app\models\RoleDao;
@@ -231,5 +232,40 @@ class ProjectService
             'role' => $roleList,
         ];
         return $selectConfig;
+    }
+
+
+    /**
+     * 根据id批量删除项目
+     *
+     * @param array $ids
+     * @return bool
+     * @throws Exception
+     * @throws \Throwable
+     */
+    public function deletePro(array $ids) {
+        if (!is_array($ids)){
+            foreach ($ids as $e){
+                if(!is_numeric($e)){
+                    return false;
+                }
+            }
+        }
+
+        $pro = new ProjectDao();
+        $transaction = $pro::getDb()->beginTransaction();
+        try {
+            $pro::deleteAll(['in', 'id', $ids]);
+
+            PeopleProjectDao::deleteAll(['in', 'projid', $ids]);
+        } catch(\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        } catch(\Throwable $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+        $transaction->commit();
+        return true;
     }
 }

@@ -17,7 +17,7 @@ use app\models\TrainDao;
 use app\models\UserDao;
 use app\service\OrganizationService;
 use app\service\UserService;
-use app\Service\ProjectService;
+use app\service\ProjectService;
 use Yii;
 use \Lcobucci\JWT\Builder;
 use \Lcobucci\JWT\Signer\Hmac\Sha256;
@@ -144,6 +144,13 @@ class ProjectController extends BaseController
         return $ret;
     }
 
+    /**
+     * 删除项目接口（批量）
+     *
+     * @return array
+     * @throws Exception
+     * @throws \Throwable
+     */
     public function actionDelete()
     {
         $this->defineMethod = 'POST';
@@ -157,33 +164,23 @@ class ProjectController extends BaseController
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
-        $idArr = $this->getParam('id', '');
-        $userService = new UserService();
-        foreach ($pidArr as $pid) {
-            //todo 当人员还有项目时，不可删除
-            $peopleInfo = $userService->getPeopleInfo($pid);
-            if ($peopleInfo) {
-                $deleteRet = $userService->deleteUserInfo($pid, $peopleInfo['type']);
-                if ($deleteRet) {
-                    $successPid[] = $pid;
-                }else {
-                    $failPid[] = $pid;
-                }
-            }else {
-                $successPid[] = $pid;
-            }
+        $idArr = json_decode($this->getParam('id', ''), true);
+        if (!$idArr) {
+            return $this->outputJson('',
+                ErrorDict::getError(ErrorDict::G_PARAM, '参数格式不对！')
+            );
         }
-        if (count($failPid) == 0) {
-            $error = ErrorDict::getError(ErrorDict::SUCCESS);
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }else {
-            Log::addLogNode('delete user fail pid:', json_encode($failPid));
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '',
-                '部分人员删除成功');
-            $ret = $this->outputJson('', $error);
-            return $ret;
+
+        $service = new ProjectService();
+        if(!$service->deletePro($idArr)){
+            return $this->outputJson('',
+                ErrorDict::getError(ErrorDict::ERR_INTERNAL)
+            );
         }
+
+        return $this->outputJson('',
+            ErrorDict::getError(ErrorDict::SUCCESS)
+        );
     }
 
     //修改人员信息
