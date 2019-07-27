@@ -3,6 +3,7 @@
 namespace app\modules\api\controllers;
 
 use app\classes\BaseController;
+use app\classes\Checker;
 use app\classes\ErrorDict;
 use app\classes\Log;
 use app\classes\Pinyin;
@@ -477,55 +478,122 @@ class ProjectController extends BaseController
 
     //查询列表
     public function actionList() {
-        $this->defineMethod = 'POST';
+        $this->defineMethod = 'GET';
         $this->defineParams = array (
-            'organization' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
-            'type' => array (
+            'projyear' => array (
                 'require' => false,
                 'checker' => 'noCheck',
             ),
-            'organid' => array (
+            'projlevel' => array (
                 'require' => false,
-                'checker' => 'noCheck',
+                'checker' => 'isNumber',
+            ),
+            'medium' => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
+            'internal' => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
+            'projstage' => array (
+                'require' => false,
+                'checker' => 'isNumber',
             ),
             'query' => array (
                 'require' => false,
                 'checker' => 'noCheck',
             ),
             'length' => array (
-                'require' => true,
-                'checker' => 'noCheck',
+                'require' => false,
+                'checker' => 'isNumber',
             ),
             'page' => array (
-                'require' => true,
-                'checker' => 'noCheck',
+                'require' => false,
+                'checker' => 'isNumber',
             ),
         );
         if (false === $this->check()) {
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
-        //查询类型 1 所有 2 人员类型 3 具体机构
-        $organizationArr = [1, 2, 3];
-        $organization = $this->getParam('organization');
-        $type = $this->getParam('type', '');
-        $organid = $this->getParam('organid', '');
+        $projyear = $this->getParam('projyear', '');
+        $projlevel = intval($this->getParam('projlevel', 0));
+        $medium = intval($this->getParam('medium', 0));
+        $internal = intval($this->getParam('internal', 0));
+        $projstage = intval($this->getParam('projstage', 0));
         $query = $this->getParam('query', '');
-        $length = $this->getParam('length');
-        $page = $this->getParam('page');
-        if (!in_array($organization, $organizationArr)) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'organization is error');
-            $ret = $this->outputJson('', $error);
-            return $ret;
+        $length = intval($this->getParam('length', 0));
+        $page = intval($this->getParam('page', 0));
+
+        $prj = new ProjectDao();
+        $con = $prj::find();
+
+        if ($projyear) {
+            if (date('Y', strtotime($projyear)) !== $projyear) {
+                return $this->outputJson('',
+                    ErrorDict::getError(ErrorDict::G_PARAM, "projyear 输入格式不对！应为年份格式!")
+                );
+            }
+            $con->where(['projyear' => $projyear]);
         }
-        $userService = new UserService();
-        $data = $userService->getUserList($organization, $type, $organid, $query, $length, $page);
-        $error = ErrorDict::getError(ErrorDict::SUCCESS);
-        $ret = $this->outputJson($data, $error);
-        return $ret;
+
+        if ($projlevel) {
+            if (!in_array($projlevel, [1, 2, 3, 4])) {
+                return $this->outputJson('',
+                    ErrorDict::getError(ErrorDict::G_PARAM, "projlevel 输入格式不对！")
+                );
+            }
+            $con->where(['projlevel' => $projlevel]);
+        }
+
+        if ($medium) {
+            if (!in_array($medium, [1, 2, 3, 4, 5])) {
+                return $this->outputJson('',
+                    ErrorDict::getError(ErrorDict::G_PARAM, "medium 输入格式不对！")
+                );
+            }
+            $con->where(['medium' => $medium]);
+        }
+
+        /**  注释部分为审核相关内容 */
+
+//        if ($internal) {
+//            if (!in_array($internal, [1, 2, 3, 4, 5])) {
+//                return $this->outputJson('',
+//                    ErrorDict::getError(ErrorDict::G_PARAM, "internal 输入格式不对！")
+//                );
+//            }
+//            $con->where(['medium' => $internal]);
+//        }
+//
+//        if ($projstage) {
+//            if (!in_array($projstage, [1, 2, 3, 4, 5])) {
+//                return $this->outputJson('',
+//                    ErrorDict::getError(ErrorDict::G_PARAM, "projstage 输入格式不对！")
+//                );
+//            }
+//            $con->where(['projstage' => $projstage]);
+//        }
+
+
+        if ($query) {
+            $con->where(['or', ['like', 'projectnum', $query], ['like', 'name', $query]]);
+        }
+        if (!$length) {
+            $length = 20;
+        }
+        if (!$page) {
+            $page = 1;
+        }
+        $countCon = clone $con;
+        $list = $con->limit($length)->offset(($page - 1) * $length)->all();
+        $total = $countCon->count();
+
+        return $this->outputJson([
+            'list' => $list,
+            'total' => $total,
+        ], ErrorDict::SUCCESS);
     }
 
     public function actionSelectconfig() {
@@ -761,5 +829,8 @@ class ProjectController extends BaseController
         return $this->outputJson($data, ErrorDict::getError(ErrorDict::SUCCESS));
 
     }
+
+
+
 
 }
