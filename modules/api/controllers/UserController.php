@@ -717,7 +717,6 @@ class UserController extends BaseController
             $tr->commit();
         }catch (Exception $e) {
             $tr->rollBack();
-            var_dump($e);
             Log::addLogNode('addException', serialize($e->errorInfo));
             $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
             $ret = $this->outputJson('', $error);
