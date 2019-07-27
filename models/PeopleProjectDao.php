@@ -20,4 +20,9 @@ class PeopleProjectDao extends ActiveRecord{
     public static function tableName() {
         return "peopleproject";
     }
+
+
+    const ROLE_TYPE_GROUPER = 3;
+    const ROLE_TYPE_GROUP_LEADER = 1;
+    const ROLE_TYPE_MASTER = 2;
 }

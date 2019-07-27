@@ -638,6 +638,13 @@ class ProjectController extends BaseController
     }
 
 
+    /**
+     * 项目状态变更接口
+     *
+     */
+    public function actionUpdatestatus() {
+
+    }
 
 
 }
