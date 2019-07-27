@@ -279,7 +279,11 @@ class ProjectController extends BaseController
         return $ret;
     }
 
-    //查询列表
+    /**
+     * 项目列表接口
+     *
+     * @return array
+     */
     public function actionList() {
         $this->defineMethod = 'GET';
         $this->defineParams = array (
