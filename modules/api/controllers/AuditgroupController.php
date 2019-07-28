@@ -139,4 +139,39 @@ class AuditgroupController extends BaseController {
         );
     }
 
+
+    /**
+     * 审计组操作：解锁人员
+     *
+     */
+    public function actionUnlock(){
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'id' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+            'pid' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+        );
+        $id = intval($this->getParam('id', 0));
+        $pid = intval($this->getParam('pid', 0));
+
+        $proDao = new PeopleProjectDao();
+        $peoPro = $proDao::find()
+            ->where(['groupid' => $id])
+            ->andwhere(['pid' => $pid])
+            ->one();
+
+        $peoPro->islock = 2;
+        $peoPro->save();
+
+
+        return $this->outputJson('',
+            ErrorDict::getError(ErrorDict::SUCCESS)
+        );
+    }
+
 }
