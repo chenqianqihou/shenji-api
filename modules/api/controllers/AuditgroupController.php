@@ -36,12 +36,7 @@ class AuditgroupController extends BaseController {
         $pid = intval($this->getParam('pid', 0));
 
         $proDao = new PeopleProjectDao();
-        try{
-            $peoPros = $proDao::find()->where(['groupid' => $id])->groupBy('projid')->all();
-        }catch (\Exception $e){
-            Log::fatal($e->getMessage());
-            return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
-        }
+        $peoPros = $proDao::find()->where(['groupid' => $id])->groupBy('projid')->all();
 
         $transaction = $proDao::getDb()->beginTransaction();
         try{
@@ -60,6 +55,50 @@ class AuditgroupController extends BaseController {
             Log::fatal($e->getMessage());
             return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
         }
+
+        return $this->outputJson('',
+            ErrorDict::getError(ErrorDict::SUCCESS)
+        );
+    }
+
+    /**
+     * 审计组操作：更改角色
+     *
+     */
+    public function actionUpdaterole(){
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'id' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+            'pid' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+            'role' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+        );
+        $id = intval($this->getParam('id', 0));
+        $pid = intval($this->getParam('pid', 0));
+        $role = intval($this->getParam('role', 0));
+
+        if(!in_array($role, [PeopleProjectDao::ROLE_TYPE_GROUPER,
+            PeopleProjectDao::ROLE_TYPE_GROUP_LEADER,
+            PeopleProjectDao::ROLE_TYPE_MASTER])) {
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+        }
+
+        $proDao = new PeopleProjectDao();
+        $peoPro = $proDao::find()
+            ->where(['groupid' => $id])
+            ->andwhere(['pid' => $pid])
+            ->one();
+        $peoPro->roletype = $role;
+        $peoPro->save();
+
 
         return $this->outputJson('',
             ErrorDict::getError(ErrorDict::SUCCESS)
