@@ -91,16 +91,40 @@ class UserDao extends ActiveRecord{
         2 => '综合岗位',
     ];
 
+    //是否审计人员
+    public static $isAudit = [
+        1 => '是',
+        2 => '不是',
+    ];
+
+    public static $isAuditToName = [
+        '是' => 1,
+        '不是' => 2,
+    ];
+
+    //工作状态
+    public static $isJob = [
+        1 => '在点',
+        2 => '不在点',
+        3 => '-',
+    ];
+
+    public static $isJobToName = [
+        '在点' => 1,
+        '不在点' => 2,
+        '-' => 3,
+    ];
+
     public function addPeople($pid, $name, $sex, $type, $organId, $department, $level, $phone, $email,
                               $passwd, $cardid, $address, $education, $school, $major, $political, $nature,
-                              $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment) {
+                              $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment, $isAudit, $isJob) {
         $sql=sprintf('INSERT INTO %s (pid, `name`, sex, `type`, organid, department, `level`, phone, email,
                               passwd, cardid, address, education, school, major, political, nature,
-                              specialties, achievements, `position`, location, workbegin, auditbegin, comment,
+                              specialties, achievements, `position`, location, workbegin, auditbegin, comment, isaudit, isjob,
                               ctime, utime)
                               values (:pid, :name, :sex, :type, :organid, :department, :level, :phone, :email, :passwd,
                               :cardid, :address, :education, :school, :major, :political, :nature,
-                              :specialties, :achievements, :position, :location, :workbegin, :auditbegin, :comment,
+                              :specialties, :achievements, :position, :location, :workbegin, :auditbegin, :comment, :isaudit, :isjob,
                               :ctime, :utime)', self::tableName()
         );
         $curTime = date('Y-m-d H:i:s');
@@ -130,6 +154,8 @@ class UserDao extends ActiveRecord{
         $stmt->bindParam(':workbegin', $workbegin, \PDO::PARAM_STR);
         $stmt->bindParam(':auditbegin', $auditbegin, \PDO::PARAM_STR);
         $stmt->bindParam(':comment', $comment, \PDO::PARAM_STR);
+        $stmt->bindParam(':isaudit', $isAudit, \PDO::PARAM_INT);
+        $stmt->bindParam(':isjob', $isJob, \PDO::PARAM_INT);
         $stmt->bindParam(':ctime', $curTime, \PDO::PARAM_STR);
         $stmt->bindParam(':utime', $curTime, \PDO::PARAM_STR);
         $ret = $stmt->execute();
@@ -138,14 +164,14 @@ class UserDao extends ActiveRecord{
 
     public function updatePeople($pid, $name, $sex, $type, $organId, $department, $level, $phone, $email,
                                  $cardid, $address, $education, $school, $major, $political, $nature,
-                              $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment) {
+                              $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment, $isAudit) {
         $sql=sprintf('UPDATE %s SET `name` = :name, sex = :sex, `type` = :type, organid = :organid,
                               department = :department, `level` = :level, phone = :phone, email = :email, 
                               cardid = :cardid, address = :address, education = :education, school = :school,
                               major = :major, political = :political, nature = :nature, specialties = :specialties, 
                               achievements = :achievements, `position` = :position, location = :location,
                               workbegin = :workbegin, auditbegin = :auditbegin, 
-                              comment = :comment where pid = :pid', self::tableName()
+                              comment = :comment, isaudit = :isaudit where pid = :pid', self::tableName()
         );
         $stmt = self::getDb()->createCommand($sql);
         $stmt->prepare();
@@ -172,6 +198,7 @@ class UserDao extends ActiveRecord{
         $stmt->bindParam(':workbegin', $workbegin, \PDO::PARAM_STR);
         $stmt->bindParam(':auditbegin', $auditbegin, \PDO::PARAM_STR);
         $stmt->bindParam(':comment', $comment, \PDO::PARAM_STR);
+        $stmt->bindParam(':isaudit', $isAudit, \PDO::PARAM_INT);
         $ret = $stmt->execute();
         return $ret;
     }
@@ -190,7 +217,7 @@ class UserDao extends ActiveRecord{
     }
 
     //人员列表
-    public function queryPeopleList($type, $organid, $query, $start, $length) {
+    public function queryPeopleList($type, $organid, $query, $status, $start, $length) {
         $condition = "";
         if ($type != "") {
             $condition = $condition . " type = :type ";
@@ -202,6 +229,12 @@ class UserDao extends ActiveRecord{
                 $condition = $condition . " and ";
             }
             $condition = $condition . " (name like '%$query%' or pid like '%$query%')";
+        }
+        if (isset(self::$isJob[$status])) {
+            if ($condition != "") {
+                $condition = $condition . " and ";
+            }
+            $condition = $condition . " isaudit = :isaudit ";
         }
         if ($condition != "") {
             $sql = sprintf('SELECT * FROM %s WHERE %s ',
@@ -219,6 +252,9 @@ class UserDao extends ActiveRecord{
             $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
         }elseif ($organid != "") {
             $stmt->bindParam(':organid', $organid, \PDO::PARAM_INT);
+        }
+        if (isset(self::$isJob[$status])) {
+            $stmt->bindParam(':isaudit', $status, \PDO::PARAM_INT);
         }
         $stmt->execute();
         $ret = $stmt->queryAll();
@@ -283,6 +319,30 @@ class UserDao extends ActiveRecord{
         $stmt->prepare();
         $stmt->bindParam(':pid', $pid, \PDO::PARAM_STR);
         $stmt->bindParam(':passwd', $passwd, \PDO::PARAM_STR);
+        $ret = $stmt->execute();
+        return $ret;
+    }
+
+    public function updateIsAudit($pid, $isAudit) {
+        $sql=sprintf('UPDATE %s SET isaudit = :isaudit WHERE pid = :pid',
+            self::tableName()
+        );
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':pid', $pid, \PDO::PARAM_STR);
+        $stmt->bindParam(':isaudit', $isAudit, \PDO::PARAM_INT);
+        $ret = $stmt->execute();
+        return $ret;
+    }
+
+    public function updateIsJob($pid, $isJob) {
+        $sql=sprintf('UPDATE %s SET isjob = :isjob WHERE pid = :pid',
+            self::tableName()
+        );
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':pid', $pid, \PDO::PARAM_STR);
+        $stmt->bindParam(':isjob', $isJob, \PDO::PARAM_INT);
         $ret = $stmt->execute();
         return $ret;
     }
