@@ -538,4 +538,117 @@ class OrganizationController extends BaseController
         $writer->save('php://output');
         Yii::$app->end();
     }
+
+    public function actionExcelupload() {
+        if( empty($_FILES['file']) ){
+            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }  
+
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($_FILES['file']['tmp_name']);
+        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+        unset( $sheetData[1]);
+        
+        $insertData = [];
+        foreach( $sheetData as $data) {
+            $tmpdata = [];
+            $tmpdata['name'] =$data['B'];
+            if( empty($tmpdata['name'])){
+                continue;
+            }
+
+            $tmpdata['otype'] = explode(':',$data['A'])[0];
+            if( empty($tmpdata['otype']) ||!is_numeric($tmpdata['otype']) || !in_array($tmpdata['otype'],[1,2]) ){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['A'].' 类型格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+
+            $tmpdata['deputy'] = trim($data['C']);
+            $tmpdata['regtime'] = strtotime($data['H']);
+            $shen = explode('_',$data['D']);
+            if( count($shen) != 3 || !isset( $districts[$shen[1]] )){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['D'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $shi = explode('_',$data['E']);
+            if( count($shi) != 3 || !isset( $districts[$shi[1]] )){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['E'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $qu = explode('_',$data['F']);
+            if( count($qu) != 3 ){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['F'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $shenstr = $shen[1];
+            $shistr = $shi[1];
+            $qustr = $qu[1];
+            $tmpdata['regnum'] = "$shenstr,$shistr,$qustr";
+            $tmpdata['regaddress'] = $data['G'];
+            $tmpdata['category'] = $data['I'];
+            $tmpdata['level'] = $data['J'];
+            $tmpdata['capital'] = intval($data['K']);
+            $tmpdata['workbegin'] = strtotime($data['L']);
+            $tmpdata['costeng'] = intval($data['M']);
+            $tmpdata['coster'] = intval($data['N']);
+            $tmpdata['accountant'] = intval($data['O']);
+            $tmpdata['highlevel'] = intval($data['P']);
+            $tmpdata['midlevel'] = intval($data['Q']);
+            $tmpdata['retiree'] = $data['R'];
+            $tmpdata['parttimers'] = $data['S'];
+            $tmpdata['contactor'] = $data['T'];
+            $tmpdata['contactphone'] = $data['U'];
+            $tmpdata['contactnumber'] = $data['V'];
+            $shen = explode('_',$data['W']);
+            if( count($shen) != 3 || !isset( $districts[$shen[1]] )){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['W'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $shi = explode('_',$data['X']);
+            if( count($shi) != 3 || !isset( $districts[$shi[1]] )){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['X'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $qu = explode('_',$data['Y']);
+            if( count($qu) != 3 ){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['Y'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $shenstr = $shen[1];
+            $shistr = $shi[1];
+            $qustr = $qu[1];
+            $tmpdata['officenum'] = "$shenstr,$shistr,$qustr";
+            $tmpdata['officeaddress'] = $data['Z'];
+            $tmpdata['qualiaudit'] = $data['AA'];
+            $tmpdata['parentid'] = '0';
+
+            $insertData[] = $tmpdata;	
+        }
+
+        $organService = new OrganizationService();
+        foreach($insertData as $params) {
+            $checkres = $organService->checkParams( $params );
+            if( !$checkres['res']){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM);
+                $ret = $this->outputJson($checkres, $error);
+                return $ret;
+            }
+        }
+
+        foreach($insertData as $params) {
+            $organService->insertOrganization( $params );
+        }
+
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson('', $error);
+        return $ret;
+    }
 }
