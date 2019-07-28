@@ -262,7 +262,7 @@ class UserDao extends ActiveRecord{
     }
 
     //人员列表总数
-    public function countPeopleList($type, $organid, $query, $start, $length) {
+    public function countPeopleList($type, $organid, $query, $status, $start, $length) {
         $condition = "";
         if ($type != "") {
             $condition = $condition . " type = :type ";
@@ -274,6 +274,12 @@ class UserDao extends ActiveRecord{
                 $condition = $condition . " and ";
             }
             $condition = $condition . " (name like '%$query%' or pid like '%$query%')";
+        }
+        if (isset(self::$isJob[$status])) {
+            if ($condition != "") {
+                $condition = $condition . " and ";
+            }
+            $condition = $condition . " isaudit = :isaudit ";
         }
         if ($condition != "") {
             $sql = sprintf('SELECT count(1) as c FROM %s WHERE %s ',
@@ -290,6 +296,9 @@ class UserDao extends ActiveRecord{
             $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
         }elseif ($organid != "") {
             $stmt->bindParam(':organid', $type, \PDO::PARAM_INT);
+        }
+        if (isset(self::$isJob[$status])) {
+            $stmt->bindParam(':isaudit', $status, \PDO::PARAM_INT);
         }
         $stmt->execute();
         $ret = $stmt->queryOne();

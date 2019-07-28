@@ -158,7 +158,7 @@ class UserService
             $page = 1;
         }
         $start = $length * ($page - 1);
-        $userList = $userDao->queryPeopleupdatePeopleInfoList($type, $organid, $query, $status, $start, $length);
+        $userList = $userDao->queryPeopleList($type, $organid, $query, $status, $start, $length);
         $organizationService = new OrganizationService();
         $organizationInfo = [];
         $allOrganization = $organizationService->getAllOrganization();
@@ -198,7 +198,7 @@ class UserService
             $list[] = $one;
         }
         $userDao = new UserDao();
-        $count = $userDao->countPeopleList($type, $organid, $query, $start, $length);
+        $count = $userDao->countPeopleList($type, $organid, $query, $status, $start, $length);
         $data['list'] = $list;
         $data['total'] = $count;
         return $data;
