@@ -278,6 +278,22 @@ class UserController extends BaseController
         $passwd = md5('12345678');
         $tr = Yii::$app->get('db')->beginTransaction();
         try {
+            //todo role id 是否准确
+            $isAudit = UserDao::$isAuditToName['不是'];
+            $roleDao = new RoleDao();
+            $roleIdArr = explode(',', $role);
+            foreach ($roleIdArr as $rid) {
+                //判断是否角色为“审计组员”
+                if ($rid == 8) {
+                    $isAudit = UserDao::$isAuditToName['是'];
+                }
+                $roleDao->addPeopleRole($pid, $rid);
+            }
+            if ($isAudit == UserDao::$isAuditToName['是']) {
+                $isJob = UserDao::$isJobToName['不在点'];
+            }else {
+                $isJob = UserDao::$isJobToName['-'];
+            }
             //不同审计人员类别，填写不同的数据
             if ($type == UserDao::$typeToName['审计机关']) {
                 $department = intval($this->getParam('department', 0));
@@ -345,7 +361,7 @@ class UserController extends BaseController
                 //录入数据
                 $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, $department, $level, $phone, $email,
                     $passwd, $cardid, $address, $education, $school, $major, $political, $nature,
-                    '', '', $position, $location, $workbegin, $auditbegin, $comment);
+                    '', '', $position, $location, $workbegin, $auditbegin, $comment, $isAudit, $isJob);
 
             }else {
                 $specialties = $this->getParam('specialties', '');
@@ -369,13 +385,7 @@ class UserController extends BaseController
                 $workbegin = date('Y-m-d H:i:s', intval($workbegin));
                 $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, 0, $level, $phone, $email,
                     $passwd, $cardid, $address, $education, $school, $major, $political, 0,
-                    $specialties, $achievements, $position, $location, $workbegin, $curTime, $comment);
-            }
-            //todo role id 是否准确
-            $roleDao = new RoleDao();
-            $roleIdArr = explode(',', $role);
-            foreach ($roleIdArr as $rid) {
-                $roleDao->addPeopleRole($pid, $rid);
+                    $specialties, $achievements, $position, $location, $workbegin, $curTime, $comment, $isAudit, $isJob);
             }
             $tr->commit();
         }catch (Exception $e) {
@@ -608,6 +618,20 @@ class UserController extends BaseController
         $userService = new UserService();
         $tr = Yii::$app->get('db')->beginTransaction();
         try {
+            //todo role id 是否准确
+            //先删除，后添加
+            $isAudit = UserDao::$isAuditToName['不是'];
+            $roleDao = new RoleDao();
+            $roleDao->deletePeopleRole($pid);
+            $roleIdArr = explode(',', $role);
+            foreach ($roleIdArr as $rid) {
+                //判断是否角色为“审计组员”
+                if ($rid == 8) {
+                    $isAudit = UserDao::$isAuditToName['是'];
+                }
+                $roleDao->addPeopleRole($pid, $rid);
+            }
+
             //不同审计人员类别，填写不同的数据
             if ($type == UserDao::$typeToName['审计机关']) {
                 $department = $this->getParam('department', 0);
@@ -679,7 +703,7 @@ class UserController extends BaseController
                 //更新数据
                 $userService->updatePeopleInfo($pid, $name, $sex, $type, $organization, $department, $level, $phone, $email,
                     $cardid, $address, $education, $school, $major, $political, $nature,
-                    '', '', $position, $location, $workbegin, $auditbegin, $comment);
+                    '', '', $position, $location, $workbegin, $auditbegin, $comment, $isAudit);
 
             }else {
                 $specialties = $this->getParam('specialties', '');
@@ -704,20 +728,11 @@ class UserController extends BaseController
                 $workbegin = date('Y-m-d H:i:s', $workbegin);
                 $userService->updatePeopleInfo($pid, $name, $sex, $type, $organization, 0, $level, $phone, $email,
                     $cardid, $address, $education, $school, $major, $political, 0,
-                    $specialties, $achievements, $position, $location, $workbegin, $curTime, $comment);
-            }
-            //todo role id 是否准确
-            //先删除，后添加
-            $roleDao = new RoleDao();
-            $roleDao->deletePeopleRole($pid);
-            $roleIdArr = explode(',', $role);
-            foreach ($roleIdArr as $rid) {
-                $roleDao->addPeopleRole($pid, $rid);
+                    $specialties, $achievements, $position, $location, $workbegin, $curTime, $comment, $isAudit);
             }
             $tr->commit();
         }catch (Exception $e) {
             $tr->rollBack();
-            var_dump($e);
             Log::addLogNode('addException', serialize($e->errorInfo));
             $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
             $ret = $this->outputJson('', $error);
@@ -802,7 +817,7 @@ class UserController extends BaseController
         $type = $this->getParam('type', '');
         $organid = $this->getParam('organid', '');
         $query = $this->getParam('query', '');
-        $status = $this->getParam('status', '');
+        $status = intval($this->getParam('status', 0));
         $length = $this->getParam('length');
         $page = $this->getParam('page');
         if (!in_array($organization, $organizationArr)) {
@@ -811,7 +826,7 @@ class UserController extends BaseController
             return $ret;
         }
         $userService = new UserService();
-        $data = $userService->getUserList($organization, $type, $organid, $query, $length, $page);
+        $data = $userService->getUserList($organization, $type, $organid, $query, $status, $length, $page);
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($data, $error);
         return $ret;
@@ -938,12 +953,28 @@ class UserController extends BaseController
         $role = $this->getParam('role', '');
         $tr = Yii::$app->get('db')->beginTransaction();
         try {
+            //todo role id 是否准确
             //先删除，后添加
+            $isAudit = UserDao::$isAuditToName['不是'];
             $roleDao = new RoleDao();
             $roleDao->deletePeopleRole($pid);
             $roleIdArr = explode(',', $role);
             foreach ($roleIdArr as $rid) {
+                //判断是否角色为“审计组员”
+                if ($rid == 8) {
+                    $isAudit = UserDao::$isAuditToName['是'];
+                }
                 $roleDao->addPeopleRole($pid, $rid);
+            }
+            $userDao = new UserDao();
+            $userInfo = $userDao->queryByID($pid);
+            if ($userInfo['isaudit'] != $isAudit) {
+                $userDao->updateIsAudit($pid, $isAudit);
+                if ($isAudit == UserDao::$isAuditToName['是'] && $userInfo['isjob'] == UserDao::$isJobToName['-']) {
+                    $userDao->updateIsJob($pid, UserDao::$isJobToName['不在点']);
+                }elseif ($isAudit == UserDao::$isAuditToName['不是'] && $userInfo['isjob'] == UserDao::$isJobToName['不在点']) {
+                    $userDao->updateIsJob($pid, UserDao::$isJobToName['-']);
+                }
             }
             $tr->commit();
         }catch (Exception $e) {

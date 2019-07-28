@@ -143,41 +143,6 @@ class ProjectDao extends ActiveRecord{
         return $ret;
     }
 
-    public function queryList($type, $organid, $query, $start, $length) {
-        $condition = "";
-        if ($type != "") {
-            $condition = $condition . " type = :type ";
-        }elseif ($organid != "") {
-            $condition = $condition . " organid = :organid ";
-        }
-        if ($query != "") {
-            if ($condition != "") {
-                $condition = $condition . " and ";
-            }
-            $condition = $condition . " (name like '%$query%' or pid like '%$query%')";
-        }
-        if ($condition != "") {
-            $sql = sprintf('SELECT * FROM %s WHERE %s ',
-                self::tableName(), $condition
-            );
-        }else {
-            $sql = sprintf('SELECT * FROM %s',
-                self::tableName()
-            );
-        }
-        $sql = $sql . " order by ctime desc limit $start, $length";
-        $stmt = self::getDb()->createCommand($sql);
-        $stmt->prepare();
-        if ($type != "") {
-            $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
-        }elseif ($organid != "") {
-            $stmt->bindParam(':organid', $organid, \PDO::PARAM_INT);
-        }
-        $stmt->execute();
-        $ret = $stmt->queryAll();
-        return $ret;
-    }
-
     public function countList($type, $organid, $query) {
         $condition = "";
         if ($type != "") {

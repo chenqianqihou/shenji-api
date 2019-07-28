@@ -34,21 +34,21 @@ class UserService
 
     public function AddPeopleInfo($pid, $name, $sex, $type, $organId, $department, $level, $phone, $email,
                                   $passwd, $cardid, $address, $education, $school, $major, $political, $nature,
-                                  $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment) {
+                                  $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment, $isAudit, $isJob) {
         $userDao = new UserDao();
         $ret = $userDao->addPeople($pid, $name, $sex, $type, $organId, $department, $level, $phone, $email,
             $passwd, $cardid, $address, $education, $school, $major, $political, $nature,
-            $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment);
+            $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment, $isAudit, $isJob);
         return $ret;
     }
 
     public function updatePeopleInfo($pid, $name, $sex, $type, $organId, $department, $level, $phone, $email,
                                   $cardid, $address, $education, $school, $major, $political, $nature,
-                                  $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment) {
+                                  $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment, $isAudit) {
         $userDao = new UserDao();
         $ret = $userDao->updatePeople($pid, $name, $sex, $type, $organId, $department, $level, $phone, $email,
             $cardid, $address, $education, $school, $major, $political, $nature,
-            $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment);
+            $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment, $isAudit);
         return $ret;
     }
 
@@ -126,7 +126,7 @@ class UserService
     }
 
     // 用户列表
-    public function getUserList($organization, $type, $organid, $query, $length, $page) {
+    public function getUserList($organization, $type, $organid, $query, $status, $length, $page) {
         $data = [
             'list' => [],
             'total' => 0,
@@ -158,7 +158,7 @@ class UserService
             $page = 1;
         }
         $start = $length * ($page - 1);
-        $userList = $userDao->queryPeopleList($type, $organid, $query, $start, $length);
+        $userList = $userDao->queryPeopleList($type, $organid, $query, $status, $start, $length);
         $organizationService = new OrganizationService();
         $organizationInfo = [];
         $allOrganization = $organizationService->getAllOrganization();
@@ -184,12 +184,7 @@ class UserService
             }else {
                 $projectnum = 0;
             }
-            if ($projectnum > 0) {
-                $status = 1; //在点
-            }else {
-                $status = 2; //不在点
-            }
-            $one['status'] = $status;
+            $one['status'] = $user['isaudit'];
             $one['projectnum'] = $projectnum;
             $roleList = [];
             $roleInfo = $roleDao->queryByPid($user['pid']);
@@ -203,7 +198,7 @@ class UserService
             $list[] = $one;
         }
         $userDao = new UserDao();
-        $count = $userDao->countPeopleList($type, $organid, $query, $start, $length);
+        $count = $userDao->countPeopleList($type, $organid, $query, $status, $start, $length);
         $data['list'] = $list;
         $data['total'] = $count;
         return $data;

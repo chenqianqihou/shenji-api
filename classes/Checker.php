@@ -31,13 +31,56 @@ class Checker
         if(!$unixTime) { //无法用strtotime转换，说明日期格式非法
             self::$_err = ErrorDict::getError(ErrorDict::G_PARAM, 'invalid param '.$paramName, $paramName.'格式错误');
             self::$_ret = false;
+            return;
         }
 
         //校验日期合法性
         if(date($format, $unixTime) == $paramValue) {
             self::$_ret = true;
+            return;
         }
 
-        return false;
+        self::$_ret = false;
+    }
+
+    /**
+     * 判断是否是整数
+     *
+     * @param $paramName
+     * @param $paramValue
+     */
+    public static function isNumber($paramName, $paramValue) {
+        if (is_numeric($paramValue)) {
+            self::$_ret = true;
+            return;
+        }
+        var_dump("zzz");
+
+        self::$_err = ErrorDict::getError(ErrorDict::G_PARAM, 'invalid param '.$paramName, $paramName.'应为整数!');
+        self::$_ret = false;
+    }
+
+    /**
+     * 判断是否是某一年
+     *
+     * @param $paramName
+     * @param $paramValue
+     */
+    public static function isYear($paramName, $paramValue) {
+        $format = 'Y';
+        $unixTime = strtotime($paramValue);
+        if(!$unixTime) { //无法用strtotime转换，说明日期格式非法
+            self::$_err = ErrorDict::getError(ErrorDict::G_PARAM, 'invalid param '.$paramName, $paramName.'格式错误');
+            self::$_ret = false;
+            return;
+        }
+
+        //校验日期合法性
+        if(date($format, $unixTime) == $paramValue) {
+            self::$_ret = true;
+            return;
+        }
+
+        self::$_ret = false;
     }
 }

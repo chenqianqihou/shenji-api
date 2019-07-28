@@ -190,10 +190,10 @@ class BaseController extends Controller {
             return false;
         }
 
-        // 请求参数校验
-        if (empty($this->params)) {
-            return true;
-        }
+//        // 请求参数校验
+//        if (empty($this->params)) {
+//            return true;
+//        }
 
         foreach ($this->defineParams as $name => $conf) {
             $value = $this->getParam($name);
