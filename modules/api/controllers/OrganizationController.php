@@ -272,7 +272,7 @@ class OrganizationController extends BaseController
 
         $result[] = [
             'type' => 3,
-            'list' => $distinct
+            'list' => ['520000'=>$distinct]
         ];
 
         //内审机构
@@ -308,7 +308,7 @@ class OrganizationController extends BaseController
 
         $result[] = [
             'type' => 2,
-            'list' => $distinct
+            'list' => ['520000'=>$distinct]
         ];
 
         //中介列表
@@ -319,9 +319,61 @@ class OrganizationController extends BaseController
         }
         $result[] = [
             'type' => 1,
-            'list' => ['name'=>'中介','id'=>1,'type'=>'parent','data'=>[],'list'=>$oneres]
+            'list' => ['zj'=>['name'=>'中介','id'=>1,'type'=>'parent','data'=>[],'list'=>$oneres]]
         ];
 
+        //处理格式
+        //一层嵌套处理
+        foreach( $result as $rk=>$rv){
+            if( isset($rv['list']) ){
+                $result[$rk]['list'] = array_values( $rv['list'] );    
+            }
+        }
+
+        //二层嵌套处理
+        foreach( $result as $rk=>$rv){
+            if( isset($rv['list']) ){
+                foreach( $rv['list'] as $rvk=>$rvv ){
+                    if( isset($rvv['list']) ){
+                        $result[$rk]['list'][$rvk]['list'] = array_values( $rvv['list'] );    
+                    }    
+                }
+            }
+        }
+
+        //三层嵌套处理
+        foreach( $result as $rk=>$rv){
+            if( isset($rv['list']) ){
+                foreach( $rv['list'] as $rvk=>$rvv ){
+                    if( isset($rvv['list']) ){
+                        foreach( $rvv['list'] as $rvvk=>$rvvv){
+                            if(isset($rvvv['list'])){
+                                $result[$rk]['list'][$rvk]['list'][$rvvk]['list'] = array_values( $rvvv['list'] );    
+                            }    
+                        }
+                    }    
+                }
+            }
+        }
+
+        //四层嵌套处理
+        foreach( $result as $rk=>$rv){
+            if( isset($rv['list']) ){
+                foreach( $rv['list'] as $rvk=>$rvv ){
+                    if( isset($rvv['list']) ){
+                        foreach( $rvv['list'] as $rvvk=>$rvvv){
+                            if(isset($rvvv['list'])){
+                                foreach( $rvvv['list'] as $rvvvk=>$rvvvv){
+                                    if(isset($rvvvv['list'])){
+                                        $result[$rk]['list'][$rvk]['list'][$rvvk]['list'][$rvvvk]['list'] = array_values( $rvvvv['list'] );    
+                                    }    
+                                }
+                            }    
+                        }
+                    }    
+                }
+            }
+        }
 
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($result, $error);
