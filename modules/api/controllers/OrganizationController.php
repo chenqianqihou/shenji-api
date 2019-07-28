@@ -6,6 +6,9 @@ use app\classes\BaseController;
 use app\classes\ErrorDict;
 use app\models\UserDao;
 use app\service\OrganizationService;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use Yii;
 
 class OrganizationController extends BaseController
@@ -460,4 +463,192 @@ class OrganizationController extends BaseController
         return $ret;
     }
 
+    public function actionExcel() {
+        $this->defineMethod = 'GET';
+
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load(APP_PATH."/static/jigouluru.xlsx");
+
+        $ss = 2;
+        $se = 1100;
+        
+        for($ss = 2; $ss < 1000;$ss++){
+
+            $spreadsheet->getActiveSheet()->getStyle('H'.$ss) 
+                ->getNumberFormat() 
+                ->setFormatCode( 
+                        \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_YYYYMMDD2
+                        ); 
+            $validation = $spreadsheet->getActiveSheet()->getCell('H'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_DATE);
+            $validation->setErrorStyle(DataValidation::STYLE_STOP);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('请输入正确的日期格式 ‘2019-06-12’');
+            $validation->setPromptTitle('Allowed input');
+            $validation->setPrompt('请输入正确的日期格式 ‘2019-06-12’');
+
+
+            $spreadsheet->getActiveSheet()->getStyle('L'.$ss) 
+                ->getNumberFormat() 
+                ->setFormatCode( 
+                        \PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_YYYYMMDD2
+                        ); 
+            $validation = $spreadsheet->getActiveSheet()->getCell('L'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_DATE);
+            $validation->setErrorStyle(DataValidation::STYLE_STOP);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('请输入正确的日期格式 ‘2019-06-12’');
+            $validation->setPromptTitle('Allowed input');
+            $validation->setPrompt('请输入正确的日期格式 ‘2019-06-12’');
+
+            $validation = $spreadsheet->getActiveSheet()->getCell('AA'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list.');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a value from the drop-down list.');
+            $validation->setFormula1('"1:已审核,2:未审核"'); 
+
+        }
+
+        // Redirect output to a client’s web browser (Xlsx)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="机构批量导入.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        Yii::$app->end();
+    }
+
+    public function actionExcelupload() {
+        if( empty($_FILES['file']) ){
+            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }  
+
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($_FILES['file']['tmp_name']);
+        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+        unset( $sheetData[1]);
+        
+        $insertData = [];
+        foreach( $sheetData as $data) {
+            $tmpdata = [];
+            $tmpdata['name'] =$data['B'];
+            if( empty($tmpdata['name'])){
+                continue;
+            }
+
+            $tmpdata['otype'] = explode(':',$data['A'])[0];
+            if( empty($tmpdata['otype']) ||!is_numeric($tmpdata['otype']) || !in_array($tmpdata['otype'],[1,2]) ){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['A'].' 类型格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+
+            $tmpdata['deputy'] = trim($data['C']);
+            $tmpdata['regtime'] = strtotime($data['H']);
+            $shen = explode('_',$data['D']);
+            if( count($shen) != 3 || !isset( $districts[$shen[1]] )){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['D'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $shi = explode('_',$data['E']);
+            if( count($shi) != 3 || !isset( $districts[$shi[1]] )){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['E'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $qu = explode('_',$data['F']);
+            if( count($qu) != 3 ){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['F'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $shenstr = $shen[1];
+            $shistr = $shi[1];
+            $qustr = $qu[1];
+            $tmpdata['regnum'] = "$shenstr,$shistr,$qustr";
+            $tmpdata['regaddress'] = $data['G'];
+            $tmpdata['category'] = $data['I'];
+            $tmpdata['level'] = $data['J'];
+            $tmpdata['capital'] = intval($data['K']);
+            $tmpdata['workbegin'] = strtotime($data['L']);
+            $tmpdata['costeng'] = intval($data['M']);
+            $tmpdata['coster'] = intval($data['N']);
+            $tmpdata['accountant'] = intval($data['O']);
+            $tmpdata['highlevel'] = intval($data['P']);
+            $tmpdata['midlevel'] = intval($data['Q']);
+            $tmpdata['retiree'] = $data['R'];
+            $tmpdata['parttimers'] = $data['S'];
+            $tmpdata['contactor'] = $data['T'];
+            $tmpdata['contactphone'] = $data['U'];
+            $tmpdata['contactnumber'] = $data['V'];
+            $shen = explode('_',$data['W']);
+            if( count($shen) != 3 || !isset( $districts[$shen[1]] )){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['W'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $shi = explode('_',$data['X']);
+            if( count($shi) != 3 || !isset( $districts[$shi[1]] )){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['X'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $qu = explode('_',$data['Y']);
+            if( count($qu) != 3 ){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['Y'].' 地区格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+            $shenstr = $shen[1];
+            $shistr = $shi[1];
+            $qustr = $qu[1];
+            $tmpdata['officenum'] = "$shenstr,$shistr,$qustr";
+            $tmpdata['officeaddress'] = $data['Z'];
+            $tmpdata['qualiaudit'] = $data['AA'];
+            $tmpdata['parentid'] = '0';
+
+            $insertData[] = $tmpdata;	
+        }
+
+        $organService = new OrganizationService();
+        foreach($insertData as $params) {
+            $checkres = $organService->checkParams( $params );
+            if( !$checkres['res']){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM);
+                $ret = $this->outputJson($checkres, $error);
+                return $ret;
+            }
+        }
+
+        foreach($insertData as $params) {
+            $organService->insertOrganization( $params );
+        }
+
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson('', $error);
+        return $ret;
+    }
 }
