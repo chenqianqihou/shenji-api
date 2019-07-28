@@ -234,7 +234,7 @@ class UserDao extends ActiveRecord{
             if ($condition != "") {
                 $condition = $condition . " and ";
             }
-            $condition = $condition . " isaudit = :isaudit ";
+            $condition = $condition . " isjob = :isjob ";
         }
         if ($condition != "") {
             $sql = sprintf('SELECT * FROM %s WHERE %s ',
@@ -254,7 +254,7 @@ class UserDao extends ActiveRecord{
             $stmt->bindParam(':organid', $organid, \PDO::PARAM_INT);
         }
         if (isset(self::$isJob[$status])) {
-            $stmt->bindParam(':isaudit', $status, \PDO::PARAM_INT);
+            $stmt->bindParam(':isjob', $status, \PDO::PARAM_INT);
         }
         $stmt->execute();
         $ret = $stmt->queryAll();
