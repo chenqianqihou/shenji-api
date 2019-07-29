@@ -297,15 +297,23 @@ class OrganizationController extends BaseController
         foreach( $twolist as $tr ){
             $regnum = trim($tr['regnum'],',');    
             $regArr = explode(',', $regnum);
+            $r0 = intval($regArr[count($regArr)-1] / 10000) * 10000;
+
+            //判断是否为520000区域
+            if( $r0 != '520000'){
+                continue;   
+            }
+
             $r1 = intval($regArr[count($regArr)-1] / 100) * 100;
             $usePList = isset( $useParArr[$tr['id']]) ? $useParArr[$tr['id']] : [];
-            if( $regnum == $distinct['id']){
+            if( $regnum === $distinct['id'].''){
                 $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
             } else {
                 if(isset($distinct['list'][$regnum])){
                     $distinct['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
                 } else {
-                    $distinct['list'][$r1]['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
+                    //$distinct['list'][$r1]['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
+                    $distinct['list'][$r1]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
                 }
             }
         }
@@ -323,7 +331,7 @@ class OrganizationController extends BaseController
         }
         $result[] = [
             'type' => 1,
-            'list' => ['zj'=>['name'=>'中介','id'=>1,'type'=>'parent','data'=>[],'list'=>$oneres]]
+            'list' => array_values( $oneres )
         ];
 
         //处理格式

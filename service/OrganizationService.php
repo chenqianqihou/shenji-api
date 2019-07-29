@@ -195,6 +195,9 @@ class OrganizationService
         $organDao = OrganizationDao::find()->where(['id' => $oid])->one();
         unset( $params['oid']);
         foreach( $params as $pk=>$pv){
+            if( $pk =='otype'){
+                continue;    
+            }
             if( !in_array($pk,$attrs) ){
                 continue;    
             }
