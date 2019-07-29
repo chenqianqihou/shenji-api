@@ -184,7 +184,7 @@ class UserService
             }else {
                 $projectnum = 0;
             }
-            $one['status'] = $user['isaudit'];
+            $one['status'] = $user['isjob'];
             $one['projectnum'] = $projectnum;
             $roleList = [];
             $roleInfo = $roleDao->queryByPid($user['pid']);
