@@ -39,7 +39,7 @@ class OrganizationService
             $res = $res->andWhere(['like', 'name', $keyword]);    
         }
         $total = $res->count();
-        $list = $res->offset( $start )->limit($length)->asArray()->all();
+        $list = $res->orderBy('id desc')->offset( $start )->limit($length)->asArray()->all();
         return ['total'=>$total,'list'=>$list];
     }
 
@@ -67,6 +67,7 @@ class OrganizationService
             }
             $om->delete();
         }
+
         return true;
     }
 
@@ -298,6 +299,23 @@ class OrganizationService
             ];
 
             return $result;
+        }
+
+        //如果是内审，只允许贵州的机构
+        $regArr = explode(',',$params['regnum']);
+        if( $params['otype'] == 2){
+            $r0 = intval($regArr[count($regArr)-1] / 10000) * 10000;
+
+            //判断是否为520000区域
+            if( $r0 != '520000'){
+                $result = [
+                    'res' => false,
+                    'key' => 'regnum',
+                    'message' => 'regnum must guizhou!'
+                ];
+
+                return $result;
+            }
         }
 
 

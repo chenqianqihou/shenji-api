@@ -225,7 +225,7 @@ class OrganizationController extends BaseController
             }
         }
 
-        $res = $organService->deleteOrganizations( $this->getParams());
+        $res = $organService->deleteOrganizations( $this->getParam('oid'));
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($res, $error);
         return $ret;
