@@ -329,7 +329,7 @@ class OrganizationController extends BaseController
         //一层嵌套处理
         foreach( $result as $rk=>$rv){
             if( isset($rv['list']) ){
-                $result[$rk]['list'] = array_values( $rv['list'] );    
+                $result[$rk]['list'] = array_reverse(array_values( $rv['list'] ));    
             }
         }
 
@@ -338,7 +338,7 @@ class OrganizationController extends BaseController
             if( isset($rv['list']) ){
                 foreach( $rv['list'] as $rvk=>$rvv ){
                     if( isset($rvv['list']) ){
-                        $result[$rk]['list'][$rvk]['list'] = array_values( $rvv['list'] );    
+                        $result[$rk]['list'][$rvk]['list'] = array_reverse(array_values( $rvv['list'] ));    
                     }    
                 }
             }
@@ -351,7 +351,7 @@ class OrganizationController extends BaseController
                     if( isset($rvv['list']) ){
                         foreach( $rvv['list'] as $rvvk=>$rvvv){
                             if(isset($rvvv['list'])){
-                                $result[$rk]['list'][$rvk]['list'][$rvvk]['list'] = array_values( $rvvv['list'] );    
+                                $result[$rk]['list'][$rvk]['list'][$rvvk]['list'] = array_reverse(array_values( $rvvv['list'] ));    
                             }    
                         }
                     }    
@@ -368,7 +368,7 @@ class OrganizationController extends BaseController
                             if(isset($rvvv['list'])){
                                 foreach( $rvvv['list'] as $rvvvk=>$rvvvv){
                                     if(isset($rvvvv['list'])){
-                                        $result[$rk]['list'][$rvk]['list'][$rvvk]['list'][$rvvvk]['list'] = array_values( $rvvvv['list'] );    
+                                        $result[$rk]['list'][$rvk]['list'][$rvvk]['list'][$rvvvk]['list'] = array_reverse(array_values( $rvvvv['list'] ));    
                                     }    
                                 }
                             }    
