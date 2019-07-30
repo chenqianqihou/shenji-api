@@ -4,6 +4,7 @@ namespace app\service;
 
 use app\models\OrganizationDao;
 use app\models\UserDao;
+use Yii;
 
 class OrganizationService
 {
@@ -497,5 +498,87 @@ class OrganizationService
         */
 
         return $result;
+    }
+
+    function getDistrictRervMap( $provinceid = 0) {
+        $dists = Yii::$app->params['districts'];
+
+        $distArr = json_decode( $dists,true);
+        krsort( $distArr );
+        //$res = ['100000' => ['name'=>'中国','id'=>'100000','type'=>'parent','data'=> [],'list'=>[] ]];
+        $res = [];
+        foreach( $distArr['100000'] as $k=>$v ){
+            if( !isset($res[$k]) ){
+                $res[$k] =  ['name'=>$v,'id'=>$k,'type'=>'parent','data'=> [],'list'=>[] ];
+            }
+            if( !isset($distArr[$k]) ){
+                continue;
+            }
+            foreach( $distArr[$k] as $vk=>$vv){
+                $res[$k]['list'][$vk] =  ['name'=>$vv,'id'=>$vk,'type'=>'parent','data'=> [],'list'=>[] ];
+            }
+        }
+
+        return $res[$provinceid];
+    }
+
+
+    public function getSubordinateIds($organid){
+
+        $organCount = $this->getOrganizationCount( $organid);
+        if( $organCount <=0){
+            return false;
+        }
+        $organInfo = $this->getOrganizationInfo( $organid );
+        $objnum = $organInfo['regnum'];
+
+        //机关机构
+        $distinct = $this->getDistrictRervMap( 520000 );
+        $threelist = $this->getOrganizationListByType(3);
+        $useParArr = [];
+        foreach( $threelist as $tk=>$tr ){
+            $parid = $tr['parentid'];
+            if($parid > 0){
+                if( !isset($useParArr[$parid])){
+                    $useParArr[$parid] = [];
+                }
+                $useParArr[$parid][$tr['id']] = ['id'=>$tr['id'],'name'=>$tr['name'],'type'=>'child','data'=>$tr,'list'=>[]];
+                unset( $threelist[$tk] );
+            }
+        }
+        foreach( $threelist as $tr ){
+            $regnum = trim($tr['regnum'],',');
+            $regArr = explode(',', $regnum);
+            $r1 = intval($regArr[count($regArr)-1] / 100) * 100;
+
+            $usePList = isset( $useParArr[$tr['id']]) ? $useParArr[$tr['id']] : [];
+            if( $regnum == $distinct['id']){
+                $distinct['list'][ $tr['id'] ] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
+            } else {
+                if(isset($distinct['list'][$regnum])){
+                    $distinct['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
+                } else {
+                    $distinct['list'][$r1]['list'][ $regnum ]['list'][$tr['id']] = ['id'=>$tr['id'], 'name' => $tr['name'], 'type'=>'parent','data'=>$tr,'list'=>$usePList];
+                }
+            }
+        }
+
+
+        if($objnum == '520000'){
+            $result = $distinct;
+        } else {
+            if( isset($distinct['list'][$objnum]) && isset($distinct['list'][$objnum]['list'][$organid]) ){
+                $result = $distinct['list'][$objnum]['list'][$organid];
+            } else {
+                $result = ['id'=>$organInfo['id'],'name'=>$organInfo['name'],'type'=>'child','data'=>$organInfo,'list'=>[]];
+            }
+        }
+
+        //todo 弄懂这部分逻辑关系之后，在遍历树结构吧
+        $ret = array_keys($result['list']);
+        $ret[] = $organid;
+
+        return $ret;
+
     }
 }

@@ -63,10 +63,11 @@ class ProjectDao extends ActiveRecord{
                               projorgan, projtype, projlevel, leadorgan, projstart, projauditcontent,
                               leadernum, auditornum, masternum, ctime, utime)
                               values (:status, :projectnum, :name, :projyear, :plantime, :projdesc, 
-                              :projorgan, :projtype, :projlevel, :leadorgan, "0000-00-00 00:00:00", "",
+                              :projorgan, :projtype, :projlevel, :leadorgan, :projstart, "",
                               :leadernum, :auditornum, :masternum, :ctime, :utime)', self::tableName()
         );
         $curTime = date('Y-m-d H:i:s');
+        $projstartime = date('Y-m-d');
         $stmt = self::getDb()->createCommand($sql);
         $stmt->prepare();
         $stmt->bindParam(':status', $status, \PDO::PARAM_INT);
@@ -84,6 +85,7 @@ class ProjectDao extends ActiveRecord{
         $stmt->bindParam(':masternum', $masternum, \PDO::PARAM_INT);
         $stmt->bindParam(':ctime', $curTime, \PDO::PARAM_STR);
         $stmt->bindParam(':utime', $curTime, \PDO::PARAM_STR);
+        $stmt->bindParam(':projstart', $projstartime, \PDO::PARAM_STR);
         $ret = $stmt->execute();
         return $ret;
     }

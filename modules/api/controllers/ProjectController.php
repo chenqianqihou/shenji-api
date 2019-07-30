@@ -7,8 +7,10 @@ use app\classes\Checker;
 use app\classes\ErrorDict;
 use app\classes\Log;
 use app\classes\Pinyin;
+use app\models\AuditGroupDao;
 use app\models\ExpertiseDao;
 use app\models\OrganizationDao;
+use app\models\PeopleProjectDao;
 use app\models\ProjectDao;
 use app\models\QualificationDao;
 use app\models\RoleDao;
@@ -93,14 +95,13 @@ class ProjectController extends BaseController
         $auditornum = intval($this->getParam('auditornum', 0));
 
         //如果单位组织不存在，则返回异常
-        $organ = ProjectDao::find()->where(['id' => $projorgan])->one();
+        $organ = OrganizationDao::find()->where(['id' => $projorgan])->one();
         if(!$organ){
             return $this->outputJson(
                 '',
                 ErrorDict::getError(ErrorDict::G_PARAM, "不存在的项目单位！")
             );
         }
-        $projtype = json_decode($projtype, true);
         if(empty($projtype)){
             return $this->outputJson(
                 '',
@@ -113,31 +114,154 @@ class ProjectController extends BaseController
                 ErrorDict::getError(ErrorDict::G_PARAM, "项目层级输入有误！")
             );
         }
-        $leadorgan = ProjectDao::find()->where(['id' => $leadorganId])->one();
+        $leadorgan = OrganizationDao::find()->where(['id' => $leadorganId])->one();
         if(!$leadorgan){
             return $this->outputJson(
                 '',
                 ErrorDict::getError(ErrorDict::G_PARAM, "不存在的牵头业务部门！")
             );
         }
-        $service = new ProjectService();
-        ;
 
-        $service->createProject(
-            1,
-            strtotime('now'),
-            $name,
-            $projyear,
-            $plantime,
-            $projdesc,
-            $projorgan,
-            $projtype,
-            $projlevel,
-            $leadorganId,
-            $leadernum,
-            $auditornum,
-            $masternum
+        $transaction = ProjectDao::getDb()->beginTransaction();
+
+        try{
+            $service = new ProjectService();
+            $projectId = $service->createProject(
+                1,
+                strtotime('now'),
+                $name,
+                $projyear,
+                $plantime,
+                $projdesc,
+                $projorgan,
+                json_encode($projtype, JSON_UNESCAPED_UNICODE),
+                $projlevel,
+                $leadorganId,
+                $leadernum,
+                $auditornum,
+                $masternum
             );
+
+            //预分配人员
+
+            $orgIds = (new OrganizationService)->getSubordinateIds($projorgan);
+
+            $allMatchPeoples = UserDao::find()
+                ->where(['isjob' => 2])
+                ->andWhere(['in', 'organid', $orgIds])
+                ->limit($leadernum + $auditornum + $masternum)
+                ->all();
+
+            $groups = [];
+            if (count($allMatchPeoples) < $leadernum) {
+                $leadernum = count($allMatchPeoples);
+            }
+            for($i = 0; $i < $leadernum; $i++) {
+                $group = new AuditGroupDao();
+                $groups[] = [
+                    'id' => $group->addAuditGroup(),
+                    'leader' => $allMatchPeoples[$i]->id
+                ];
+                unset($allMatchPeoples[$i]);
+            }
+
+            $allMatchPeoples = array_values($allMatchPeoples);
+            if ($masternum > count($allMatchPeoples)){
+                $masternum = count($allMatchPeoples);
+            }
+            $preMasterNum = intval($masternum/$leadernum);
+            for($i = $leadernum - 1; $i >= 0; $i--) {
+                for($j = 0; $j < $preMasterNum; $j++){
+                    $groups[$i]['master_ids'][] = $allMatchPeoples[$i]->id;
+                    unset($allMatchPeoples[$i]);
+                }
+            }
+            $allMatchPeoples = array_values($allMatchPeoples);
+            $surplusMasterNum = $masternum - $preMasterNum * $leadernum;
+            for($i = 0; $i < $surplusMasterNum; $i++) {
+                $groups[$i]['master_ids'][] = $allMatchPeoples[$i]->id;
+                unset($allMatchPeoples[$i]);
+            }
+
+            $allMatchPeoples = array_values($allMatchPeoples);
+            if ($auditornum > count($allMatchPeoples)){
+                $auditornum = count($allMatchPeoples);
+            }
+            $preAuditorNum = intval($auditornum/$leadernum);
+            for($i = 0; $i < $leadernum; $i++) {
+                for($j = 0; $j < $preAuditorNum; $j++){
+                    $groups[$i]['auditor_ids'][] = $allMatchPeoples[$i]->id;
+                    unset($allMatchPeoples[$i]);
+                }
+            }
+            $allMatchPeoples = array_values($allMatchPeoples);
+            $surplusAuditorNum = $auditornum - $preAuditorNum * $leadernum;
+            for($i = 0; $i < $surplusAuditorNum; $i++) {
+                $groups[$i]['auditor_ids'][] = $allMatchPeoples[$i]->id;
+                unset($allMatchPeoples[$i]);
+            }
+
+            foreach ($groups as $e ){
+                //leader
+                $pepProject = new PeopleProjectDao();
+                $pepProject->pid = $e['leader'];
+                $pepProject->groupid = $e['id'];
+                $pepProject->roletype = $pepProject::ROLE_TYPE_GROUP_LEADER;
+                $pepProject->islock = $pepProject::NOT_LOCK;
+                $pepProject->projid = $projectId;
+                $pepProject->save();
+                $person = UserDao::findOne($e['leader']);
+                $person->isaudit = UserDao::IS_AUDIT;
+                $person->isjob = UserDao::IS_JOB;
+                $person->save();
+
+                //master
+                if(isset($e['master_ids']) && !empty($e['master_ids'])){
+                    foreach ($e['master_ids'] as $m){
+                        $pepProject = new PeopleProjectDao();
+                        $pepProject->pid = $m;
+                        $pepProject->groupid = $e['id'];
+                        $pepProject->roletype = $pepProject::ROLE_TYPE_MASTER;
+                        $pepProject->islock = $pepProject::NOT_LOCK;
+                        $pepProject->projid = $projectId;
+                        $pepProject->save();
+
+                        $person = UserDao::findOne($e['leader']);
+                        $person->isaudit = UserDao::IS_AUDIT;
+                        $person->isjob = UserDao::IS_JOB;
+                        $person->save();
+                    }
+                }
+
+                //group
+                if(isset($e['auditor_ids']) && !empty($e['auditor_ids'])){
+                    foreach ($e['auditor_ids'] as $a){
+                        $pepProject = new PeopleProjectDao();
+                        $pepProject->pid = $a;
+                        $pepProject->groupid = $e['id'];
+                        $pepProject->roletype = $pepProject::ROLE_TYPE_GROUPER;
+                        $pepProject->islock = $pepProject::NOT_LOCK;
+                        $pepProject->projid = $projectId;
+                        $pepProject->save();
+
+                        $person = UserDao::findOne($e['leader']);
+                        $person->isaudit = UserDao::IS_AUDIT;
+                        $person->isjob = UserDao::IS_JOB;
+                        $person->save();
+                    }
+                }
+
+            }
+
+            $transaction->commit();
+        } catch(\Exception $e){
+            Log::fatal(printf("create project error %s, %s", $e->getMessage(), $e->getTraceAsString()));
+            $transaction->rollBack();
+            return $this->outputJson('',
+                ErrorDict::getError(ErrorDict::ERR_INTERNAL, "创建项目内部错误！")
+            );
+        }
+
 
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson('', $error);

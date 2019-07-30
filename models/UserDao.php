@@ -91,10 +91,13 @@ class UserDao extends ActiveRecord{
         2 => '综合岗位',
     ];
 
-    //是否审计人员
+
+    const IS_AUDIT = 1;
+    const IS_NOT_AUDIT = 2;
+
     public static $isAudit = [
-        1 => '是',
-        2 => '不是',
+        self::IS_AUDIT => '是',
+        self::IS_NOT_AUDIT => '不是',
     ];
 
     public static $isAuditToName = [
@@ -102,11 +105,14 @@ class UserDao extends ActiveRecord{
         '不是' => 2,
     ];
 
-    //工作状态
+
+    const IS_JOB = 1;
+    const IS_NOT_JOB = 2;
+    const OTHER_JOB = 3;
     public static $isJob = [
-        1 => '在点',
-        2 => '不在点',
-        3 => '-',
+        self::IS_JOB => '在点',
+        self::IS_NOT_JOB => '不在点',
+        self::OTHER_JOB => '-',
     ];
 
     public static $isJobToName = [

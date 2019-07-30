@@ -25,4 +25,7 @@ class PeopleProjectDao extends ActiveRecord{
     const ROLE_TYPE_GROUPER = 3;
     const ROLE_TYPE_GROUP_LEADER = 1;
     const ROLE_TYPE_MASTER = 2;
+
+    const IS_LOCK = 1;
+    const NOT_LOCK = 2;
 }
