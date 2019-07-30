@@ -203,7 +203,7 @@ class UserService
                 }
             }
             $one['role'] = $roleList;
-            $one['type'] = intval($user['sex']);
+            $one['type'] = intval($user['type']);
             $list[] = $one;
         }
         $userDao = new UserDao();
