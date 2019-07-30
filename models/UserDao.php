@@ -217,12 +217,14 @@ class UserDao extends ActiveRecord{
     }
 
     //人员列表
-    public function queryPeopleList($type, $organid, $query, $status, $start, $length) {
+    public function queryPeopleList($type, $organid, $departid, $query, $status, $start, $length) {
         $condition = "";
         if ($type != "") {
             $condition = $condition . " type = :type ";
-        }elseif ($organid != "") {
-            $condition = $condition . " organid = :organid ";
+        }elseif ($organid != 0) {
+            $condition = $condition . " organid = :organid";
+        }elseif ($departid != 0) {
+            $condition = $condition . " department = :department";
         }
         if ($query != "") {
             if ($condition != "") {
@@ -250,8 +252,10 @@ class UserDao extends ActiveRecord{
         $stmt->prepare();
         if ($type != "") {
             $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
-        }elseif ($organid != "") {
+        }elseif ($organid != 0) {
             $stmt->bindParam(':organid', $organid, \PDO::PARAM_INT);
+        }elseif ($departid != 0) {
+            $stmt->bindParam(':department', $departid, \PDO::PARAM_INT);
         }
         if (isset(self::$isJob[$status])) {
             $stmt->bindParam(':isjob', $status, \PDO::PARAM_INT);
@@ -262,12 +266,14 @@ class UserDao extends ActiveRecord{
     }
 
     //人员列表总数
-    public function countPeopleList($type, $organid, $query, $status, $start, $length) {
+    public function countPeopleList($type, $organid, $departid, $query, $status, $start, $length) {
         $condition = "";
         if ($type != "") {
             $condition = $condition . " type = :type ";
-        }elseif ($organid != "") {
-            $condition = $condition . " organid = :organid ";
+        }elseif ($organid != 0) {
+            $condition = $condition . " organid = :organid";
+        }elseif ($departid != 0) {
+            $condition = $condition . " department = :department";
         }
         if ($query != "") {
             if ($condition != "") {
@@ -294,8 +300,10 @@ class UserDao extends ActiveRecord{
         $stmt->prepare();
         if ($type != "") {
             $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
-        }elseif ($organid != "") {
-            $stmt->bindParam(':organid', $type, \PDO::PARAM_INT);
+        }elseif ($organid != 0) {
+            $stmt->bindParam(':organid', $organid, \PDO::PARAM_INT);
+        }elseif ($departid != 0) {
+            $stmt->bindParam(':department', $departid, \PDO::PARAM_INT);
         }
         if (isset(self::$isJob[$status])) {
             $stmt->bindParam(':isjob', $status, \PDO::PARAM_INT);

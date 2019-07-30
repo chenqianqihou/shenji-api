@@ -18,6 +18,11 @@ class OrganizationService
         return OrganizationDao::find()->where(['id' => $oid])->asArray()->one();
     }
 
+    // 查询某机构下的部门列表
+    public function getOrganSonInfo($oid) {
+        return OrganizationDao::find()->where(['parentid' => $oid])->asArray()->all();
+    }
+
     // 根据type查询机构信息
     public function getOrganizationListByType($otype,$isparent = true) {
         if( $isparent ){
@@ -39,7 +44,7 @@ class OrganizationService
             $res = $res->andWhere(['like', 'name', $keyword]);    
         }
         $total = $res->count();
-        $list = $res->offset( $start )->limit($length)->asArray()->all();
+        $list = $res->orderBy('id desc')->offset( $start )->limit($length)->asArray()->all();
         return ['total'=>$total,'list'=>$list];
     }
 
@@ -67,12 +72,13 @@ class OrganizationService
             }
             $om->delete();
         }
+
         return true;
     }
 
     //检查机构下是否有人员
     public function numberPeopleBelong( $oid ){
-        return UserDao::find()->where(['organid' => $oid])->count();    
+        return UserDao::find()->where(['organid' => $oid])->count() + UserDao::find()->where(['department' => $oid])->count();    
     }
 
     //添加机构
@@ -195,6 +201,9 @@ class OrganizationService
         $organDao = OrganizationDao::find()->where(['id' => $oid])->one();
         unset( $params['oid']);
         foreach( $params as $pk=>$pv){
+            if( $pk =='otype'){
+                continue;    
+            }
             if( !in_array($pk,$attrs) ){
                 continue;    
             }
@@ -295,6 +304,23 @@ class OrganizationService
             ];
 
             return $result;
+        }
+
+        //如果是内审，只允许贵州的机构
+        $regArr = explode(',',$params['regnum']);
+        if( $params['otype'] == 2){
+            $r0 = intval($regArr[count($regArr)-1] / 10000) * 10000;
+
+            //判断是否为520000区域
+            if( $r0 != '520000'){
+                $result = [
+                    'res' => false,
+                    'key' => 'regnum',
+                    'message' => 'regnum must guizhou!'
+                ];
+
+                return $result;
+            }
         }
 
 

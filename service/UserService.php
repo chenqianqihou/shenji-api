@@ -135,7 +135,8 @@ class UserService
         //查询类型 1 所有 2 人员类型 3 具体机构
         if ($organization == 1) {
             $type = "";
-            $organid = "";
+            $organid = 0;
+            $departid = 0;
         }elseif ($organization == 2) {
             $type = intval($type);
             if (empty($type)) {
@@ -144,12 +145,20 @@ class UserService
             if (!isset(UserDao::$type[$type])) {
                 return $data;
             }
-            $organid = "";
+            $organid = 0;
+            $departid = 0;
         }else {
             $type = "";
             $organid = intval($organid);
+            $departid = 0;
             if (empty($organid)) {
                 return $data;
+            }
+            $organizationService = new OrganizationService();
+            $organInfo = $organizationService->getOrganizationInfo($organid);
+            if ($organInfo['parentid'] != 0) {
+                $departid = $organid;
+                $organid = 0;
             }
         }
         $userDao = new UserDao();
@@ -158,7 +167,7 @@ class UserService
             $page = 1;
         }
         $start = $length * ($page - 1);
-        $userList = $userDao->queryPeopleList($type, $organid, $query, $status, $start, $length);
+        $userList = $userDao->queryPeopleList($type, $organid, $departid, $query, $status, $start, $length);
         $organizationService = new OrganizationService();
         $organizationInfo = [];
         $allOrganization = $organizationService->getAllOrganization();
@@ -184,7 +193,7 @@ class UserService
             }else {
                 $projectnum = 0;
             }
-            $one['status'] = $user['isaudit'];
+            $one['status'] = $user['isjob'];
             $one['projectnum'] = $projectnum;
             $roleList = [];
             $roleInfo = $roleDao->queryByPid($user['pid']);
@@ -194,11 +203,11 @@ class UserService
                 }
             }
             $one['role'] = $roleList;
-            $one['type'] = intval($user['sex']);
+            $one['type'] = intval($user['type']);
             $list[] = $one;
         }
         $userDao = new UserDao();
-        $count = $userDao->countPeopleList($type, $organid, $query, $status, $start, $length);
+        $count = $userDao->countPeopleList($type, $organid, $departid, $query, $status, $start, $length);
         $data['list'] = $list;
         $data['total'] = $count;
         return $data;

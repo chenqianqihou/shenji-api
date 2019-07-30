@@ -877,6 +877,11 @@ class UserController extends BaseController
             $ret = $this->outputJson('', $error);
             return $ret;
         }
+        if ($old == $new) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '新旧密码一致，无需修改！');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
         $userDao = new UserDao();
         $ret = $userDao->updatePassword($pid, $new);
         if ($ret) {
