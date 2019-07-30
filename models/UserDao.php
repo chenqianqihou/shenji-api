@@ -222,7 +222,7 @@ class UserDao extends ActiveRecord{
         if ($type != "") {
             $condition = $condition . " type = :type ";
         }elseif ($organIdStr != "") {
-            $condition = $condition . " organid in ( " . $organIdStr . ")";
+            $condition = $condition . " department in ( " . $organIdStr . ")";
         }
         if ($query != "") {
             if ($condition != "") {
@@ -265,7 +265,7 @@ class UserDao extends ActiveRecord{
         if ($type != "") {
             $condition = $condition . " type = :type ";
         }elseif ($organIdStr != "") {
-            $condition = $condition . " organid in ( " . $organIdStr . ")";
+            $condition = $condition . " department in ( " . $organIdStr . ")";
         }
         if ($query != "") {
             if ($condition != "") {
