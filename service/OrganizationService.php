@@ -73,7 +73,7 @@ class OrganizationService
 
     //检查机构下是否有人员
     public function numberPeopleBelong( $oid ){
-        return UserDao::find()->where(['organid' => $oid])->count();    
+        return UserDao::find()->where(['organid' => $oid])->count() + UserDao::find()->where(['department' => $oid])->count();    
     }
 
     //添加机构

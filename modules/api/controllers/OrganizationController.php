@@ -215,8 +215,12 @@ class OrganizationController extends BaseController
         $organService = new OrganizationService();
         foreach( $this->getParam('oid') as $oid ){
             if( ! is_numeric($oid) ){
-                continue;    
+                $error = ErrorDict::getError(ErrorDict::G_PARAM);
+                $error['returnMessage'] = '该机构id非法，无法删除';
+                $ret = $this->outputJson("$oid has people , can not be deleted.", $error);
+                return $ret;
             }    
+            
             if( $organService->numberPeopleBelong($oid) > 0 ){
                 $error = ErrorDict::getError(ErrorDict::G_PARAM);
                 $error['returnMessage'] = '该机构下有人员，无法删除';
