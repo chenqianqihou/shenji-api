@@ -51,4 +51,8 @@ return [
     'api/auditgroup/delete' => 'api/auditgroup/delete',
     'api/auditgroup/unlock' => 'api/auditgroup/unlock',
     'api/auditgroup/updatestatus' => 'api/auditgroup/updatestatus',
+
+    'api/assess/statlist' => 'api/assess/statlist',
+    'api/assess/form' => 'api/assess/form',
+    'api/assess/assesstypes' => 'api/assess/assesstypes',
 ];
