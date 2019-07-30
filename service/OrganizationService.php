@@ -18,6 +18,11 @@ class OrganizationService
         return OrganizationDao::find()->where(['id' => $oid])->asArray()->one();
     }
 
+    // 查询某机构下的部门列表
+    public function getOrganSonInfo($oid) {
+        return OrganizationDao::find()->where(['parentid' => $oid])->asArray()->all();
+    }
+
     // 根据type查询机构信息
     public function getOrganizationListByType($otype,$isparent = true) {
         if( $isparent ){

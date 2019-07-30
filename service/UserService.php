@@ -135,7 +135,7 @@ class UserService
         //查询类型 1 所有 2 人员类型 3 具体机构
         if ($organization == 1) {
             $type = "";
-            $organid = "";
+            $organIdStr = "";
         }elseif ($organization == 2) {
             $type = intval($type);
             if (empty($type)) {
@@ -144,13 +144,25 @@ class UserService
             if (!isset(UserDao::$type[$type])) {
                 return $data;
             }
-            $organid = "";
+            $organIdStr = "";
         }else {
             $type = "";
+            $organIdArr = [];
             $organid = intval($organid);
             if (empty($organid)) {
                 return $data;
             }
+            $organizationService = new OrganizationService();
+            $organInfo = $organizationService->getOrganizationInfo($organid);
+            if ($organInfo['parentid'] == 0) {
+                $organList = $organizationService->getOrganSonInfo($organid);
+                foreach ($organList as $organ) {
+                    $organIdArr[] = $organ['id'];
+                }
+            }else {
+                $organIdArr[] = $organid;
+            }
+            $organIdStr = implode(',', $organIdArr);
         }
         $userDao = new UserDao();
         $page = intval($page);
@@ -158,7 +170,7 @@ class UserService
             $page = 1;
         }
         $start = $length * ($page - 1);
-        $userList = $userDao->queryPeopleList($type, $organid, $query, $status, $start, $length);
+        $userList = $userDao->queryPeopleList($type, $organIdStr, $query, $status, $start, $length);
         $organizationService = new OrganizationService();
         $organizationInfo = [];
         $allOrganization = $organizationService->getAllOrganization();
