@@ -20,7 +20,7 @@ class AssessController extends BaseController
                     'require' => true,
                     'checker' => 'noCheck',
                     ),
-                'pid' => array (
+                'projectid' => array (
                     'require' => true,
                     'checker' => 'noCheck',
                     ),
@@ -31,7 +31,7 @@ class AssessController extends BaseController
         }
 
         $uid = $this->getParam('uid');
-        $pid = $this->getParam('pid');
+        $pid = $this->getParam('projectid');
 
         $projDao = new ProjectDao();
         $projInfo = $projDao->queryByID($pid);
@@ -129,7 +129,7 @@ class AssessController extends BaseController
         $result['userinfo'] = $objuserInfo;
 
         $assessService = new AssessService();
-        $formcontent = $assessService->FormContent( $uid,$objuid,$typeid,$projectid);
+        $formcontent = $assessService->FormContent( $uid,$objuid,$projectid,$typeid);
         $result['content'] = $formcontent;
 
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
@@ -206,7 +206,7 @@ class AssessController extends BaseController
         }
 
         $assessService = new AssessService();
-        $formcontent = $assessService->SubmitFormContent( $uid,$objuid,$typeid,$projectid,$answers);
+        $formcontent = $assessService->SubmitFormContent( $uid,$objuid,$projectid,$typeid,$answers);
 
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($formcontent, $error);
