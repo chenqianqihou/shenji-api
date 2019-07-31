@@ -54,5 +54,6 @@ return [
 
     'api/assess/statlist' => 'api/assess/statlist',
     'api/assess/form' => 'api/assess/form',
+    'api/assess/submit' => 'api/assess/submit',
     'api/assess/assesstypes' => 'api/assess/assesstypes',
 ];

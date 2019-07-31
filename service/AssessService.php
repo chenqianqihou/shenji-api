@@ -63,4 +63,27 @@ class AssessService
         }
         return $result;
     }
+
+    public function SubmitFormContent( $uid,$objuid,$projectid,$typeid,$answers) {
+        
+        $result = ['answer'=>[],'question'=>[]];
+        //是否已经回答过
+        if( QanswerDao::find()->where(['pid'=>$uid,'objpid'=>$objuid,'projectid'=>$projectid,'configid'=>$typeid])->count() ){
+            $qanswer = QanswerDao::find()->where(['pid'=>$uid,'objpid'=>$objuid,'projectid'=>$projectid,'configid'=>$typeid])->one();
+            $qanswer->answers = json_encode( $answers );
+            $qanswer->save();
+        } else {
+            $qanswer = new QanswerDao();
+            $qanswer->pid=$uid;
+            $qanswer->objpid=$objuid;
+            $qanswer->projectid=$projectid;
+            $qanswer->configid=$typeid;
+            $qanswer->answers=json_encode($answers);
+            $qanswer->save();   
+        }
+        $result['answer'] = $answers;
+        $result['question'] = $this->getConfigQuestion( $typeid );
+        return $result;
+    }
+
 }
