@@ -41,6 +41,18 @@ class ProjectDao extends ActiveRecord{
         4 => "县级",
     ];
 
+    const OPERATOR_STATUS_SURE = 1;
+    const OPERATOR_STATUS_START = 2;
+    const OPERATOR_STATUS_AUDIT = 3;
+    const OPERATOR_STATUS_END = 4;
+
+    public static $operatorStatus = [
+        self::OPERATOR_STATUS_SURE => "确认计划",
+        self::OPERATOR_STATUS_START => "项目启动",
+        self::OPERATOR_STATUS_AUDIT => "开始审理",
+        self::OPERATOR_STATUS_END => "结束审理",
+    ];
+
     /**
      * 获取项目层级
      *

@@ -527,6 +527,11 @@ class ProjectController extends BaseController
         ], ErrorDict::SUCCESS);
     }
 
+    /**
+     * 新建页&编辑页配置接口
+     *
+     * @return array
+     */
     public function actionSelectconfig() {
         $data = [];
         $organizationService = new OrganizationService();
@@ -767,6 +772,135 @@ class ProjectController extends BaseController
      *
      */
     public function actionUpdatestatus() {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'id' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'operate' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            )
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $id = intval($this->getParam('id', 0));
+        $operate = intval($this->getParam('operate', 0));
+        if(!in_array($operate, array_keys(ProjectDao::$operatorStatus))) {
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+        }
+
+        //todo 注意！可能后续会加上权限相关的东西
+
+        $transaction = ProjectDao::getDb()->beginTransaction();
+
+        try{
+            $pro = ProjectDao::findOne($id);
+            switch ($operate) {
+                case ProjectDao::OPERATOR_STATUS_SURE:
+
+                    $pepProGroups = PeopleProjectDao::find()
+                        ->where(["projid" => $id])
+                        ->groupBy('groupid')
+                        ->all();
+                    $groupIds = array_map(
+                        function($e)
+                        {
+                            return $e->groupid;
+                        },
+                        $pepProGroups
+                    );
+
+                    $groups = AuditGroupDao::findAll($groupIds);
+                    foreach ($groups as $e){
+                        $e->status = AuditGroupDao::$statusToName['应进点'];
+                        $e->save();
+                    }
+                    $transaction->commit();
+                    break;
+                case ProjectDao::OPERATOR_STATUS_START:
+                    $pro->status = ProjectDao::$statusToName['实施阶段'];
+                    $pro->save();
+
+//                    $pepProGroups = PeopleProjectDao::find()
+//                        ->where(["projid" => $id])
+//                        ->groupBy('groupid')
+//                        ->all();
+//                    $groupIds = array_map(
+//                        function($e)
+//                        {
+//                            return $e->groupid;
+//                        },
+//                        $pepProGroups
+//                    );
+//
+//                    $groups = AuditGroupDao::findAll($groupIds);
+//                    foreach ($groups as $e){
+//                        $e->status = AuditGroupDao::$statusToName['应进点'];
+//                        $e->save();
+//                    }
+                    $transaction->commit();
+                    break;
+                case ProjectDao::OPERATOR_STATUS_AUDIT:
+                    $pro->status = ProjectDao::$statusToName['审理阶段'];
+                    $pro->save();
+
+                    $pepProGroups = PeopleProjectDao::find()
+                        ->where(["projid" => $id])
+                        ->groupBy('groupid')
+                        ->all();
+                    $groupIds = array_map(
+                        function($e)
+                        {
+                            return $e->groupid;
+                        },
+                        $pepProGroups
+                    );
+
+                    $groups = AuditGroupDao::findAll($groupIds);
+                    foreach ($groups as $e){
+                        $e->status = AuditGroupDao::$statusToName['审理中'];
+                        $e->save();
+                    }
+                    $transaction->commit();
+                    break;
+                case ProjectDao::OPERATOR_STATUS_END:
+                    $pro->status = ProjectDao::$statusToName['项目结束'];
+                    $pro->save();
+
+                    $pepProGroups = PeopleProjectDao::find()
+                        ->where(["projid" => $id])
+                        ->groupBy('groupid')
+                        ->all();
+                    $groupIds = array_map(
+                        function($e)
+                        {
+                            return $e->groupid;
+                        },
+                        $pepProGroups
+                    );
+
+                    $groups = AuditGroupDao::findAll($groupIds);
+                    foreach ($groups as $e){
+                        $e->status = AuditGroupDao::$statusToName['报告中'];
+                        $e->save();
+                    }
+                    $transaction->commit();
+                    break;
+            }
+        }catch(\Exception $e){
+            $transaction->rollBack();
+            Log::addLogNode('状态变更错误！', serialize($e->errorInfo));
+            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+
+
+        return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
 
     }
 
