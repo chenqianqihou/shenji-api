@@ -8,6 +8,8 @@ use app\models\QuestionsDao;
 use app\models\ObjectivescoreDao;
 use app\models\ObjectivetypeDao;
 use app\models\ViolationDao;
+use Yii;
+
 
 class AssessService
 {
@@ -121,5 +123,43 @@ class AssessService
         }
 
         return $result;
+    }
+
+    public function Violations() {
+        return json_decode(Yii::$app->params['violations']);
+
+        /* //生成violations json的逻辑
+        $result = [];
+        $level0 = ViolationDao::find()->where(['parentid'=>0])->asArray()->all();              
+        foreach( $level0 as $lv) {
+            $result[] = ['name'=>$lv['name'],'id'=>$lv['id'],'type'=>'parent','data'=>[],'list'=>[]];    
+        }
+
+        foreach( $result as $rk=>$rv ) {
+            $sid = $rv['id'];    
+            $level1 = ViolationDao::find()->where(['parentid'=>$sid])->asArray()->all();              
+            foreach( $level1 as $lv) {
+                $result[$rk]['list'][] = ['name'=>$lv['name'],'id'=>$lv['id'],'type'=>'parent','data'=>[],'list'=>[]];    
+            }
+
+            foreach( $result[$rk]['list'] as $rkk=>$rvv) {
+                $ssid = $rvv['id']; 
+                $level2 = ViolationDao::find()->where(['parentid'=>$ssid])->asArray()->all();              
+                foreach( $level2 as $lv) {
+                    $result[$rk]['list'][$rkk]['list'][] = ['name'=>$lv['name'],'id'=>$lv['id'],'type'=>'parent','data'=>[],'list'=>[]];    
+                }
+
+                foreach( $result[$rk]['list'][$rkk]['list'] as $rkkk=>$rvvv) {
+                    $sssid = $rvvv['id']; 
+                    $level3 = ViolationDao::find()->where(['parentid'=>$sssid])->asArray()->all();              
+                    foreach( $level3 as $lv) {
+                        $result[$rk]['list'][$rkk]['list'][$rkkk]['list'][] = ['name'=>$lv['name'],'id'=>$lv['id'],'type'=>'parent','data'=>[],'list'=>[]];    
+                    }
+                }
+            }
+        }
+
+        return $result;
+        */
     }
 }

@@ -58,4 +58,5 @@ return [
     'api/assess/assesstypes' => 'api/assess/assesstypes',
     'api/assess/scoreconfig' => 'api/assess/scoreconfig',
     'api/assess/saveconfig' => 'api/assess/saveconfig',
+    'api/assess/violations' => 'api/assess/violations',
 ];
