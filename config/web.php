@@ -10,6 +10,8 @@ $environment = "dev";
 $params = require(__DIR__ . '/' . $environment . '_params.php');
 $db = require(__DIR__ . '/' . $environment . '_db.php');
 $params = array_merge($params, $db);
+$violations = require( __DIR__ . '/violations.php');
+$params['violations'] = $violations;
 
 $logDir = "/data0/www/applogs/shenji-api";
 $cacheDir = "/data0/www/cache/shenji-api";
