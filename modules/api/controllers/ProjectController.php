@@ -382,7 +382,7 @@ class ProjectController extends BaseController
         $instance->projyear = $projyear;
         $instance->projorgan = $projorgan;
         $instance->projdesc = $projdesc;
-        $instance->projtype = $projtype;
+        $instance->projtype = json_encode($projtype, JSON_UNESCAPED_UNICODE);
         $instance->projlevel = $projlevel;
         $instance->leadorgan = $leadorganId;
         $instance->save();
@@ -390,16 +390,6 @@ class ProjectController extends BaseController
 
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson('', $error);
-        return $ret;
-    }
-
-    //个人信息
-    public function actionMy() {
-        $pid = $this->data['ID'];
-        $userService = new UserService();
-        $userInfo = $userService->getUserInfo($pid);
-        $error = ErrorDict::getError(ErrorDict::SUCCESS);
-        $ret = $this->outputJson($userInfo, $error);
         return $ret;
     }
 
