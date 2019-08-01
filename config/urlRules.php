@@ -56,4 +56,6 @@ return [
     'api/assess/form' => 'api/assess/form',
     'api/assess/submit' => 'api/assess/submit',
     'api/assess/assesstypes' => 'api/assess/assesstypes',
+    'api/assess/scoreconfig' => 'api/assess/scoreconfig',
+    'api/assess/saveconfig' => 'api/assess/saveconfig',
 ];

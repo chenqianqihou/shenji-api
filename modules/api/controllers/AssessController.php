@@ -213,4 +213,15 @@ class AssessController extends BaseController
         return $ret;
     }
 
+    public function actionScoreconfig() {
+        $assessService = new AssessService();    
+        $configs = $assessService->ScoreConfig();
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($configs, $error);
+        return $ret;
+    }
+
+    public function actionSaveconfig() {
+        
+    }
 }

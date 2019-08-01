@@ -5,6 +5,9 @@ namespace app\service;
 use app\models\AssessconfigDao;
 use app\models\QanswerDao;
 use app\models\QuestionsDao;
+use app\models\ObjectivescoreDao;
+use app\models\ObjectivetypeDao;
+use app\models\ViolationDao;
 
 class AssessService
 {
@@ -86,4 +89,37 @@ class AssessService
         return $result;
     }
 
+    public function ScoreConfig() {
+        $result = [];
+        $typelist = ObjectivetypeDao::find()->asArray()->all();
+        foreach( $typelist as $tk=>$tv) {
+            $one = $tv['onetype'];
+            $two = $tv['twotype'];
+            if( count($result) <= 0 || $result[count($result)-1]['name'] != $one ){
+                $result[] = ['name'=>$one,'list'=>[]];    
+            }
+            $result[count($result)-1]['list'][] = ['id'=>$tv['id'],'list'=>[],'name'=>$two,'kindid'=>$tv['kindid']];    
+        }
+
+        $scorelist = ObjectivescoreDao::find()->asArray()->all();
+        $scoreArr = [];
+        foreach( $scorelist as $sv){
+            $typeid = $sv['typeid'];
+
+            if( !isset( $scoreArr[$typeid] )){
+                $scoreArr[$typeid] = [];
+            }
+            $scoreArr[$typeid][] = $sv;
+        }
+
+        foreach( $result as $rk=>$rv){
+            foreach($rv['list'] as $rvk=>$rvv){
+                if( isset( $scoreArr[$rvv['id']] ) ){
+                    $result[$rk]['list'][$rvk]['list'] = $scoreArr[$rvv['id']];    
+                }    
+            }    
+        }
+
+        return $result;
+    }
 }
