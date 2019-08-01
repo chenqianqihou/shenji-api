@@ -107,6 +107,10 @@ class AssessService
         $scoreArr = [];
         foreach( $scorelist as $sv){
             $typeid = $sv['typeid'];
+            $kindid = $sv['kindid'];
+            if( $kindid == 2 ){
+                $sv['nameone'] = json_decode( $sv['nameone'], true );    
+            }
 
             if( !isset( $scoreArr[$typeid] )){
                 $scoreArr[$typeid] = [];
@@ -162,4 +166,61 @@ class AssessService
         return $result;
         */
     }
+
+    public function addNewConfigs( $newconfig ) {
+        foreach( $newconfig as $cv ) {
+            if(!isset( $cv['kindid'])){
+                continue;    
+            }
+            unset( $cv['id']);    
+            unset( $cv['ctime']);    
+            unset( $cv['utime']);    
+            $scoreObj = new ObjectivescoreDao();
+
+            if( $cv['kindid'] == 2 ){
+                $cv['nameone'] = json_encode( $cv['nameone']);    
+            }
+
+            isset( $cv['nameone']) ? $scoreObj->nameone = $cv['nameone']: '';
+            isset( $cv['nametwo']) ? $scoreObj->nametwo = $cv['nametwo']: '';
+            isset( $cv['score']) ? $scoreObj->score = $cv['score']: '';
+            isset( $cv['typeid']) ? $scoreObj->typeid = $cv['typeid']: '';
+            isset( $cv['kindid']) ? $scoreObj->kindid = $cv['kindid']: '';
+            $scoreObj->save();
+        }
+
+        return true;
+    }
+
+    public function updateConfigs( $configs ) {
+        foreach( $configs as $cv ) {
+            if(!isset( $cv['id'])){
+                continue;    
+            }
+            unset( $cv['ctime']);    
+            unset( $cv['utime']);    
+            $scoreObj = ObjectivescoreDao::find()->where(['id'=>$cv['id']])->one();
+
+            if( $cv['kindid'] == 2 ){
+                $cv['nameone'] = json_encode( $cv['nameone']);    
+            }
+
+            isset( $cv['nameone']) ? $scoreObj->nameone = $cv['nameone']: '';
+            isset( $cv['nametwo']) ? $scoreObj->nametwo = $cv['nametwo']: '';
+            isset( $cv['score']) ? $scoreObj->score = $cv['score']: '';
+            isset( $cv['typeid']) ? $scoreObj->typeid = $cv['typeid']: '';
+            isset( $cv['kindid']) ? $scoreObj->kindid = $cv['kindid']: '';
+            $scoreObj->save();
+        }
+
+        return true;
+    }
+
+    public function deleteConfig( $configid ) {
+        if( ObjectivescoreDao::find()->where(['id'=>$configid])->count() <= 0 ){
+            return false;    
+        }
+        return ObjectivescoreDao::find()->where(['id'=>$configid])->one()->delete();
+    }
+
 }

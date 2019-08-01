@@ -230,5 +230,75 @@ class AssessController extends BaseController
     }
 
     public function actionSaveconfig() {
+        $params = $this->getParams();
+        $updres = [];
+        $addres = [];
+        foreach( $params as $pv ) {
+            if( !isset( $pv['list'] ) ) {
+                return $this->outputJson(
+                        '',
+                        ErrorDict::getError(ErrorDict::G_PARAM, "参数格式异常！")
+                        );    
+            }
+
+            foreach( $pv['list'] as $pvv ) {
+                if( !isset($pvv['list']) || !isset($pvv['id']) ||!isset($pvv['kindid'])){
+                    return $this->outputJson(
+                            '',
+                            ErrorDict::getError(ErrorDict::G_PARAM, "参数子层级格式异常，缺少id/list/kindid！")
+                            );    
+                }    
+
+                $typeid = $pvv['id'];
+                $kindid = $pvv['kindid'];
+                $list = $pvv['list'];
+
+                foreach( $list as $lv ) {
+                    if( !isset( $lv['nameone']) ){
+                        continue;    
+                    }
+                    if( !isset( $lv['id'] ) || $lv['id'] == 0){
+                        $lv['typeid'] = $typeid;
+                        $lv['kindid'] = $kindid;
+                        $addres[] = $lv;
+                    } else {
+                        $updres[] = $lv;    
+                    }
+                }
+            }
+        }
+
+        $assessService = new AssessService();
+        $assessService->addNewConfigs( $addres );
+        $assessService->updateConfigs( $updres );
+
+        $configs = $assessService->ScoreConfig();
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($configs, $error);
+        return $ret;
     }
+
+    public function actionDeleteconfig() {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+                'configid' => array (
+                    'require' => true,
+                    'checker' => 'noCheck',
+                    ),
+                );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+
+        $configid = $this->getParam('configid');
+
+        $assessService = new AssessService();
+        $result = $assessService->deleteConfig( $configid );
+
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($result, $error);
+        return $ret;
+    }
+
 }
