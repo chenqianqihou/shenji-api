@@ -288,7 +288,7 @@ class ProjectController extends BaseController
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
-        $idArr = json_decode($this->getParam('id', ''), true);
+        $idArr = $this->getParam('id', '');
         if (!$idArr) {
             return $this->outputJson('',
                 ErrorDict::getError(ErrorDict::G_PARAM, '参数格式不对！')
