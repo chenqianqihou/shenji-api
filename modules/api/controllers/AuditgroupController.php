@@ -10,8 +10,11 @@ namespace app\modules\api\controllers;
 use app\classes\BaseController;
 use app\classes\ErrorDict;
 use app\classes\Log;
+use app\models\AuditGroupDao;
+use app\models\OrganizationDao;
 use app\models\PeopleProjectDao;
 use app\models\ProjectDao;
+use app\models\UserDao;
 
 
 class AuditgroupController extends BaseController {
@@ -205,6 +208,126 @@ class AuditgroupController extends BaseController {
 
 
         return $this->outputJson('',
+            ErrorDict::getError(ErrorDict::SUCCESS)
+        );
+    }
+
+    /**
+     * 增加人员列表接口
+     *
+     * @return array
+     */
+    public function actionUserlist() {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'ismedium' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+            'isinternal' => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
+            'type'  => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
+            'jobstatus' => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
+            'length'  => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+            'page' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+        );
+        $ismedium = intval($this->getParam('ismedium', 0));
+        $isinternal = intval($this->getParam('isinternal', 0));
+        $type = intval($this->getParam('type', 0));
+        $jobstatus = intval($this->getParam('jobstatus', 0));
+        $length = intval($this->getParam('length', 0));
+        $page = intval($this->getParam('page', 0));
+
+        if(!in_array($ismedium, [1, 2])){
+            return $this->outputJson('',
+                ErrorDict::getError(ErrorDict::G_PARAM, 'ismedium输入不合法！')
+            );
+        }
+        if(!in_array($isinternal, [1, 2])){
+            return $this->outputJson('',
+                ErrorDict::getError(ErrorDict::G_PARAM, 'isinternal输入不合法！')
+            );
+        }
+        if(!in_array($type, [OrganizationDao::OTYPE_JIGUAN, OrganizationDao::OTYPE_NEISHEN, OrganizationDao::OTYPE_ZHONGJIE])){
+            return $this->outputJson('',
+                ErrorDict::getError(ErrorDict::G_PARAM, 'type输入不合法！')
+            );
+        }
+        if(!in_array($jobstatus, [UserDao::IS_JOB, UserDao::IS_NOT_JOB])){
+            return $this->outputJson('',
+                ErrorDict::getError(ErrorDict::G_PARAM, 'jobstatus输入不合法！')
+            );
+        }
+
+        $con = (new \yii\db\Query())
+            ->from('people')
+            ->join('INNER JOIN', 'organization', 'organization.id = people.organid')
+            ->select('people.pid, people.name, people.sex, people.isjob, people.type, organization.name AS oname');
+
+        if($ismedium == 2){
+            $con = $con->where(['not', ['people.type' => UserDao::$typeToName['中介机构']]]);
+        }
+
+        if($isinternal == 2){
+            $con = $con->where(['not', ['people.type' => UserDao::$typeToName['内审机构']]]);
+        }
+
+        if($type){
+            $con = $con->where(['organization.type' => $type]);
+        }
+
+
+        if($jobstatus){
+            $con = $con->where(['people.isjob' => $jobstatus]);
+        }
+        $countCon = clone $con;
+
+        $peoples = $con->limit($length)->offset(($page - 1) * $length)->all();
+
+        $ret = array_map(function($e){
+            $lockNum = PeopleProjectDao::find()
+                ->where(['pid' => $e['pid']])
+                ->andWhere(['islock' => PeopleProjectDao::IS_LOCK])
+                ->count();
+            $tmp = [
+                'pid' => $e->pid,
+                'name' => $e->name,
+                'sex' => $e->sex == 1 ? "男" : "女",
+                'isjob' => $e->isjob == 1 ? "在点" : "不在点",
+                'type' => OrganizationDao::getOTypeMsg($e->type),
+            ];
+            if($lockNum > 0){
+                $tmp['islock'] = "锁定";
+            }else{
+                $tmp['islock'] = "未锁定";
+            }
+
+            $tmp['projectnum'] = PeopleProjectDao::find()
+                ->where(['pid' => $e['pid']])
+                ->groupBy('pid')
+                ->count();
+            return $tmp;
+        }, $peoples);
+
+
+        return $this->outputJson([
+            'list' => $ret,
+            'total' => $countCon->count()
+        ],
             ErrorDict::getError(ErrorDict::SUCCESS)
         );
     }
