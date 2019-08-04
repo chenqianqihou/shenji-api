@@ -63,13 +63,14 @@ class AuditGroupDao extends ActiveRecord{
         "未锁定" => 2,
     ];
 
-    public function addAuditGroup() {
+    public function addAuditGroup($pid) {
         $sql=sprintf('INSERT INTO %s (status, ctime, utime)
                               values (:status, :ctime, :utime)', self::tableName());
         $curTime = date('Y-m-d H:i:s');
         $stmt = self::getDb()->createCommand($sql);
         $stmt->prepare();
         $stmt->bindParam(':status', self::$statusToName['无'], \PDO::PARAM_INT);
+        $stmt->bindParam(':pid', $pid, \PDO::PARAM_INT);
         $stmt->bindParam(':ctime', $curTime, \PDO::PARAM_STR);
         $stmt->bindParam(':utime', $curTime, \PDO::PARAM_STR);
         $stmt->execute();

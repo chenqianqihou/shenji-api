@@ -189,26 +189,83 @@ class AuditgroupController extends BaseController {
                 'require' => true,
                 'checker' => 'isNumber',
             ),
-            'pid' => array (
+            'operate' => array (
                 'require' => true,
                 'checker' => 'isNumber',
             ),
         );
         $id = intval($this->getParam('id', 0));
-        $pid = intval($this->getParam('pid', 0));
+        $operate = intval($this->getParam('operate', 0));
 
-        $proDao = new PeopleProjectDao();
-        $peoPro = $proDao::find()
-            ->where(['groupid' => $id])
-            ->andwhere(['pid' => $pid])
-            ->one();
+        if(!in_array($operate, [1, 2, 3, 4])) {
+            return $this->outputJson('',
+                ErrorDict::getError('',
+                    ErrorDict::getError(ErrorDict::G_PARAM, '点击操作格式不合法!')
+                )
+            );
+        }
 
-        $peoPro->islock = 2;
-        $peoPro->save();
+        $transaction = AuditGroupDao::getDb()->beginTransaction();
+
+        try {
+            switch ($operate) {
+                //进点
+                case 1:
+                    $audit = AuditGroupDao::findOne($id);
+                    if ($audit->status = AuditGroupDao::$statusToName['应进点']){
+                        return $this->outputJson('',
+                            ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不为应进点!')
+                        );
+                    }
+                    $audit->status = AuditGroupDao::$statusToName['已进点'];
+                    $audit->save();
+
+                    return $this->outputJson('', ErrorDict::getError('', ErrorDict::SUCCESS));
+                case 2:
+                    $audit = AuditGroupDao::findOne($id);
+                    $audit->status = AuditGroupDao::$statusToName['实施结束'];
+                    $audit->save();
+
+                    $pro = ProjectDao::findOne($audit->pid);
+                    $pro->status = ProjectDao::$statusToName['审理阶段'];
+                    $pro->save();
+                    $transaction->commit();
+
+                    return $this->outputJson('', ErrorDict::getError('', ErrorDict::SUCCESS));
+                case 3:
+                    $audit = AuditGroupDao::findOne($id);
+                    if ($audit->status = AuditGroupDao::$statusToName['实施结束']){
+                        return $this->outputJson('',
+                            ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不正确！')
+                        );
+                    }
+                    $audit->status = AuditGroupDao::$statusToName['报告中'];
+                    $audit->save();
+                    $transaction->commit();
+
+                    return $this->outputJson('', ErrorDict::getError('', ErrorDict::SUCCESS));
+                case 4:
+                    $audit = AuditGroupDao::findOne($id);
+                    if ($audit->status = AuditGroupDao::$statusToName['报告中']){
+                        return $this->outputJson('',
+                            ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不正确！')
+                        );
+                    }
+                    $audit->status = AuditGroupDao::$statusToName['报告结束！'];
+                    $audit->save();
+                    $transaction->commit();
+
+                    return $this->outputJson('', ErrorDict::getError('', ErrorDict::SUCCESS));
+            }
+        }catch (\Exception $e){
+            $transaction->rollBack();
+            Log::fatal("审计组长变更状态出现错误！{$e->getTraceAsString()}");
+            return $this->outputJson('', ErrorDict::getError('', ErrorDict::ERR_INTERNAL));
+        }
 
 
         return $this->outputJson('',
-            ErrorDict::getError(ErrorDict::SUCCESS)
+            ErrorDict::getError(ErrorDict::ERR_INTERNAL)
         );
     }
 

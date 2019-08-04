@@ -151,6 +151,12 @@ class ProjectController extends BaseController
                 ->andWhere(['in', 'organid', $orgIds])
                 ->limit($leadernum + $auditornum + $masternum)
                 ->all();
+            if (count($allMatchPeoples) == 0) {
+                $group = new AuditGroupDao();
+                $group->addAuditGroup($projectId);
+                $transaction->commit();
+                return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
+            }
 
             $groups = [];
             if (count($allMatchPeoples) < $leadernum) {
@@ -159,7 +165,7 @@ class ProjectController extends BaseController
             for($i = 0; $i < $leadernum; $i++) {
                 $group = new AuditGroupDao();
                 $groups[] = [
-                    'id' => $group->addAuditGroup(),
+                    'id' => $group->addAuditGroup($projectId),
                     'leader' => $allMatchPeoples[$i]->id
                 ];
                 unset($allMatchPeoples[$i]);
