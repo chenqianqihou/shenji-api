@@ -689,7 +689,7 @@ class ProjectController extends BaseController
             ),
             'projstart' => array (
                 'require' => true,
-                'checker' => 'isDateValid',
+                'checker' => 'isNumber',
             ),
             'projauditcontent' => array (
                 'require' => true,
@@ -701,7 +701,8 @@ class ProjectController extends BaseController
             return $ret;
         }
         $id = intval($this->getParam('id', 0));
-        $projstart = $this->getParam('projstart', '');
+        $projstart = intval($this->getParam('projstart', ''));
+        $projstart = date('Y-m-d H:i:s', $projstart);
         $projauditcontent = $this->getParam('projauditcontent', '');
 
 
