@@ -668,7 +668,37 @@ class ProjectController extends BaseController
 
         //todo
         // 1、牵扯到状态的
-        // 2、审计组
+        $ret['auditgroup'] = [
+            'medium' => 1,  //需要审核模块
+            'internal' => 1, //需要审核模块
+        ];
+
+        $auditGroups = AuditGroupDao::find()
+            ->where(['pid' => $id])
+            ->all();
+        foreach ($auditGroups as $e){
+            $tmp = [];
+            $tmp['status'] = $e['status'];
+            $tmp['operate'] = 1; //组长可操作性
+
+            $peoples = (new \yii\db\Query())
+                ->from('peopleproject')
+                ->innerJoin('people', 'peopleproject.pid = people.id')
+                ->innerJoin('peopletitle', 'peopletitle.pid = people.pid')
+                ->innerJoin('techtitle', 'techtitle.id = peopletitle.tid')
+                ->select('people.pid, people.name, people.sex, peopleproject.roletype, people.address as location, peopleproject.roletype as role, people.level, peopleproject.islock')
+                ->where(['peopleproject.groupid' => $e['id']])
+                ->andWhere(['peopleproject.projid' => $id])
+                ->all();
+
+            foreach ($peoples as $p){
+                $tmp['group'][] = $p;
+            }
+            $ret['auditgroup']['list'][] = $tmp;
+        }
+
+        $ret['trialmemmber'] = ''; //审理成员 需求不明确
+        $ret['discuss'] = ''; //审计评价 需求不明确
 
 
 

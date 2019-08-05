@@ -99,7 +99,8 @@ class ProjectDao extends ActiveRecord{
         $stmt->bindParam(':utime', $curTime, \PDO::PARAM_STR);
         $stmt->bindParam(':projstart', $projstartime, \PDO::PARAM_STR);
         $ret = $stmt->execute();
-        return $ret;
+        $id = $stmt->db->getLastInsertID();
+        return $id;
     }
 
     public function updateProject($status, $projectnum, $name, $projyear, $plantime, $projdesc,
