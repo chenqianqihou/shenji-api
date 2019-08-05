@@ -662,6 +662,8 @@ class ProjectController extends BaseController
             'projdesc' => $data['projdesc'],
             'projstart' => $data['projstart'],
             'projauditcontent' => $data['projauditcontent'],
+            'projectname' => $data['name'],
+            'projectstatus' => $data['status'],
         ];
 
         //todo
