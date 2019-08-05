@@ -64,8 +64,8 @@ class AuditGroupDao extends ActiveRecord{
     ];
 
     public function addAuditGroup($pid) {
-        $sql=sprintf('INSERT INTO %s (status, ctime, utime)
-                              values (:status, :ctime, :utime)', self::tableName());
+        $sql=sprintf('INSERT INTO %s (status, pid, ctime, utime)
+                              values (:status, :pid, :ctime, :utime)', self::tableName());
         $curTime = date('Y-m-d H:i:s');
         $stmt = self::getDb()->createCommand($sql);
         $stmt->prepare();
