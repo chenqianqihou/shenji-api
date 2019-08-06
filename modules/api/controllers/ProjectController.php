@@ -457,7 +457,8 @@ class ProjectController extends BaseController
         $con = $prj::find();
 
         if ($projyear) {
-            if (date('Y', strtotime($projyear)) !== $projyear) {
+            //if (date('Y', strtotime($projyear)) !== $projyear) {
+            if ( !is_numeric( $projyear) ) {
                 return $this->outputJson('',
                     ErrorDict::getError(ErrorDict::G_PARAM, "projyear 输入格式不对！应为年份格式!")
                 );
