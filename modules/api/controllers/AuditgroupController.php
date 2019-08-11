@@ -363,11 +363,11 @@ class AuditgroupController extends BaseController {
                 ->andWhere(['islock' => PeopleProjectDao::IS_LOCK])
                 ->count();
             $tmp = [
-                'pid' => $e->pid,
-                'name' => $e->name,
-                'sex' => $e->sex == 1 ? "男" : "女",
-                'isjob' => $e->isjob == 1 ? "在点" : "不在点",
-                'type' => OrganizationDao::getOTypeMsg($e->type),
+                'pid' => $e['pid'],
+                'name' => $e['name'],
+                'sex' => $e['sex'] == 1 ? "男" : "女",
+                'isjob' => $e['isjob'] == 1 ? "在点" : "不在点",
+                'type' => OrganizationDao::getOTypeMsg($e['type']),
             ];
             if($lockNum > 0){
                 $tmp['islock'] = "锁定";
