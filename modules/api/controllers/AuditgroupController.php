@@ -13,7 +13,9 @@ use app\classes\Log;
 use app\models\AuditGroupDao;
 use app\models\OrganizationDao;
 use app\models\PeopleProjectDao;
+use app\models\PeopleReviewDao;
 use app\models\ProjectDao;
+use app\models\ReviewDao;
 use app\models\UserDao;
 
 
@@ -385,6 +387,79 @@ class AuditgroupController extends BaseController {
             'list' => $ret,
             'total' => $countCon->count()
         ],
+            ErrorDict::getError(ErrorDict::SUCCESS)
+        );
+    }
+
+    /**
+     * 提交中介/内审人员至人员分配审核
+     *
+     */
+    public function actionReviewadd() {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'id' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+            'pids' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'type' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+        );
+        $id = intval($this->getParam('id', 0));
+        $pids = $this->getParam('pids', []);
+        $type = $this->getParam('pids', []);
+
+        if(count($pids) == 0) {
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+        }
+        if(!in_array($type,[ReviewDao::ZHONGJIE_TYPE, ReviewDao::NEISHEN_TYPE])){
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+        }
+
+        $group = AuditGroupDao::findOne($id);
+        if(!$group){
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+        }
+
+        $transaction = ReviewDao::getDb()->beginTransaction();
+        try {
+            $rew = new ReviewDao();
+            $rew->type = ReviewDao::PEOPLE_TYPE;
+            $rew->projid = $group->pid;
+            $rew->ptype = $type;
+            $rew->save();
+
+            foreach ($pids as $e){
+                $prew = new PeopleReviewDao();
+                $isExsit = $prew::find()->where(['pid' => $e])->where(['rid' => $rew->id])->count();
+                if($isExsit){
+                    $transaction->rollBack();
+                    return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, ''));
+                }
+
+                $prew->pid = $e;
+                $prew->rid = $rew->id;
+
+                $prew->save();
+            }
+            $transaction->commit();
+        } catch(\Exception $e) {
+            $transaction->rollBack();
+            Log::fatal(printf("提交人员分配审核出现问题：%s", $e->getMessage()));
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
+        } catch(\Throwable $e) {
+            $transaction->rollBack();
+            Log::fatal(printf("提交人员分配审核出现问题：%s", $e->getMessage()));
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
+        }
+
+        return $this->outputJson('',
             ErrorDict::getError(ErrorDict::SUCCESS)
         );
     }

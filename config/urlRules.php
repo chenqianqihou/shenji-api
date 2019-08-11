@@ -51,6 +51,9 @@ return [
     'api/auditgroup/unlock' => 'api/auditgroup/unlock',
     'api/auditgroup/updatestatus' => 'api/auditgroup/updatestatus',
     'api/auditgroup/userlist' => 'api/auditgroup/userlist',
+    'api/auditgroup/reviewadd' => 'api/auditgroup/reviewadd',
+    'api/review/listsetting' => 'api/review/listsetting',
+    'api/review/operate' => 'api/review/operate',
 
     'api/assess/statlist' => 'api/assess/statlist',
     'api/assess/form' => 'api/assess/form',
