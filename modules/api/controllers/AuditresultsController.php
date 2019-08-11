@@ -35,8 +35,16 @@ class AuditresultsController extends BaseController
             return $ret;    
         }
 
+        $arres = $arservice->GetAuditResultById( $resultid );
+        $projectDao = new ProjectDao();
+        $userDao = new UserDao();
+        $projid = $arres['projectid'];    
+        $userid = $arres['peopleid'];
+        $arres['project_msg'] = $projectDao->queryByID( $projid );
+        $arres['people_msg'] = $userDao->queryByID( $userid );
+
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
-        $ret = $this->outputJson($arservice->GetAuditResultById($resultid), $error);
+        $ret = $this->outputJson($arres, $error);
         return $ret;
     }
 
@@ -79,7 +87,7 @@ class AuditresultsController extends BaseController
         }
 
         //判断用户是否存在
-        if ( UserDao::find()->where(['id'=>$peopleid])->count() <= 0 ) {
+        if ( UserDao::find()->where(['pid'=>$peopleid])->count() <= 0 ) {
             $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
             $ret = $this->outputJson('', $error);
             return $ret;    
@@ -156,7 +164,7 @@ class AuditresultsController extends BaseController
         }
 
         //判断用户是否存在
-        if ( UserDao::find()->where(['id'=>$peopleid])->count() <= 0 ) {
+        if ( UserDao::find()->where(['pid'=>$peopleid])->count() <= 0 ) {
             $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
             $ret = $this->outputJson('', $error);
             return $ret;    
@@ -219,4 +227,29 @@ class AuditresultsController extends BaseController
         return $ret;
     }
 
+    public function actionSearch() {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array ();
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $projectids = $this->getParam('projectid',[]);
+        $status = intval($this->getParam('status',-1));
+        $start = $this->getParam('start',0);
+        $length = $this->getParam('length',10);
+        $arService = new AuditresultsService();
+        $arList = $arService->getAuditResultsList( $projectids,$status,$start,$length );
+        $projectDao = new ProjectDao();
+        $userDao = new UserDao();
+        foreach( $arList['list'] as $ak=>$av ) {
+            $projid = $av['projectid'];    
+            $userid = $av['peopleid'];
+            $arList['list'][$ak]['project_msg'] = $projectDao->queryByID( $projid );
+            $arList['list'][$ak]['people_msg'] = $userDao->queryByID( $userid );
+        }
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($arList, $error);
+        return $ret;
+    }
 }

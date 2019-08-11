@@ -31,6 +31,20 @@ class AuditresultsService
             return AuditresultsDao::deleteAll(['id'=>$ids]);    
     }
 
+    public function getAuditResultsList( $projectids,$status,$start,$length) {
+        $res = AuditresultsDao::find()->where(1);
+        if( $status > 0 ){
+            $res = $res->andWhere(['status'=>$status]);    
+        }
+
+        if( !empty($projectids) ){
+            $res = $res->andWhere(['projectid'=>$projectids]);    
+        }
+        $total = $res->count();
+        $list = $res->orderBy('id desc')->offset( $start )->limit($length)->asArray()->all();
+        return ['total'=>$total,'list'=>$list];
+    }
+
     public function SaveAuditResult( $params = [] ) {
         if( isset($params['id']) && is_numeric($params['id']) && AuditresultsDao::find()->where(['id' => $params['id']])->count() > 0 ){
             $auditdao = AuditresultsDao::find()->where(['id' => $params['id']])->one();    
