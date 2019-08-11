@@ -678,9 +678,11 @@ class ProjectController extends BaseController
             ->where(['pid' => $id])
             ->all();
         foreach ($auditGroups as $e){
-            $tmp = [];
-            $tmp['status'] = $e['status'];
-            $tmp['operate'] = 1; //组长可操作性
+            $tmp = [
+                'id' => $e['id'],
+                'status' => $e['status'],
+                'operate' => 1
+            ];
 
             $peoples = (new \yii\db\Query())
                 ->from('peopleproject')
