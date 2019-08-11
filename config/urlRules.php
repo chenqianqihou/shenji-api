@@ -63,4 +63,6 @@ return [
 
     'api/auditresults/details' => 'api/auditresults/details',
     'api/auditresults/saveresult' => 'api/auditresults/saveresult',
+    'api/auditresults/submitresult' => 'api/auditresults/submitresult',
+    'api/auditresults/delresult' => 'api/auditresults/delresult',
 ];

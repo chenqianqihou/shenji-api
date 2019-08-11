@@ -27,6 +27,10 @@ class AuditresultsService
             return AuditresultsDao::find()->where(['id' => $id])->count();    
     }
 
+    public function DeleteAuditResult( $ids ) {
+            return AuditresultsDao::deleteAll(['id'=>$ids]);    
+    }
+
     public function SaveAuditResult( $params = [] ) {
         if( isset($params['id']) && is_numeric($params['id']) && AuditresultsDao::find()->where(['id' => $params['id']])->count() > 0 ){
             $auditdao = AuditresultsDao::find()->where(['id' => $params['id']])->one();    
