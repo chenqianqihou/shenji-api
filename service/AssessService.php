@@ -130,7 +130,7 @@ class AssessService
     }
 
     public function Violations() {
-        return json_decode(Yii::$app->params['violations']);
+        return json_decode(Yii::$app->params['violations'],true);
 
         /* //生成violations json的逻辑
         $result = [];

@@ -20,7 +20,11 @@ class AuditresultsService
     }
 
     public function GetAuditResultById( $id ) {
-            return AuditresultsDao::find()->where(['id' => $params['id']])->one();    
+            return AuditresultsDao::find()->where(['id' => $id])->asArray()->one();    
+    }
+
+    public function AuditResultCount( $id ) {
+            return AuditresultsDao::find()->where(['id' => $id])->count();    
     }
 
     public function SaveAuditResult( $params = [] ) {
@@ -34,7 +38,7 @@ class AuditresultsService
 
         foreach( $params as $pk=>$pv) {
             if( in_array($pk,$attrs) ){
-                $auditdao->$pk=>$pv;    
+                $auditdao->$pk=$pv;    
             }    
         }
         $auditdao->status = 1;
@@ -53,7 +57,7 @@ class AuditresultsService
 
         foreach( $params as $pk=>$pv) {
             if( in_array($pk,$attrs) ){
-                $auditdao->$pk=>$pv;    
+                $auditdao->$pk=$pv;    
             }    
         }
         $auditdao->status = 2;

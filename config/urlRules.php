@@ -60,4 +60,7 @@ return [
     'api/assess/saveconfig' => 'api/assess/saveconfig',
     'api/assess/deleteconfig' => 'api/assess/deleteconfig',
     'api/assess/violations' => 'api/assess/violations',
+
+    'api/auditresults/details' => 'api/auditresults/details',
+    'api/auditresults/saveresult' => 'api/auditresults/saveresult',
 ];
