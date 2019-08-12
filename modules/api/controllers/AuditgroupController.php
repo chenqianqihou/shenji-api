@@ -337,7 +337,7 @@ class AuditgroupController extends BaseController {
         $con = (new \yii\db\Query())
             ->from('people')
             ->join('INNER JOIN', 'organization', 'organization.id = people.organid')
-            ->select('people.pid, people.name, people.sex, people.isjob, people.type, organization.name AS oname');
+            ->select('people.id,people.pid, people.name, people.sex, people.isjob, people.type, organization.name AS oname');
 
         if($ismedium == 2){
             $con = $con->where(['not', ['people.type' => UserDao::$typeToName['中介机构']]]);
@@ -361,6 +361,7 @@ class AuditgroupController extends BaseController {
                 ->andWhere(['islock' => PeopleProjectDao::IS_LOCK])
                 ->count();
             $tmp = [
+                'id' => $e['id'],
                 'pid' => $e['pid'],
                 'name' => $e['name'],
                 'sex' => $e['sex'] == 1 ? "男" : "女",
