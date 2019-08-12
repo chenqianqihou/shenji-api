@@ -687,9 +687,7 @@ class ProjectController extends BaseController
             $peoples = (new \yii\db\Query())
                 ->from('peopleproject')
                 ->innerJoin('people', 'peopleproject.pid = people.id')
-                ->innerJoin('peopletitle', 'peopletitle.pid = people.pid')
-                ->innerJoin('techtitle', 'techtitle.id = peopletitle.tid')
-                ->select('people.pid, people.name, people.sex, peopleproject.roletype, people.address as location, peopleproject.roletype as role, people.level, peopleproject.islock')
+                ->select('people.id, people.pid, people.name, people.sex, peopleproject.roletype, people.address as location, peopleproject.roletype as role, people.level, peopleproject.islock')
                 ->where(['peopleproject.groupid' => $e['id']])
                 ->andWhere(['peopleproject.projid' => $id])
                 ->all();
