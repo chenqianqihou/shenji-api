@@ -298,10 +298,6 @@ class AuditgroupController extends BaseController {
                 'require' => false,
                 'checker' => 'isNumber',
             ),
-            'type'  => array (
-                'require' => false,
-                'checker' => 'isNumber',
-            ),
             'jobstatus' => array (
                 'require' => false,
                 'checker' => 'isNumber',
@@ -317,7 +313,6 @@ class AuditgroupController extends BaseController {
         );
         $ismedium = intval($this->getParam('ismedium', 0));
         $isinternal = intval($this->getParam('isinternal', 0));
-        $type = intval($this->getParam('type', 0));
         $jobstatus = intval($this->getParam('jobstatus', 0));
         $length = intval($this->getParam('length', 0));
         $page = intval($this->getParam('page', 0));
@@ -332,11 +327,7 @@ class AuditgroupController extends BaseController {
                 ErrorDict::getError(ErrorDict::G_PARAM, 'isinternal输入不合法！')
             );
         }
-        if(!in_array($type, [OrganizationDao::OTYPE_JIGUAN, OrganizationDao::OTYPE_NEISHEN, OrganizationDao::OTYPE_ZHONGJIE])){
-            return $this->outputJson('',
-                ErrorDict::getError(ErrorDict::G_PARAM, 'type输入不合法！')
-            );
-        }
+
         if(!in_array($jobstatus, [UserDao::IS_JOB, UserDao::IS_NOT_JOB])){
             return $this->outputJson('',
                 ErrorDict::getError(ErrorDict::G_PARAM, 'jobstatus输入不合法！')
@@ -354,10 +345,6 @@ class AuditgroupController extends BaseController {
 
         if($isinternal == 2){
             $con = $con->where(['not', ['people.type' => UserDao::$typeToName['内审机构']]]);
-        }
-
-        if($type){
-            $con = $con->where(['organization.type' => $type]);
         }
 
 
