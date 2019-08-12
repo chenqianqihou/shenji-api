@@ -96,11 +96,16 @@ class AuditgroupController extends BaseController {
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
         }
 
-        $proDao = new PeopleProjectDao();
-        $peoPro = $proDao::find()
+
+        $peoPro = PeopleProjectDao::find()
             ->where(['groupid' => $id])
             ->andwhere(['pid' => $pid])
             ->one();
+        if(!$peoPro){
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '未找不到合适的人员!'));
+        }
+
+        $peoPro = PeopleProjectDao::findOne($peoPro['id']);
         $peoPro->roletype = $role;
         $peoPro->save();
 
