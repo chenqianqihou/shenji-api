@@ -295,7 +295,7 @@ class AuditgroupController extends BaseController {
                 'checker' => 'isNumber',
             ),
             'isinternal' => array (
-                'require' => false,
+                'require' => true,
                 'checker' => 'isNumber',
             ),
             'jobstatus' => array (
@@ -328,7 +328,8 @@ class AuditgroupController extends BaseController {
             );
         }
 
-        if(!in_array($jobstatus, [UserDao::IS_JOB, UserDao::IS_NOT_JOB])){
+
+        if($jobstatus != 0 && !in_array($jobstatus, [UserDao::IS_JOB, UserDao::IS_NOT_JOB])){
             return $this->outputJson('',
                 ErrorDict::getError(ErrorDict::G_PARAM, 'jobstatus输入不合法！')
             );
@@ -339,12 +340,12 @@ class AuditgroupController extends BaseController {
             ->join('INNER JOIN', 'organization', 'organization.id = people.organid')
             ->select('people.id,people.pid, people.name, people.sex, people.isjob, people.type, organization.name AS oname');
 
-        if($ismedium == 2){
-            $con = $con->where(['not', ['people.type' => UserDao::$typeToName['中介机构']]]);
+        if($ismedium == 1){
+            $con = $con->where(['people.type' => UserDao::$typeToName['中介机构']]);
         }
 
-        if($isinternal == 2){
-            $con = $con->where(['not', ['people.type' => UserDao::$typeToName['内审机构']]]);
+        if($isinternal == 1){
+            $con = $con->where(['people.type' => UserDao::$typeToName['内审机构']]);
         }
 
 
