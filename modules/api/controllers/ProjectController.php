@@ -463,7 +463,7 @@ class ProjectController extends BaseController
                     ErrorDict::getError(ErrorDict::G_PARAM, "projyear 输入格式不对！应为年份格式!")
                 );
             }
-            $con->where(['projyear' => $projyear]);
+            $con = $con->andwhere(['projyear' => $projyear]);
         }
 
         if ($projlevel) {
@@ -472,7 +472,7 @@ class ProjectController extends BaseController
                     ErrorDict::getError(ErrorDict::G_PARAM, "projlevel 输入格式不对！")
                 );
             }
-            $con->where(['projlevel' => $projlevel]);
+            $con = $con->andwhere(['projlevel' => $projlevel]);
         }
 
         if ($medium) {
@@ -481,7 +481,7 @@ class ProjectController extends BaseController
                     ErrorDict::getError(ErrorDict::G_PARAM, "medium 输入格式不对！")
                 );
             }
-            $con->where(['medium' => $medium]);
+            $con = $con->andwhere(['medium' => $medium]);
         }
 
         /**  注释部分为审核相关内容 */
@@ -506,7 +506,7 @@ class ProjectController extends BaseController
 
 
         if ($query) {
-            $con->where(['or', ['like', 'projectnum', $query], ['like', 'name', $query]]);
+            $con = $con->andwhere(['or', ['like', 'projectnum', $query], ['like', 'name', $query]]);
         }
         if (!$length) {
             $length = 20;
