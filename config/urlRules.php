@@ -52,6 +52,9 @@ return [
     'api/auditgroup/updatestatus' => 'api/auditgroup/updatestatus',
     'api/auditgroup/userlist' => 'api/auditgroup/userlist',
     'api/auditgroup/reviewadd' => 'api/auditgroup/reviewadd',
+    'api/auditgroup/jugebind' => 'api/auditgroup/jugebind',
+    'api/auditgroup/jugelist' => 'api/auditgroup/jugelist',
+    'api/auditgroup/jugeunbind' => 'api/auditgroup/jugeunbind',
     'api/review/listsetting' => 'api/review/listsetting',
     'api/review/operate' => 'api/review/operate',
 

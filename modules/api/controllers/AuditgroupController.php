@@ -11,6 +11,7 @@ use app\classes\BaseController;
 use app\classes\ErrorDict;
 use app\classes\Log;
 use app\models\AuditGroupDao;
+use app\models\JugeProjectDao;
 use app\models\OrganizationDao;
 use app\models\PeopleProjectDao;
 use app\models\PeopleReviewDao;
@@ -37,6 +38,11 @@ class AuditgroupController extends BaseController {
                 'checker' => 'isNumber',
             ),
         );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+
         $id = intval($this->getParam('id', 0));
         $pid = intval($this->getParam('pid', 0));
 
@@ -86,6 +92,10 @@ class AuditgroupController extends BaseController {
                 'checker' => 'isNumber',
             ),
         );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
         $id = intval($this->getParam('id', 0));
         $pid = intval($this->getParam('pid', 0));
         $role = intval($this->getParam('role', 0));
@@ -131,6 +141,10 @@ class AuditgroupController extends BaseController {
                 'checker' => 'isNumber',
             ),
         );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
         $id = intval($this->getParam('id', 0));
         $pid = intval($this->getParam('pid', 0));
 
@@ -169,6 +183,10 @@ class AuditgroupController extends BaseController {
                 'checker' => 'isNumber',
             ),
         );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
         $id = intval($this->getParam('id', 0));
         $pid = intval($this->getParam('pid', 0));
 
@@ -207,6 +225,10 @@ class AuditgroupController extends BaseController {
                 'checker' => 'isNumber',
             ),
         );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
         $id = intval($this->getParam('id', 0));
         $operate = intval($this->getParam('operate', 0));
 
@@ -311,6 +333,10 @@ class AuditgroupController extends BaseController {
                 'checker' => 'isNumber',
             ),
         );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
         $ismedium = intval($this->getParam('ismedium', 0));
         $isinternal = intval($this->getParam('isinternal', 0));
         $jobstatus = intval($this->getParam('jobstatus', 0));
@@ -411,6 +437,10 @@ class AuditgroupController extends BaseController {
                 'checker' => 'isNumber',
             ),
         );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
         $id = intval($this->getParam('id', 0));
         $pids = $this->getParam('pids', []);
         $type = $this->getParam('pids', []);
@@ -464,4 +494,140 @@ class AuditgroupController extends BaseController {
         );
     }
 
+    /**
+     * 增加审理人员列表接口
+     *
+     */
+    public function actionJugebind() {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'pid' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+            'projid' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $pid = intval($this->getParam('pid', 0));
+        $projid = $this->getParam('projid', 0);
+
+
+        $jp = new JugeProjectDao();
+        $jp->projid = $projid;
+        $jp->pid = $pid;
+        $jp->save();
+
+        return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
+
+    }
+
+    /**
+     * 解除审理人员
+     *
+     */
+    public function actionJugeunbind() {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'pid' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+            'projid' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $pid = intval($this->getParam('pid', 0));
+        $projid = $this->getParam('projid', 0);
+
+
+        $juge = JugeProjectDao::find()
+            ->where(['projid' => $projid])
+            ->where(['pid' => $pid])
+            ->one();
+        if(!$juge){
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+        }
+
+        $juge->delete();
+
+        return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
+
+    }
+
+
+    /**
+     * 审理人员列表接口
+     *
+     */
+    public function actionJugelist() {
+        $this->defineMethod = 'GET';
+        $this->defineParams = array (
+            'id' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+            'page_size' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+            'page' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $pid = intval($this->getParam('id', 0));
+        $page_size = intval($this->getParam('page_size', 0));
+        $page = intval($this->getParam('page', 0));
+
+        $people = JugeProjectDao::find()
+            ->where(['projid' => $pid])
+            ->select('group_concat(groupid), pid')
+            ->groupBy('pid');
+        $countPeople = clone $people;
+        $countPeople = $countPeople->count();
+
+        $people = $people
+            ->limit($page_size)
+            ->offset(($page - 1) * $page_size)
+            ->asArray()
+            ->all();
+
+        $people = array_map(function($e){
+            $tmp = [
+                'id' => $e['pid'],
+                'group' => $e['group_concat(groupid)']
+            ];
+            $user = UserDao::findOne($e['pid']);
+            $tmp['pid'] = $user['pid'];
+            $tmp['name'] = $user['name'];
+            $tmp['sex'] = UserDao::$sex[$user['sex']];
+            $tmp['location'] = $user['location'];
+
+            $depart = OrganizationDao::findOne($user['department']);
+            $tmp['department'] = $depart['name'] ?? '';
+
+            return $tmp;
+        }, $people);
+
+        return $this->outputJson([
+            'list' => $people,
+            'total' => $countPeople
+        ], ErrorDict::getError(ErrorDict::SUCCESS));
+
+    }
 }
