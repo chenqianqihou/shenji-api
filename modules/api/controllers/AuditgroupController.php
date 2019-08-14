@@ -630,4 +630,80 @@ class AuditgroupController extends BaseController {
         ], ErrorDict::getError(ErrorDict::SUCCESS));
 
     }
+
+    /**
+     * 更改审计组
+     *
+     */
+    public function actionJugechange() {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'pid' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+            'projid' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+            'groupids' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $pid = intval($this->getParam('pid', 0));
+        $projid = intval($this->getParam('projid', 0));
+        $groupids = $this->getParam('groupids');
+
+        if(count($groupids) == 0){
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '审计组id为空!'));
+        }
+
+        $peopjos = PeopleProjectDao::find()
+            ->where(['pid' => $pid])
+            ->andWhere('in', 'groupid', $groupids)
+            ->andWhere(['projid' => $projid])
+            ->count();
+        if($peopjos > 0){
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '审计组中有该成员！'));
+        }
+
+        $transaction = JugeProjectDao::getDb()->beginTransaction();
+
+        try {
+            $juges = JugeProjectDao::find()
+                ->where(['projid' => $projid])
+                ->where(['pid' => $pid])
+                ->all();
+            foreach ($juges as $e){
+                $e->delete();
+            }
+
+            foreach ($groupids as $e){
+                $jg = new JugeProjectDao();
+                $jg->pid = $pid;
+                $jg->groupid = $e;
+                $jg->projid = $projid;
+                $jg->save();
+            }
+
+            $transaction->commit();
+        } catch(\Exception $e) {
+            $transaction->rollBack();
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
+        } catch(\Throwable $e) {
+            $transaction->rollBack();
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
+        }
+
+
+
+
+        return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
+
+    }
 }
