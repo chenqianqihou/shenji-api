@@ -72,10 +72,22 @@ class AssessService
     public function SubmitFormContent( $uid,$objuid,$projectid,$typeid,$answers) {
         
         $result = ['answer'=>[],'question'=>[]];
+
+        //计算分数
+        $totalscore = 0;
+        foreach( $answers as $av) {
+            foreach($av as $aitem) {
+                $sc = isset($aitem['score']) ? $aitem['score'] : 0;
+                $isselect = empty( $aitem['selected'] ) ? 0 : 1;
+                $totalscore += $sc * $isselect;
+            }
+        }
+
         //是否已经回答过
         if( QanswerDao::find()->where(['pid'=>$uid,'objpid'=>$objuid,'projectid'=>$projectid,'configid'=>$typeid])->count() ){
             $qanswer = QanswerDao::find()->where(['pid'=>$uid,'objpid'=>$objuid,'projectid'=>$projectid,'configid'=>$typeid])->one();
             $qanswer->answers = json_encode( $answers );
+            $qanswer->score = $totalscore;
             $qanswer->save();
         } else {
             $qanswer = new QanswerDao();
@@ -84,6 +96,7 @@ class AssessService
             $qanswer->projectid=$projectid;
             $qanswer->configid=$typeid;
             $qanswer->answers=json_encode($answers);
+            $qanswer->score = $totalscore;
             $qanswer->save();   
         }
         $result['answer'] = $answers;
