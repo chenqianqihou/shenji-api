@@ -225,6 +225,10 @@ class AuditgroupController extends BaseController {
                 'require' => true,
                 'checker' => 'isNumber',
             ),
+            'num' => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
         );
         if (false === $this->check()) {
             $ret = $this->outputJson(array(), $this->err);
@@ -232,11 +236,19 @@ class AuditgroupController extends BaseController {
         }
         $id = intval($this->getParam('id', 0));
         $operate = intval($this->getParam('operate', 0));
+        $num = intval($this->getParam('num', 0));
 
         if(!in_array($operate, [1, 2, 3, 4])) {
             return $this->outputJson('',
                 ErrorDict::getError('',
                     ErrorDict::getError(ErrorDict::G_PARAM, '点击操作格式不合法!')
+                )
+            );
+        }
+        if($operate == 3 && $num == 0){
+            return $this->outputJson('',
+                ErrorDict::getError('',
+                    ErrorDict::getError(ErrorDict::G_PARAM, '预审理人数不对！')
                 )
             );
         }
@@ -277,6 +289,11 @@ class AuditgroupController extends BaseController {
                     }
                     $audit->status = AuditGroupDao::$statusToName['报告中'];
                     $audit->save();
+
+                    $pro = ProjectDao::findOne($audit['pid']);
+                    $pro->jugenum = $num;
+                    $pro->save();
+
                     $transaction->commit();
 
                     return $this->outputJson('', ErrorDict::getError('', ErrorDict::SUCCESS));
