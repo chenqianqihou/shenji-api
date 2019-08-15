@@ -11,8 +11,10 @@ use app\models\AuditGroupDao;
 use app\models\ExpertiseDao;
 use app\models\OrganizationDao;
 use app\models\PeopleProjectDao;
+use app\models\PeopleReviewDao;
 use app\models\ProjectDao;
 use app\models\QualificationDao;
+use app\models\ReviewDao;
 use app\models\RoleDao;
 use app\models\TechtitleDao;
 use app\models\TrainDao;
@@ -24,6 +26,7 @@ use Yii;
 use \Lcobucci\JWT\Builder;
 use \Lcobucci\JWT\Signer\Hmac\Sha256;
 use yii\db\Exception;
+use app\service\ReviewService;
 
 class ProjectController extends BaseController
 {
@@ -615,7 +618,69 @@ class ProjectController extends BaseController
 
 
     /**
-     * 项目详情接口
+     * 项目详情接口一列表部分
+     *
+     * @return array
+     */
+    public function actionInfolist() {
+        $this->defineMethod = 'GET';
+        $this->defineParams = array (
+            'id' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $id = intval($this->getParam('id', 0));
+        $projectDao = new ProjectDao();
+        $data = $projectDao->queryByID($id);
+        if(!$data){
+            $error = ErrorDict::getError(ErrorDict::G_PARAM);
+            $ret = $this->outputJson("", $error);
+            return $ret;
+        }
+
+        $rew = new ReviewService();
+
+        $ret['auditgroup'] = [
+            'medium' => $rew->getMediumStatus($id),
+            'internal' => $rew->getInternalStatus($id), //需要审核模块
+        ];
+
+        $auditGroups = AuditGroupDao::find()
+            ->where(['pid' => $id])
+            ->all();
+        foreach ($auditGroups as $e){
+            $tmp = [
+                'id' => $e['id'],
+                'status' => $e['status'],
+                'operate' => 1
+            ];
+
+            $peoples = (new \yii\db\Query())
+                ->from('peopleproject')
+                ->innerJoin('people', 'peopleproject.pid = people.id')
+                ->select('people.id, people.pid, people.name, people.sex, peopleproject.roletype, people.address as location, peopleproject.roletype as role, people.level, peopleproject.islock')
+                ->where(['peopleproject.groupid' => $e['id']])
+                ->andWhere(['peopleproject.projid' => $id])
+                ->all();
+
+            foreach ($peoples as $p){
+                $tmp['group'][] = $p;
+            }
+            $ret['auditgroup']['list'][] = $tmp;
+        }
+
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($ret, $error);
+        return $ret;
+    }
+
+    /**
+     * 项目详情接口一无列表部分
      *
      * @return array
      */
@@ -667,46 +732,12 @@ class ProjectController extends BaseController
             'projectstatus' => $data['status'],
         ];
 
-        //todo
-        // 1、牵扯到状态的
-        $ret['auditgroup'] = [
-            'medium' => 1,  //需要审核模块
-            'internal' => 1, //需要审核模块
-        ];
-
-        $auditGroups = AuditGroupDao::find()
-            ->where(['pid' => $id])
-            ->all();
-        foreach ($auditGroups as $e){
-            $tmp = [
-                'id' => $e['id'],
-                'status' => $e['status'],
-                'operate' => 1
-            ];
-
-            $peoples = (new \yii\db\Query())
-                ->from('peopleproject')
-                ->innerJoin('people', 'peopleproject.pid = people.id')
-                ->select('people.id, people.pid, people.name, people.sex, peopleproject.roletype, people.address as location, peopleproject.roletype as role, people.level, peopleproject.islock')
-                ->where(['peopleproject.groupid' => $e['id']])
-                ->andWhere(['peopleproject.projid' => $id])
-                ->all();
-
-            foreach ($peoples as $p){
-                $tmp['group'][] = $p;
-            }
-            $ret['auditgroup']['list'][] = $tmp;
-        }
-
-        $ret['trialmemmber'] = ''; //审理成员 需求不明确
-        $ret['discuss'] = ''; //审计评价 需求不明确
-
-
-
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($ret, $error);
         return $ret;
     }
+
+
 
     /**
      * 变更审计信息接口

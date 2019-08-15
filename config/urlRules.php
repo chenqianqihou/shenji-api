@@ -39,6 +39,7 @@ return [
     'api/project/update' => 'api/project/update',
     'api/project/delete' => 'api/project/delete',
     'api/project/info' => 'api/project/info',
+    'api/project/infolist' => 'api/project/infolist',
     'api/project/updatestatus' => 'api/project/updatestatus',
     'api/project/auditinfo' => 'api/project/auditinfo',
     'api/project/listselect' => 'api/project/listselect',

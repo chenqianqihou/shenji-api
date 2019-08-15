@@ -28,9 +28,11 @@ class ReviewDao extends ActiveRecord{
       self::RESULT_TYPE => "审计成果审核"
     ];
 
+    const STATUS_DEFAULT = 0;
     const STATUS_SUCCESS = 1;
     const STATUS_FAILED = 2;
     public static $statusMsg = [
+        self::STATUS_DEFAULT => '未审核',
         self::STATUS_SUCCESS => '成功！',
         self::STATUS_FAILED => '失败!'
     ];
