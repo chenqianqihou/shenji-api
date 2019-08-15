@@ -488,13 +488,17 @@ class ProjectController extends BaseController
                 $projs = (new \yii\db\Query())
                     ->from('peopleproject')
                     ->innerJoin('people', 'peopleproject.pid = people.id')
-                    ->andWhere(['not', ['people.type' => UserDao::$typeToName['中介机构']]])
+                    ->andWhere(['people.type' => UserDao::$typeToName['中介机构']])
                     ->select('peopleproject.projid')
                     ->groupBy('peopleproject.projid')
                     ->all();
 
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
+
                 if(count($projs) !== 0){
-                    $con = $con->andWhere(['in', 'id', $projs]);
+                    $con = $con->andWhere(['not in', 'id', $projs]);
                 }
             }else if($medium == 2){
                 $projs = (new \yii\db\Query())
@@ -504,11 +508,19 @@ class ProjectController extends BaseController
                     ->select('peopleproject.projid')
                     ->groupBy('peopleproject.projid')
                     ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
+
                 $rews = ReviewDao::find()
                     ->andWhere(['ptype' => 1])
                     ->groupBy('projid')
                     ->select('projid')
                     ->all();
+                $rews = array_map(function($e){
+                    return $e['projid'];
+                }, $rews);
+
                 $projs = array_diff($projs, $rews);
 
                 $con = $con->andWhere(['in', 'id', $projs]);
@@ -521,6 +533,10 @@ class ProjectController extends BaseController
                     ->select('peopleproject.projid')
                     ->groupBy('peopleproject.projid')
                     ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
+
                 $rews = ReviewDao::find()
                     ->andWhere(['ptype' => 1])
                     ->andWhere(['in', 'projid', $projs])
@@ -528,6 +544,9 @@ class ProjectController extends BaseController
                     ->groupBy('projid')
                     ->select('projid')
                     ->all();
+                $rews = array_map(function($e){
+                    return $e['projid'];
+                }, $rews);
 
                 $con = $con->andWhere(['in', 'id', $rews]);
 
@@ -540,6 +559,9 @@ class ProjectController extends BaseController
                     ->select('peopleproject.projid')
                     ->groupBy('peopleproject.projid')
                     ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
                 $rews = ReviewDao::find()
                     ->andWhere(['ptype' => 1])
                     ->andWhere(['in', 'projid', $projs])
@@ -547,6 +569,9 @@ class ProjectController extends BaseController
                     ->groupBy('projid')
                     ->select('projid')
                     ->all();
+                $rews = array_map(function($e){
+                    return $e['projid'];
+                }, $rews);
 
                 $con = $con->andWhere(['in', 'id', $rews]);
 
@@ -558,6 +583,9 @@ class ProjectController extends BaseController
                     ->select('peopleproject.projid')
                     ->groupBy('peopleproject.projid')
                     ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
                 $rews = ReviewDao::find()
                     ->andWhere(['ptype' => 1])
                     ->andWhere(['in', 'projid', $projs])
@@ -565,6 +593,10 @@ class ProjectController extends BaseController
                     ->groupBy('projid')
                     ->select('projid')
                     ->all();
+                $rews = array_map(function($e){
+                    return $e['projid'];
+                }, $rews);
+
                 $con = $con->andWhere(['in', 'id', $rews]);
             }
 
@@ -581,13 +613,16 @@ class ProjectController extends BaseController
                 $projs = (new \yii\db\Query())
                     ->from('peopleproject')
                     ->innerJoin('people', 'peopleproject.pid = people.id')
-                    ->andWhere(['not', ['people.type' => UserDao::$typeToName['内审机构']]])
+                    ->andWhere(['people.type' => UserDao::$typeToName['内审机构']])
                     ->select('peopleproject.projid')
                     ->groupBy('peopleproject.projid')
                     ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
 
                 if(count($projs) !== 0){
-                    $con = $con->andWhere(['in', 'id', $projs]);
+                    $con = $con->andWhere(['not in', 'id', $projs]);
                 }
             }else if($internal == 2){
                 $projs = (new \yii\db\Query())
@@ -597,11 +632,18 @@ class ProjectController extends BaseController
                     ->select('peopleproject.projid')
                     ->groupBy('peopleproject.projid')
                     ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
                 $rews = ReviewDao::find()
                     ->andWhere(['ptype' => 1])
                     ->groupBy('projid')
                     ->select('projid')
                     ->all();
+                $rews = array_map(function($e){
+                    return $e['projid'];
+                }, $rews);
+
                 $projs = array_diff($projs, $rews);
 
                 $con = $con->andWhere(['in', 'id', $projs]);
@@ -613,6 +655,9 @@ class ProjectController extends BaseController
                     ->select('peopleproject.projid')
                     ->groupBy('peopleproject.projid')
                     ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
                 $rews = ReviewDao::find()
                     ->andWhere(['ptype' => 1])
                     ->andWhere(['in', 'projid', $projs])
@@ -620,6 +665,10 @@ class ProjectController extends BaseController
                     ->groupBy('projid')
                     ->select('projid')
                     ->all();
+                $rews = array_map(function($e){
+                    return $e['projid'];
+                }, $rews);
+
                 $con = $con->andWhere(['in', 'id', $rews]);
             }else if($internal == 4){
                 $projs = (new \yii\db\Query())
@@ -629,6 +678,9 @@ class ProjectController extends BaseController
                     ->select('peopleproject.projid')
                     ->groupBy('peopleproject.projid')
                     ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
                 $rews = ReviewDao::find()
                     ->andWhere(['ptype' => 1])
                     ->andWhere(['in', 'projid', $projs])
@@ -636,6 +688,10 @@ class ProjectController extends BaseController
                     ->groupBy('projid')
                     ->select('projid')
                     ->all();
+                $rews = array_map(function($e){
+                    return $e['projid'];
+                }, $rews);
+
                 $con = $con->andWhere(['in', 'id', $rews]);
             }else if($internal == 5){
                 $projs = (new \yii\db\Query())
@@ -645,6 +701,10 @@ class ProjectController extends BaseController
                     ->select('peopleproject.projid')
                     ->groupBy('peopleproject.projid')
                     ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
+
                 $rews = ReviewDao::find()
                     ->andWhere(['ptype' => 1])
                     ->andWhere(['in', 'projid', $projs])
@@ -652,6 +712,9 @@ class ProjectController extends BaseController
                     ->groupBy('projid')
                     ->select('projid')
                     ->all();
+                $rews = array_map(function($e){
+                    return $e['projid'];
+                }, $rews);
                 $con = $con->andWhere(['in', 'id', $rews]);
             }
 
