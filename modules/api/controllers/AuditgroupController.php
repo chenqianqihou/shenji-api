@@ -366,21 +366,24 @@ class AuditgroupController extends BaseController {
             ->join('INNER JOIN', 'organization', 'organization.id = people.organid')
             ->select('people.id,people.pid, people.name, people.sex, people.isjob, people.type, organization.name AS oname');
 
+        $types = [
+            UserDao::$typeToName['审计机关']
+        ];
         if($ismedium == 1){
-            $con = $con->where(['people.type' => UserDao::$typeToName['中介机构']]);
+            $types[] = UserDao::$typeToName['中介机构'];
         }
 
         if($isinternal == 1){
-            $con = $con->where(['people.type' => UserDao::$typeToName['内审机构']]);
+            $types[] = UserDao::$typeToName['内审机构'];
         }
 
 
         if($jobstatus){
-            $con = $con->where(['people.isjob' => $jobstatus]);
+            $con = $con->Where(['people.isjob' => $jobstatus]);
         }
         $countCon = clone $con;
 
-        $peoples = $con->limit($length)->offset(($page - 1) * $length)->all();
+        $peoples = $con->andWhere(['in', 'people.type', $types])->limit($length)->offset(($page - 1) * $length)->all();
 
         $ret = array_map(function($e){
             $lockNum = PeopleProjectDao::find()
