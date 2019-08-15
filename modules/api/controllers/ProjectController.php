@@ -484,28 +484,187 @@ class ProjectController extends BaseController
                     ErrorDict::getError(ErrorDict::G_PARAM, "medium 输入格式不对！")
                 );
             }
-            $con = $con->andwhere(['medium' => $medium]);
+            if($medium == 1){
+                $projs = (new \yii\db\Query())
+                    ->from('peopleproject')
+                    ->innerJoin('people', 'peopleproject.pid = people.id')
+                    ->andWhere(['not', ['people.type' => UserDao::$typeToName['中介机构']]])
+                    ->select('peopleproject.projid')
+                    ->groupBy('peopleproject.projid')
+                    ->all();
+
+                if(count($projs) !== 0){
+                    $con = $con->andWhere(['in', 'id', $projs]);
+                }
+            }else if($medium == 2){
+                $projs = (new \yii\db\Query())
+                    ->from('peopleproject')
+                    ->innerJoin('people', 'peopleproject.pid = people.id')
+                    ->andWhere(['people.type' => UserDao::$typeToName['中介机构']])
+                    ->select('peopleproject.projid')
+                    ->groupBy('peopleproject.projid')
+                    ->all();
+                $rews = ReviewDao::find()
+                    ->andWhere(['ptype' => 1])
+                    ->groupBy('projid')
+                    ->select('projid')
+                    ->all();
+                $projs = array_diff($projs, $rews);
+
+                $con = $con->andWhere(['in', 'id', $projs]);
+
+            }else if($medium == 3){
+                $projs = (new \yii\db\Query())
+                    ->from('peopleproject')
+                    ->innerJoin('people', 'peopleproject.pid = people.id')
+                    ->andWhere(['people.type' => UserDao::$typeToName['中介机构']])
+                    ->select('peopleproject.projid')
+                    ->groupBy('peopleproject.projid')
+                    ->all();
+                $rews = ReviewDao::find()
+                    ->andWhere(['ptype' => 1])
+                    ->andWhere(['in', 'projid', $projs])
+                    ->andWhere(['status' => 0])
+                    ->groupBy('projid')
+                    ->select('projid')
+                    ->all();
+
+                $con = $con->andWhere(['in', 'id', $rews]);
+
+
+            }else if($medium == 4){
+                $projs = (new \yii\db\Query())
+                    ->from('peopleproject')
+                    ->innerJoin('people', 'peopleproject.pid = people.id')
+                    ->andWhere(['people.type' => UserDao::$typeToName['中介机构']])
+                    ->select('peopleproject.projid')
+                    ->groupBy('peopleproject.projid')
+                    ->all();
+                $rews = ReviewDao::find()
+                    ->andWhere(['ptype' => 1])
+                    ->andWhere(['in', 'projid', $projs])
+                    ->andWhere(['status' => 1])
+                    ->groupBy('projid')
+                    ->select('projid')
+                    ->all();
+
+                $con = $con->andWhere(['in', 'id', $rews]);
+
+            }else if($medium == 5){
+                $projs = (new \yii\db\Query())
+                    ->from('peopleproject')
+                    ->innerJoin('people', 'peopleproject.pid = people.id')
+                    ->andWhere(['people.type' => UserDao::$typeToName['中介机构']])
+                    ->select('peopleproject.projid')
+                    ->groupBy('peopleproject.projid')
+                    ->all();
+                $rews = ReviewDao::find()
+                    ->andWhere(['ptype' => 1])
+                    ->andWhere(['in', 'projid', $projs])
+                    ->andWhere(['status' => 2])
+                    ->groupBy('projid')
+                    ->select('projid')
+                    ->all();
+                $con = $con->andWhere(['in', 'id', $rews]);
+            }
+
+
         }
 
-        /**  注释部分为审核相关内容 */
+        if ($internal) {
+            if (!in_array($internal, [1, 2, 3, 4, 5])) {
+                return $this->outputJson('',
+                    ErrorDict::getError(ErrorDict::G_PARAM, "medium 输入格式不对！")
+                );
+            }
+            if($internal == 1){
+                $projs = (new \yii\db\Query())
+                    ->from('peopleproject')
+                    ->innerJoin('people', 'peopleproject.pid = people.id')
+                    ->andWhere(['not', ['people.type' => UserDao::$typeToName['内审机构']]])
+                    ->select('peopleproject.projid')
+                    ->groupBy('peopleproject.projid')
+                    ->all();
 
-//        if ($internal) {
-//            if (!in_array($internal, [1, 2, 3, 4, 5])) {
-//                return $this->outputJson('',
-//                    ErrorDict::getError(ErrorDict::G_PARAM, "internal 输入格式不对！")
-//                );
-//            }
-//            $con->where(['medium' => $internal]);
-//        }
-//
-//        if ($projstage) {
-//            if (!in_array($projstage, [1, 2, 3, 4, 5])) {
-//                return $this->outputJson('',
-//                    ErrorDict::getError(ErrorDict::G_PARAM, "projstage 输入格式不对！")
-//                );
-//            }
-//            $con->where(['projstage' => $projstage]);
-//        }
+                if(count($projs) !== 0){
+                    $con = $con->andWhere(['in', 'id', $projs]);
+                }
+            }else if($internal == 2){
+                $projs = (new \yii\db\Query())
+                    ->from('peopleproject')
+                    ->innerJoin('people', 'peopleproject.pid = people.id')
+                    ->andWhere(['people.type' => UserDao::$typeToName['内审机构']])
+                    ->select('peopleproject.projid')
+                    ->groupBy('peopleproject.projid')
+                    ->all();
+                $rews = ReviewDao::find()
+                    ->andWhere(['ptype' => 1])
+                    ->groupBy('projid')
+                    ->select('projid')
+                    ->all();
+                $projs = array_diff($projs, $rews);
+
+                $con = $con->andWhere(['in', 'id', $projs]);
+            }else if($internal == 3){
+                $projs = (new \yii\db\Query())
+                    ->from('peopleproject')
+                    ->innerJoin('people', 'peopleproject.pid = people.id')
+                    ->andWhere(['people.type' => UserDao::$typeToName['内审机构']])
+                    ->select('peopleproject.projid')
+                    ->groupBy('peopleproject.projid')
+                    ->all();
+                $rews = ReviewDao::find()
+                    ->andWhere(['ptype' => 1])
+                    ->andWhere(['in', 'projid', $projs])
+                    ->andWhere(['status' => 0])
+                    ->groupBy('projid')
+                    ->select('projid')
+                    ->all();
+                $con = $con->andWhere(['in', 'id', $rews]);
+            }else if($internal == 4){
+                $projs = (new \yii\db\Query())
+                    ->from('peopleproject')
+                    ->innerJoin('people', 'peopleproject.pid = people.id')
+                    ->andWhere(['people.type' => UserDao::$typeToName['内审机构']])
+                    ->select('peopleproject.projid')
+                    ->groupBy('peopleproject.projid')
+                    ->all();
+                $rews = ReviewDao::find()
+                    ->andWhere(['ptype' => 1])
+                    ->andWhere(['in', 'projid', $projs])
+                    ->andWhere(['status' => 1])
+                    ->groupBy('projid')
+                    ->select('projid')
+                    ->all();
+                $con = $con->andWhere(['in', 'id', $rews]);
+            }else if($internal == 5){
+                $projs = (new \yii\db\Query())
+                    ->from('peopleproject')
+                    ->innerJoin('people', 'peopleproject.pid = people.id')
+                    ->andWhere(['people.type' => UserDao::$typeToName['内审机构']])
+                    ->select('peopleproject.projid')
+                    ->groupBy('peopleproject.projid')
+                    ->all();
+                $rews = ReviewDao::find()
+                    ->andWhere(['ptype' => 1])
+                    ->andWhere(['in', 'projid', $projs])
+                    ->andWhere(['status' => 2])
+                    ->groupBy('projid')
+                    ->select('projid')
+                    ->all();
+                $con = $con->andWhere(['in', 'id', $rews]);
+            }
+
+        }
+
+        if ($projstage) {
+            if (!in_array($projstage, [1, 2, 3, 4, 5])) {
+                return $this->outputJson('',
+                    ErrorDict::getError(ErrorDict::G_PARAM, "projstage 输入格式不对！")
+                );
+            }
+            $con->andwhere(['projstage' => $projstage]);
+        }
 
 
         if ($query) {
@@ -518,7 +677,13 @@ class ProjectController extends BaseController
             $page = 1;
         }
         $countCon = clone $con;
-        $list = $con->limit($length)->offset(($page - 1) * $length)->all();
+        $list = $con->limit($length)->offset(($page - 1) * $length)->asArray()->all();
+        $rewService = new ReviewService();
+        $list = array_map(function($e )use ($rewService){
+            $e['medium'] = $rewService->getMediumStatus($e['id']);
+            $e['internal'] = $rewService->getInternalStatus($e['id']);
+            return $e;
+        }, $list);
         $total = $countCon->count();
 
         return $this->outputJson([
