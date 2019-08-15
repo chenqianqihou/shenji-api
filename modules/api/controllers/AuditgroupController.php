@@ -46,24 +46,25 @@ class AuditgroupController extends BaseController {
         $id = intval($this->getParam('id', 0));
         $pid = intval($this->getParam('pid', 0));
 
-        $proDao = new PeopleProjectDao();
-        $peoPros = $proDao::find()->where(['groupid' => $id])->groupBy('projid')->all();
 
-        $transaction = $proDao::getDb()->beginTransaction();
+        $group = AuditGroupDao::findOne($id);
+
+        $transaction = AuditGroupDao::getDb()->beginTransaction();
         try{
-            foreach ($peoPros as $e) {
-                $newPeop = new PeopleProjectDao();
-                $newPeop->pid = $pid;
-                $newPeop->projid = $e->projid;
-                $newPeop->groupid = $id;
-                $newPeop->roletype = $newPeop::ROLE_TYPE_GROUPER;
-                $newPeop->islock = 1;
-                $newPeop->save();
-            }
+            $newPeop = new PeopleProjectDao();
+            $newPeop->pid = $pid;
+            $newPeop->projid = $group['pid'];
+            $newPeop->groupid = $id;
+            $newPeop->roletype = PeopleProjectDao::ROLE_TYPE_GROUPER;
+            $newPeop->islock = 1;
+            $newPeop->save();
             $transaction->commit();
+
         }catch (\Exception $e){
             $transaction->rollBack();
             Log::fatal($e->getMessage());
+            var_dump($e->getMessage());
+            exit();
             return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
         }
 
