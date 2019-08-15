@@ -54,7 +54,6 @@ class Checker
             self::$_ret = true;
             return;
         }
-        var_dump("zzz");
 
         self::$_err = ErrorDict::getError(ErrorDict::G_PARAM, 'invalid param '.$paramName, $paramName.'应为整数!');
         self::$_ret = false;
