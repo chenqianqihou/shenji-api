@@ -63,7 +63,6 @@ class AuditgroupController extends BaseController {
         }catch (\Exception $e){
             $transaction->rollBack();
             Log::fatal($e->getMessage());
-            var_dump($e->getMessage());
             exit();
             return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
         }
