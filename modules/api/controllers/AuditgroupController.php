@@ -463,7 +463,7 @@ class AuditgroupController extends BaseController {
         }
         $id = intval($this->getParam('id', 0));
         $pids = $this->getParam('pids', []);
-        $type = $this->getParam('type', []);
+        $type = $this->getParam('type', 0);
 
         if(count($pids) == 0) {
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '用户id组错误!'));
@@ -487,10 +487,10 @@ class AuditgroupController extends BaseController {
 
             foreach ($pids as $e){
                 $prew = new PeopleReviewDao();
-                $isExsit = $prew::find()->where(['pid' => $e])->where(['rid' => $rew->id])->count();
+                $isExsit = $prew::find()->where(['pid' => $e])->andWhere(['rid' => $rew->id])->count();
                 if($isExsit){
                     $transaction->rollBack();
-                    return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, ''));
+                    return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '人员已经存在！'));
                 }
 
                 $prew->pid = $e;
