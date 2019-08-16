@@ -259,7 +259,7 @@ class AuditgroupController extends BaseController {
                 //进点
                 case 1:
                     $audit = AuditGroupDao::findOne($id);
-                    if ($audit->status = AuditGroupDao::$statusToName['应进点']){
+                    if ($audit->status == AuditGroupDao::$statusToName['应进点'] || $audit->status == AuditGroupDao::$statusToName['无']){
                         return $this->outputJson('',
                             ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不为应进点!')
                         );

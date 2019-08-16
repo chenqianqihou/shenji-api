@@ -1079,7 +1079,7 @@ class ProjectController extends BaseController
         $id = intval($this->getParam('id', 0));
         $operate = intval($this->getParam('operate', 0));
         if(!in_array($operate, array_keys(ProjectDao::$operatorStatus))) {
-            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '状态不正确！'));
         }
 
         //todo 注意！可能后续会加上权限相关的东西
