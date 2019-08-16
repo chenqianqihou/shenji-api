@@ -237,7 +237,7 @@ class AuditgroupController extends BaseController {
         $operate = intval($this->getParam('operate', 0));
         $num = intval($this->getParam('num', 0));
 
-        if(!in_array($operate, [1, 2, 3, 4])) {
+        if(!in_array($operate, [1, 2, 3, 4, 5, 6])) {
             return $this->outputJson('',
                 ErrorDict::getError('',
                     ErrorDict::getError(ErrorDict::G_PARAM, '点击操作格式不合法!')
@@ -266,9 +266,15 @@ class AuditgroupController extends BaseController {
                     }
                     $audit->status = AuditGroupDao::$statusToName['已进点'];
                     $audit->save();
+
+                    $pro = ProjectDao::findOne($audit->pid);
+                    $pro->status = ProjectDao::$statusToName['实施阶段'];
+                    $pro->save();
+
                     $transaction->commit();
 
                     return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
+                //实施结束
                 case 2:
                     $audit = AuditGroupDao::findOne($id);
                     $audit->status = AuditGroupDao::$statusToName['实施结束'];
@@ -280,32 +286,77 @@ class AuditgroupController extends BaseController {
                     $transaction->commit();
 
                     return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
+                //开始审理
                 case 3:
                     $audit = AuditGroupDao::findOne($id);
-                    if ($audit->status = AuditGroupDao::$statusToName['实施结束']){
-                        return $this->outputJson('',
-                            ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不正确！')
-                        );
-                    }
-                    $audit->status = AuditGroupDao::$statusToName['报告中'];
+//                    if ($audit->status = AuditGroupDao::$statusToName['审理中']){
+//                        return $this->outputJson('',
+//                            ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不正确！')
+//                        );
+//                    }
+                    $audit->status = AuditGroupDao::$statusToName['审理中'];
                     $audit->save();
 
                     $pro = ProjectDao::findOne($audit['pid']);
                     $pro->jugenum = $num;
+                    $pro->status = ProjectDao::$statusToName['审理阶段'];
                     $pro->save();
 
                     $transaction->commit();
 
                     return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
+                //审理结束
                 case 4:
                     $audit = AuditGroupDao::findOne($id);
-                    if ($audit->status = AuditGroupDao::$statusToName['报告中']){
-                        return $this->outputJson('',
-                            ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不正确！')
-                        );
-                    }
-                    $audit->status = AuditGroupDao::$statusToName['报告结束！'];
+//                    if ($audit->status = AuditGroupDao::$statusToName['审理中']){
+//                        return $this->outputJson('',
+//                            ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不正确！')
+//                        );
+//                    }
+                    $audit->status = AuditGroupDao::$statusToName['审理结束'];
                     $audit->save();
+
+                    $pro = ProjectDao::findOne($audit['pid']);
+                    $pro->status = ProjectDao::$statusToName['报告阶段'];
+                    $pro->save();
+
+
+                    $transaction->commit();
+
+                    return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
+                //开始报告
+                case 5:
+                    $audit = AuditGroupDao::findOne($id);
+//                    if ($audit->status = AuditGroupDao::$statusToName['审理结束']){
+//                        return $this->outputJson('',
+//                            ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不正确！')
+//                        );
+//                    }
+                    $audit->status = AuditGroupDao::$statusToName['报告中'];
+                    $audit->save();
+
+                    $pro = ProjectDao::findOne($audit['pid']);
+                    $pro->status = ProjectDao::$statusToName['报告阶段'];
+                    $pro->save();
+
+                    $transaction->commit();
+
+                    return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
+                //报告结束
+                case 6:
+                    $audit = AuditGroupDao::findOne($id);
+//                    if ($audit->status = AuditGroupDao::$statusToName['报告中']){
+//                        return $this->outputJson('',
+//                            ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不正确！')
+//                        );
+//                    }
+                    $audit->status = AuditGroupDao::$statusToName['报告结束'];
+                    $audit->save();
+
+                    $pro = ProjectDao::findOne($audit['pid']);
+                    $pro->status = ProjectDao::$statusToName['报告阶段'];
+                    $pro->save();
+
                     $transaction->commit();
 
                     return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
