@@ -893,7 +893,7 @@ class ProjectController extends BaseController
             }else if(in_array($e['status'], [AuditGroupDao::$statusToName['已进点'], AuditGroupDao::$statusToName['该结束未结束']])){
                 $tmp['operate'] = 2;
 
-            }else if(in_array($e['status'], [AuditGroupDao::$statusToName['审理中'], AuditGroupDao::$statusToName['审理结束']])){
+            }else if(in_array($e['status'], [AuditGroupDao::$statusToName['审理中'], AuditGroupDao::$statusToName['实施结束']])){
                 $tmp['operate'] = 3;
 
             }else if(in_array($e['status'], [AuditGroupDao::$statusToName['审理中']])){

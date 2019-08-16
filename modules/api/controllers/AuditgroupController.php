@@ -280,9 +280,9 @@ class AuditgroupController extends BaseController {
                     $audit->status = AuditGroupDao::$statusToName['实施结束'];
                     $audit->save();
 
-                    $pro = ProjectDao::findOne($audit->pid);
-                    $pro->status = ProjectDao::$statusToName['审理阶段'];
-                    $pro->save();
+//                    $pro = ProjectDao::findOne($audit->pid);
+//                    $pro->status = ProjectDao::$statusToName['审理阶段'];
+//                    $pro->save();
                     $transaction->commit();
 
                     return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
