@@ -885,8 +885,18 @@ class ProjectController extends BaseController
             $tmp = [
                 'id' => $e['id'],
                 'status' => $e['status'],
-                'operate' => 1
             ];
+
+            if(in_array($e['status'], [AuditGroupDao::$statusToName['无'], AuditGroupDao::$statusToName['应进点'], AuditGroupDao::$statusToName['该进点而未进点']])){
+                $tmp['operate'] = 1;
+            }else if(in_array($e['status'], [AuditGroupDao::$statusToName['已进点'], AuditGroupDao::$statusToName['该结束未结束']])){
+                $tmp['operate'] = 2;
+            }else if(in_array($e['status'], [AuditGroupDao::$statusToName['审理中'], AuditGroupDao::$statusToName['审理结束']])){
+                $tmp['operate'] = 3;
+            }else if(in_array($e['status'], [AuditGroupDao::$statusToName['待报告'], AuditGroupDao::$statusToName['报告中']])){
+                $tmp['operate'] = 4;
+            }
+
 
             $peoples = (new \yii\db\Query())
                 ->from('peopleproject')
