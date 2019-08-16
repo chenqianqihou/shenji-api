@@ -259,7 +259,7 @@ class AuditgroupController extends BaseController {
                 //进点
                 case 1:
                     $audit = AuditGroupDao::findOne($id);
-                    if ($audit->status !== AuditGroupDao::$statusToName['应进点'] || $audit->status !== AuditGroupDao::$statusToName['无']){
+                    if (!in_array($audit->status, [AuditGroupDao::$statusToName['应进点'], AuditGroupDao::$statusToName['无']])){
                         return $this->outputJson('',
                             ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不为应进点!')
                         );
@@ -267,7 +267,7 @@ class AuditgroupController extends BaseController {
                     $audit->status = AuditGroupDao::$statusToName['已进点'];
                     $audit->save();
 
-                    return $this->outputJson('', ErrorDict::getError('', ErrorDict::SUCCESS));
+                    return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
                 case 2:
                     $audit = AuditGroupDao::findOne($id);
                     $audit->status = AuditGroupDao::$statusToName['实施结束'];
@@ -278,7 +278,7 @@ class AuditgroupController extends BaseController {
                     $pro->save();
                     $transaction->commit();
 
-                    return $this->outputJson('', ErrorDict::getError('', ErrorDict::SUCCESS));
+                    return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
                 case 3:
                     $audit = AuditGroupDao::findOne($id);
                     if ($audit->status = AuditGroupDao::$statusToName['实施结束']){
@@ -295,7 +295,7 @@ class AuditgroupController extends BaseController {
 
                     $transaction->commit();
 
-                    return $this->outputJson('', ErrorDict::getError('', ErrorDict::SUCCESS));
+                    return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
                 case 4:
                     $audit = AuditGroupDao::findOne($id);
                     if ($audit->status = AuditGroupDao::$statusToName['报告中']){
@@ -307,17 +307,17 @@ class AuditgroupController extends BaseController {
                     $audit->save();
                     $transaction->commit();
 
-                    return $this->outputJson('', ErrorDict::getError('', ErrorDict::SUCCESS));
+                    return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
             }
         }catch (\Exception $e){
             $transaction->rollBack();
             Log::fatal("审计组长变更状态出现错误！{$e->getTraceAsString()}");
-            return $this->outputJson('', ErrorDict::getError('', ErrorDict::ERR_INTERNAL));
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
         }
 
 
         return $this->outputJson('',
-            ErrorDict::getError(ErrorDict::ERR_INTERNAL)
+            ErrorDict::getError(ErrorDict::SUCCESS)
         );
     }
 
