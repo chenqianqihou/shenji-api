@@ -880,6 +880,7 @@ class ProjectController extends BaseController
 
         $auditGroups = AuditGroupDao::find()
             ->where(['pid' => $id])
+            ->asArray()
             ->all();
         foreach ($auditGroups as $e){
             $tmp = [

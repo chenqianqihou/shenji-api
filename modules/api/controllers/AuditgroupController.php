@@ -266,6 +266,7 @@ class AuditgroupController extends BaseController {
                     }
                     $audit->status = AuditGroupDao::$statusToName['已进点'];
                     $audit->save();
+                    $transaction->commit();
 
                     return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
                 case 2:
