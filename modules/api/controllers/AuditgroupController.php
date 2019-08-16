@@ -463,18 +463,18 @@ class AuditgroupController extends BaseController {
         }
         $id = intval($this->getParam('id', 0));
         $pids = $this->getParam('pids', []);
-        $type = $this->getParam('pids', []);
+        $type = $this->getParam('type', []);
 
         if(count($pids) == 0) {
-            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '用户id组错误!'));
         }
         if(!in_array($type,[ReviewDao::ZHONGJIE_TYPE, ReviewDao::NEISHEN_TYPE])){
-            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, 'type类型不对！'));
         }
 
         $group = AuditGroupDao::findOne($id);
         if(!$group){
-            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '项目id不存在！'));
         }
 
         $transaction = ReviewDao::getDb()->beginTransaction();
