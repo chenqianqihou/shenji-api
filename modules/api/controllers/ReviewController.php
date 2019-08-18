@@ -14,8 +14,8 @@ use \app\models\PeopleReviewDao;
 use \app\classes\ErrorDict;
 use \app\models\PeopleProjectDao;
 use \app\models\OrganizationDao;
-use \app\models\AuditGroupDao;
 use app\classes\BaseController;
+use \app\models\AuditresultsDao;
 
 class ReviewController extends BaseController{
 
@@ -228,84 +228,162 @@ class ReviewController extends BaseController{
     }
 
     /**
-     * 项目详情接口
+     * 审计成果列表
      *
      * @return array
      */
-    public function actionInfo() {
+    public function actionResultlist() {
         $this->defineMethod = 'GET';
         $this->defineParams = array (
-            'id' => array (
-                'require' => true,
+            'query' => array (
+                'require' => false,
                 'checker' => 'noCheck',
+            ),
+            'page_size' => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
+            'page' => array (
+                'require' => false,
+                'checker' => 'isNumber',
             ),
         );
         if (false === $this->check()) {
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
-        $id = intval($this->getParam('id', 0));
-        $rew = ReviewDao::findOne($id);
-        if (!$rew){
-            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, 'id错误!'));
+        $useid = intval($this->data['ID']);
+        $query = $this->getParam('query', '');
+        $page_size = intval($this->getParam('page_size', 0));
+        $page = intval($this->getParam('page', 0));
+
+        $con = (new \yii\db\Query())
+            ->from('auditresults')
+            ->innerJoin('project', 'project.id = auditresults.id')
+            ->innerJoin('people', 'people.pid = auditresults.pid')
+            ->select('auditresults.id, project.projectnum, project.name, project.projyear, project.projlevel, people.id as pid, people.name as pname, people.projrole, auditresults.status')
+            ->where(['auditresults.operatorid' => $useid]);
+
+        if($query){
+            $con = $con->where(['or', ['like', 'project.projectnum', "%{$query}%"], ['like', 'project.name', "%{$query}%"]]);
         }
-        $proid = $rew->projid;
+        $countCon = clone $con;
+        $total = $countCon->count();
+        $list = $con->limit($page_size)->offset(($page - 1) * $page_size)->all();
 
 
-        $projectDao = new ProjectDao();
-        $data = $projectDao->queryByID($proid);
-        if(!$data){
-            $error = ErrorDict::getError(ErrorDict::G_PARAM);
-            $ret = $this->outputJson("", $error);
+        return $this->outputJson([
+            'list' => $list,
+            'total' => $total,
+        ], ErrorDict::getError(ErrorDict::SUCCESS));
+    }
+
+    /**
+     * 审计成果详情
+     *
+     * @return array
+     */
+    public function actionResultdetails() {
+        $this->defineMethod = 'GET';
+        $this->defineParams = array (
+            'id' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
-        $ret['project'] = [
-            'projectnum' => $data['projectnum'],
-            'projname' => $data['name'],
-            'projyear' => $data['projyear'],
-            'projtype' => $data['projtype'],
-            'projlevel' => $projectDao->getProjectLevelMsg($data['projlevel']),
-            'leadernum' => $data['leadernum'],
-            'auditornum' => $data['auditornum'],
-            'masternum' => $data['masternum'],
-            'plantime' => $data['plantime'],
-            'projdesc' => $data['projdesc'],
-            'projstart' => $data['projstart'],
-            'projauditcontent' => $data['projauditcontent'],
+        $id = $this->getParam('id', 0);
 
-        ];
-        $orgDao = new OrganizationDao();
-        $org = $orgDao::find()
-            ->where(['id' => $data['leadorgan']])->one();
-        $ret['project']['leadorgan'] = $org['name'] ?? "";
-        $org = $orgDao::find()
-            ->where(['id' => $data['projorgan']])->one();
-        $ret['project']['projorgan'] = $org['name'] ?? "";
+        $info = (new \yii\db\Query())
+            ->from('auditresults')
+            ->innerJoin('project', 'project.id = auditresults.id')
+            ->innerJoin('people', 'people.pid = auditresults.pid')
+            ->select('auditresults.*, project.projectnum, project.name as projname, project.projyear, project.projlevel, project.projtype, people.id as pid, people.name as pname, people.pid as pnum')
+            ->where(['auditresults.id' => $id])
+            ->one();
 
-        $peoples = PeopleReviewDao::find()
-            ->where(['rid' => $id])
-            ->select('pid')
-            ->all();
-        $ret['people'] = [
-            'num' => count($peoples),
-            'type' => $rew->ptype,
-        ];
-
-        if(count($peoples) <= 0){
-            $error = ErrorDict::getError(ErrorDict::SUCCESS);
-            $ret = $this->outputJson($ret, $error);
-            return $ret;
+        if(!$info){
+            return $this->outputJson('', ErrorDict::G_PARAM);
         }
+        $ret['basic_info'] = [
+            "pnum" => $info['pnum'], #人员cod
+            "pname" => $info['pname'], #姓名
+            "projname" => $info['projname'], #项目名称
+            "projnum" => $info['projnum'], #项目编号
+            "projyear" => $info['projyear'], #项目年度
+            "projtype" =>  $info['projtype'], #项目类型
+            "projlevel" => $info['projlevel'], # 1省厅统一组织 2市州本级 3市州统一组织 4县级
+            "havereport" =>  $info['havereport'], #0不填1是2否
+            "projrole" => $info['projrole'], #1审计组长,2主审,3审计组员
+        ];
+        $ret['audit_result'] = [
+            "problemtype" => $info['problemtype'], #查出问题性质
+            "problemdetail" =>  $info['problemdetail'] , #查出问题明细
+            "amountone" =>  $info['amountone'], #处理金额
+            "amounttwo" =>  $info['amounttwo'], #审计期间整改金额
+            "amountthree" =>  $info['amountthree'], #审计促进整改落实有关问题资金
+            "amountfour" =>  $info['amountfour'], #审计促进整改有关问题资金金额
+            "amountfive" =>  $info['amountfive'], #审计促进拨付资金到位
+            "amountsix" => $info['amountsix'], #审计后挽回金额
+            "desc" =>  $info['desc'],#问题描述
+            "isfindout" =>  $info['isfindout'], #是否单独查出0为不填1是2否
+            "findoutnum" => $info['findoutnum'], #查出人数
+        ];
+        $ret['move_result_info'] = [
+            "istransfer" =>  $info['istransfer'], #是否移送事项0为不填1是2否
+            "processorgans" =>  $info['processorgans'] , #移送机关，1司法机关2纪检监察机关3有关部门
+            "transferamount" =>  $info['transferamount'], #移送处理金额
+            "transferpeoplenum" => $info['transferpeoplenum'], #移送人数
+            "transferpeopletype" => $info['transferpeopletype'], #移送人员类型，0不选1地厅级以上、2县处级、3乡科级、4其他
+            "transferresult" => $info['transferresult'], #移送处理结果
+        ];
+        $ret['total_result_info'] = [
+            "bringintoone" =>  $info['bringintoone'], #是否纳入本级工作报告0为不填1是2否
+            "bringintotwo" =>  $info['bringintotwo'], #是否纳入上级审计工作报告0为不填1是2否
+            "appraisal" => $info['appraisal'], #评优，1署优秀、2署表彰、3省优秀、4省表彰、5市优秀、6市表彰、7县优秀、8县表彰
+        ];
 
-        $peoples = (new \yii\db\Query())
-            ->from('peopleproject')
-            ->innerJoin('people', 'peopleproject.pid = people.id')
-            ->select('people.pid, people.name, people.sex, people.address as location, peopleproject.roletype as projrole')
-            ->where('in', 'peopleproject.groupid', $peoples)
-            ->andWhere(['peopleproject.projid' => $proid])
-            ->all();
-        $ret['people']['list'] = $peoples;
 
         return $this->outputJson($ret, ErrorDict::getError(ErrorDict::SUCCESS));
+    }
+
+    /**
+     * 审计成果详情
+     *
+     * @return array
+     */
+    public function actionResultoperate() {
+        $this->defineMethod = 'GET';
+        $this->defineParams = array (
+            'id' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+            'status' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $id = $this->getParam('id', 0);
+        $status = $this->getParam('status', 0);
+        if(!in_array($status, [1, 2])){
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '状态不对！'));
+        }
+
+        $result = AuditresultsDao::findOne($id);
+        if(!$result){
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '审核列表id不对！'));
+        }
+        $result->status = $status;
+        $result->save();
+
+        return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
     }
 }

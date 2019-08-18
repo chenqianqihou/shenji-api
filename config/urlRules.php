@@ -59,6 +59,9 @@ return [
     'api/auditgroup/jugeunbind' => 'api/auditgroup/jugeunbind',
     'api/review/listsetting' => 'api/review/listsetting',
     'api/review/operate' => 'api/review/operate',
+    'api/review/resultlist' => 'api/review/resultlist',
+    'api/review/resultdetails' => 'api/review/resultdetails',
+    'api/review/resultoperate' => 'api/review/resultoperate',
 
     'api/assess/statlist' => 'api/assess/statlist',
     'api/assess/form' => 'api/assess/form',
