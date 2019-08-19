@@ -3,6 +3,8 @@
 namespace app\service;
 
 use app\models\AuditresultsDao;
+use app\models\PeopleProjectDao;
+use app\models\UserDao;
 use Yii;
 
 
@@ -80,6 +82,8 @@ class AuditresultsService
         }
         $auditdao->status = 2;
 
+        $auditdao->operatorid = $this->getOperator($params['peopleid'], $params['projectid']);
+
         return $auditdao->save();    
     }
 
@@ -103,5 +107,59 @@ class AuditresultsService
         $auditdao->status = 4;
 
         return $auditdao->save();
+    }
+
+    /**
+     * 获取审核操作员
+     * 审计成员/主审的成果：提交至该成果对应项目，及此人员所在项目组的审计组长来审核
+     *
+     * 审计组长的成果：提交至该成果对应项目，及此人员所在项目组的主审来审核；如有多个主审随机抽调安排一位主审审核；
+     * 如该组内无主审则由审计成员来审核，如有多个审计成员，随机抽取一位成员审核；
+     *
+     * 每位成员仅能看到需要自己审核的部分
+     *
+     * @param $pnum $projId
+     */
+    public function getOperator($pnum, $projId) {
+        $people = UserDao::find()
+            ->where(['pid' => $pnum])
+            ->one();
+
+        $peopleProjects = PeopleProjectDao::find()
+            ->where(['projid' => $projId])
+            ->all();
+
+        $roleType = PeopleProjectDao::ROLE_TYPE_GROUPER;
+        foreach ($peopleProjects as $proj){
+            if($people['id'] == $proj['pid']){
+                $roleType = $proj['roletype'];
+                break;
+            }
+        }
+        switch ($roleType){
+            case PeopleProjectDao::ROLE_TYPE_GROUPER:
+                foreach ($peopleProjects as $e){
+                    if($e['roletype'] == PeopleProjectDao::ROLE_TYPE_GROUP_LEADER){
+                        return $e['pid'];
+                    }
+                }
+                break;
+            case PeopleProjectDao::ROLE_TYPE_MASTER:
+                foreach ($peopleProjects as $e){
+                    if($e['roletype'] == PeopleProjectDao::ROLE_TYPE_GROUP_LEADER){
+                        return $e['pid'];
+                    }
+                }
+                break;
+            case PeopleProjectDao::ROLE_TYPE_GROUP_LEADER:
+                shuffle($peopleProjects);
+                foreach ($peopleProjects as $e){
+                   return $e['id'];
+                }
+                break;
+        }
+
+        return 0;
+
     }
 }
