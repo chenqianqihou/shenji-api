@@ -239,16 +239,14 @@ class AuditgroupController extends BaseController {
 
         if(!in_array($operate, [1, 2, 3, 4, 5, 6])) {
             return $this->outputJson('',
-                ErrorDict::getError('',
-                    ErrorDict::getError(ErrorDict::G_PARAM, '点击操作格式不合法!')
+                ErrorDict::getError(ErrorDict::G_PARAM,
+                    '点击操作格式不合法!'
                 )
             );
         }
         if($operate == 3 && $num == 0){
             return $this->outputJson('',
-                ErrorDict::getError('',
-                    ErrorDict::getError(ErrorDict::G_PARAM, '预审理人数不对！')
-                )
+                ErrorDict::getError(ErrorDict::G_PARAM, '预审理人数不对！')
             );
         }
 
