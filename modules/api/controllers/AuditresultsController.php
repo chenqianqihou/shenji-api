@@ -8,6 +8,9 @@ use app\service\AssessService;
 use app\models\ProjectDao;
 use app\models\UserDao;
 use app\classes\ErrorDict;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use Yii;
 
 class AuditresultsController extends BaseController
@@ -251,5 +254,40 @@ class AuditresultsController extends BaseController
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($arList, $error);
         return $ret;
+    }
+
+    public function actionExcel() {
+        $this->defineMethod = 'GET';
+
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load(APP_PATH."/static/shenjichengguo.xlsx");
+
+
+        // Redirect output to a client’s web browser (Xlsx)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="审计成果录入.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        Yii::$app->end();
+    }
+
+    public function actionExcelupload() {
+        if( empty($_FILES['file']) ){
+            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($_FILES['file']['tmp_name']);
+        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+        unset( $sheetData[1]);
+
     }
 }
