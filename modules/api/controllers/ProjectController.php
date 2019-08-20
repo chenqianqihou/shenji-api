@@ -726,7 +726,7 @@ class ProjectController extends BaseController
                     ErrorDict::getError(ErrorDict::G_PARAM, "projstage 输入格式不对！")
                 );
             }
-            $con->andwhere(['projstage' => $projstage]);
+            $con = $con->andwhere(['status' => $projstage]);
         }
 
 
