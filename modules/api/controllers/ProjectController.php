@@ -740,7 +740,7 @@ class ProjectController extends BaseController
             $page = 1;
         }
         $countCon = clone $con;
-        $list = $con->limit($length)->offset(($page - 1) * $length)->asArray()->all();
+        $list = $con->orderBy(['id' => SORT_DESC])->limit($length)->offset(($page - 1) * $length)->asArray()->all();
         $rewService = new ReviewService();
         $list = array_map(function($e )use ($rewService){
             $e['medium'] = $rewService->getMediumStatus($e['id']);
