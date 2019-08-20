@@ -677,12 +677,17 @@ class AuditgroupController extends BaseController {
             ->asArray()
             ->all();
 
-        $people = array_map(function($e){
+        $result = [];
+        foreach ($people as $e){
             $tmp = [
                 'id' => $e['pid'],
                 'group' => $e['group_concat(groupid)']
             ];
             $user = UserDao::findOne($e['pid']);
+            if(!$user){
+                continue;
+            }
+
             $tmp['pid'] = $user['pid'];
             $tmp['name'] = $user['name'];
             $tmp['sex'] = UserDao::$sex[$user['sex']];
@@ -690,12 +695,11 @@ class AuditgroupController extends BaseController {
 
             $depart = OrganizationDao::findOne($user['department']);
             $tmp['department'] = $depart['name'] ?? '';
-
-            return $tmp;
-        }, $people);
+            $result[] = $tmp;
+        }
 
         return $this->outputJson([
-            'list' => $people,
+            'list' => $result,
             'total' => $countPeople
         ], ErrorDict::getError(ErrorDict::SUCCESS));
 
