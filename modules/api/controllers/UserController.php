@@ -229,8 +229,16 @@ class UserController extends BaseController
             $ret = $this->outputJson('', $error);
             return $ret;
         }
+        $userService = new UserService();
         //校验基本信息
-        //todo 校验手机号、邮箱、身份证号是否已存在
+        if ($cardid) {
+            $existIdCard = $userService->getPeopleByIdCard($cardid);
+            if ($existIdCard) {
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '身份证号已经注册过用户！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+        }
         if (!isset(UserDao::$type[$type])) {
             $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '人员类型填写错误');
             $ret = $this->outputJson('', $error);
@@ -257,7 +265,6 @@ class UserController extends BaseController
         }
         $pid = 'sj' . $namePinyin;
         //判断用户名是否存在
-        $userService = new UserService();
         $i = 0;
         $unique = false;
         while ($i < 10) {
@@ -594,7 +601,21 @@ class UserController extends BaseController
             return $ret;
         }
         //校验基本信息
-        //todo 校验手机号、邮箱、身份证号是否已存在
+        $userService = new UserService();
+        $oldPeopleInfo = $userService->getPeopleInfo($pid);
+        if (!$oldPeopleInfo) {
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '不存在此用户');
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+        if ($oldPeopleInfo['cardid'] != $cardid) {
+            $existIdCard = $userService->getPeopleByIdCard($cardid);
+            if ($existIdCard) {
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '身份证号已经注册过用户！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+        }
         if (!isset(UserDao::$type[$type])) {
             $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '人员类型填写错误');
             $ret = $this->outputJson('', $error);
@@ -615,7 +636,6 @@ class UserController extends BaseController
             $ret = $this->outputJson('', $error);
             return $ret;
         }
-        $userService = new UserService();
         $tr = Yii::$app->get('db')->beginTransaction();
         try {
             //todo role id 是否准确

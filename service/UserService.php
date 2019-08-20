@@ -59,6 +59,13 @@ class UserService
         return $userInfo;
     }
 
+    //查询身份证信息
+    public function getPeopleByIdCard($idCard) {
+        $userDao = new UserDao();
+        $userInfo = $userDao->queryByIDCard($idCard);
+        return $userInfo;
+    }
+
     // 查询用户信息
     public function getUserInfo($pid) {
         $userDao = new UserDao();
@@ -337,7 +344,11 @@ class UserService
             return false;
         }
         //校验基本信息
-        //todo 校验手机号、邮箱、身份证号是否已存在
+        $userService = new UserService();
+        $existIdCard = $userService->getPeopleByIdCard($cardid);
+        if ($existIdCard) {
+            return false;
+        }
         if (!isset(UserDao::$type[$type])) {
             return false;
         }
@@ -356,7 +367,6 @@ class UserService
         }
         $pid = 'sj' . $namePinyin;
         //判断用户名是否存在
-        $userService = new UserService();
         $i = 0;
         $unique = false;
         while ($i < 10) {
