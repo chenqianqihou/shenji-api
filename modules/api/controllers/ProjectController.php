@@ -130,7 +130,7 @@ class ProjectController extends BaseController
         try{
             $service = new ProjectService();
             $projectId = $service->createProject(
-                1,
+                ProjectDao::$statusToName['未开始'],
                 strtotime('now'),
                 $name,
                 $projyear,
@@ -958,6 +958,7 @@ class ProjectController extends BaseController
             'auditornum' => $data['auditornum'],
             'masternum' => $data['masternum'],
             'plantime' => $data['plantime'],
+            'operate' => $projectDao->getOperator($data['status']),
         ];
         $orgDao = new OrganizationDao();
         $org = $orgDao::find()
@@ -974,7 +975,7 @@ class ProjectController extends BaseController
             'projstart' => $data['projstart'],
             'projauditcontent' => $data['projauditcontent'],
             'projectname' => $data['name'],
-            'projectstatus' => $data['status'],
+            'projectstatus' => $projectDao->getProjTimeline($data['status']),
         ];
 
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
