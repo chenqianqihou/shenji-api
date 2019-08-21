@@ -4,6 +4,7 @@ namespace app\modules\api\controllers;
 
 use app\classes\BaseController;
 use app\classes\ErrorDict;
+use app\service\AuditGroupService;
 use app\service\ProjectService;
 use app\service\AssessService;
 use app\models\ProjectDao;
@@ -30,30 +31,21 @@ class AssessController extends BaseController
             return $ret;
         }
 
-        $uid = $this->getParam('uid');
-        $pid = $this->getParam('projectid');
-
+        $pid = $this->data['ID'];
+        $projectId = $this->getParam('projectid');
+        //todo 判断用户是否是领导
+        $isLeader = true;
         $projDao = new ProjectDao();
-        $projInfo = $projDao->queryByID($pid);
+        $projInfo = $projDao->queryByID($projectId);
         if( $projInfo == false){
             return $this->outputJson(
                     '',
                     ErrorDict::getError(ErrorDict::G_PARAM, "不存在的项目单位！")
                     );    
         }
-
-        $userDao = new UserDao();
-        $userInfo = $userDao->queryByID($uid);
-        if( $userInfo == false){
-            return $this->outputJson(
-                    '',
-                    ErrorDict::getError(ErrorDict::G_PARAM, "不存在的用户！")
-                    );    
-        }
-        
-        print_r( $projInfo );die;
-        
         $result = [];
+        $list = [];
+
         $result['stat'] = false;
         //根据项目状态判断当前评论的状态
         if( in_array($projInfo['status'],[3,4,5]) ){
