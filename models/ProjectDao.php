@@ -17,6 +17,7 @@ class ProjectDao extends ActiveRecord{
 
     //项目阶段
     public static $status = [
+        0 => "未开始",
         1 => "计划阶段",
         2 => "实施阶段",
         3 => "审理阶段",
@@ -26,6 +27,7 @@ class ProjectDao extends ActiveRecord{
 
     //项目阶段
     public static $statusToName = [
+        "未开始" => 0,
         "计划阶段" => 1,
         "实施阶段" => 2,
         "审理阶段" => 3,
@@ -41,12 +43,14 @@ class ProjectDao extends ActiveRecord{
         4 => "县级",
     ];
 
+    const OPERATOR_STATUS_NO = 0;
     const OPERATOR_STATUS_SURE = 1;
     const OPERATOR_STATUS_START = 2;
     const OPERATOR_STATUS_AUDIT = 3;
     const OPERATOR_STATUS_END = 4;
 
     public static $operatorStatus = [
+        self::OPERATOR_STATUS_NO => "",
         self::OPERATOR_STATUS_SURE => "确认计划",
         self::OPERATOR_STATUS_START => "项目启动",
         self::OPERATOR_STATUS_AUDIT => "开始审理",
@@ -203,5 +207,28 @@ class ProjectDao extends ActiveRecord{
         $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
         $ret = $stmt->execute();
         return $ret;
+    }
+
+    /**
+     * 通过现有状态，返回需要的操作状态
+     *
+     * @param $status
+     */
+    public function getOperator($status){
+        switch ($status){
+            case self::$statusToName['未开始']:
+                return self::OPERATOR_STATUS_SURE;
+            case self::$statusToName['计划阶段']:
+                return self::OPERATOR_STATUS_START;
+            case self::$statusToName['实施阶段']:
+                return self::OPERATOR_STATUS_AUDIT;
+            case self::$statusToName['审理阶段']:
+                return self::OPERATOR_STATUS_END;
+            case self::$statusToName['报告阶段']:
+                return self::OPERATOR_STATUS_NO;
+            case self::$statusToName['项目结束']:
+                return self::OPERATOR_STATUS_NO;
+        }
+        return self::OPERATOR_STATUS_NO;
     }
 }
