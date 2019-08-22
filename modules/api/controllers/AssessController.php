@@ -43,21 +43,10 @@ class AssessController extends BaseController
                     ErrorDict::getError(ErrorDict::G_PARAM, "不存在的项目单位！")
                     );    
         }
-        $result = [];
-        $list = [];
-
-        $result['stat'] = false;
-        //根据项目状态判断当前评论的状态
-        if( in_array($projInfo['status'],[3,4,5]) ){
-            $result['stat'] = true;    
-        }
-
-        //todo 根据人员的角色和项目中审计组人员的列表分别给出评价状态
-
-        //todo end
-
+        $assessService = new AssessService();
+        $result = $assessService->assessList($pid, $projectId);
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
-        $ret = $this->outputJson(true, $error);
+        $ret = $this->outputJson($result, $error);
         return $ret;
     }
 

@@ -50,6 +50,13 @@ class AuditGroupDao extends ActiveRecord{
         2 => "主审",
         3 => "审计组员",
     ];
+
+    //人员在审计组中角色
+    public static $roleTypeName = [
+        "审计组长" => 1,
+        "主审" => 2,
+        "审计组员" => 3,
+    ];
     
     //是否锁定
     public static $isLock = [

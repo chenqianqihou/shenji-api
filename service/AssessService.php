@@ -3,17 +3,22 @@
 namespace app\service;
 
 use app\models\AssessconfigDao;
+use app\models\AuditGroupDao;
+use app\models\PeopleProjectDao;
+use app\models\ProjectDao;
 use app\models\QanswerDao;
 use app\models\QuestionsDao;
 use app\models\ObjectivescoreDao;
 use app\models\ObjectivetypeDao;
+use app\models\RoleDao;
+use app\models\UserDao;
 use app\models\ViolationDao;
 use Yii;
 
 
 class AssessService
 {
-    const ASSESSTYPE = [
+    public static $ASSESSTYPE = [
         '5' => '审计成员给审计组长的评价',
         '4' => '审计成员给主审的评价',
         '6' => '审计组长给审计成员的评价',
@@ -21,6 +26,16 @@ class AssessService
         '2' => '审理处给第三方审计人员的评价',
         '3' => '业务处给第三方审计人员的评价',
         '1' => '法规处给第三方审计人员的评价',
+    ];
+
+    public static $assessTypeName = [
+        '审计成员给审计组长的评价' => '5',
+        '审计成员给主审的评价' => '4',
+        '审计组长给审计成员的评价' => '6',
+        '审计组长给第三方审计人员的评价' => '7',
+        '审理处给第三方审计人员的评价' => '2',
+        '业务处给第三方审计人员的评价' => '3',
+        '法规处给第三方审计人员的评价' => '1',
     ];
 
     public static $accessStatus = [
@@ -36,7 +51,7 @@ class AssessService
     ];
 
     public function AssessType() {
-        return self::ASSESSTYPE;
+        return self::$ASSESSTYPE;
     }
 
     public function FormContent( $uid,$objuid,$projectid,$typeid) {
@@ -54,7 +69,7 @@ class AssessService
 
     protected function getDefaultConfig( $typeid ) {
         $result = [];
-        if( isset(self::ASSESSTYPE[$typeid]) ){
+        if( isset(self::$ASSESSTYPE[$typeid]) ){
             $result =  AssessconfigDao::find()->where(['id' => $typeid])->asArray()->one();
         }
         return $result;
@@ -256,6 +271,38 @@ class AssessService
 
     //基于用户查询某项目下所有审计人员是否需要被评分
     public function assessList($pid, $projectId) {
+        $returnData = [
+            'isleader' => 0,
+            'list' => [],
+        ];
+        //判断用户是否是领导
+        $roleDao = new RoleDao();
+        $roleInfo = $roleDao->queryByPid($pid);
+        $userRoleList = [];
+        foreach ($roleInfo as $oneRole) {
+            if ($oneRole['name'] == '厅领导' || $oneRole['name'] == '局领导') {
+                $returnData['isleader'] = 1;
+            }
+            $userRoleList[] = $oneRole['name'];
+        }
+        $projectDao = new ProjectDao();
+        $projectInfo = $projectDao->queryByID($projectId);
+        if (!$projectInfo) {
+            return $returnData;
+        }
+        //查询项目所属单位下的人员列表
+        $userService = new UserService();
+        $organPeopleListDict = [];
+        $organPeopleList = $userService->getOrganPeopleList($projectInfo['projorgan']);
+        foreach ($organPeopleList as $one) {
+            $organPeopleListDict[$one['pid']] = $one;
+        }
+        //查询项目牵头业务部门下的人员列表
+        $leadPeopleListDict = [];
+        $leadPeopleList = $userService->getDepartmentPeopleList($projectInfo['leadorgan']);
+        foreach ($leadPeopleList as $one) {
+            $leadPeopleListDict[$one['pid']] = $one;
+        }
         //审计组列表
         $auditGroupService = new AuditGroupService();
         $groupList = $auditGroupService->listByProjectId($projectId);
@@ -265,15 +312,92 @@ class AssessService
         foreach ($answers as $oneAnswer) {
             $answeredDict[$oneAnswer['objpid']] = $oneAnswer;
         }
+        $list = [];
         foreach ($groupList as $oneGroup) {
-            if (isset($oneGroup['group']) && $oneGroup['group']) {
-                foreach ($oneGroup['group'] as $onePeople) {
-                    //判断是否已评分
-                    if (isset($answeredDict[$onePeople['pid']])) {
-                        $oneGroup['status'] = self::$accessStatusName['已评分'];
+            if (isset($oneGroup['memList']) && $oneGroup['memList']) {
+                //判断用户是否在此组中，以及确定用户的角色
+                $inGroup = false;
+                $inRole = 0;
+                foreach ($oneGroup['memList'] as $onePeople) {
+                    if ($onePeople['pid'] == $pid) {
+                        $inGroup = true;
+                        $inRole = $onePeople['roletype'];
                     }
                 }
+                $groupInfo = [
+                    'id' => $oneGroup['id'],
+                    'memList' => [],
+                ];
+                foreach ($oneGroup['memList'] as $onePeople) {
+                    $tempPeople = [
+                        'typeid' => 0,
+                        'pnum' => $onePeople['pid'],
+                        'pname' => $onePeople['name'],
+                        'sex' => $onePeople['sex'],
+                        'ptype' => $onePeople['role'],
+                        'location' => $onePeople['location'],
+                        'projrole' => $onePeople['role'],
+                        'status' => 0,
+                    ];
+                    //判断是否已评分
+                    if (isset($answeredDict[$onePeople['pid']])) {
+                        $tempPeople['status'] = self::$accessStatusName['已评分'];
+                    }else {
+                        //审计成员给审计组长的评价
+                        if ($inGroup && $inRole == AuditGroupDao::$roleTypeName['审计组员']
+                            && $onePeople['roletype'] == AuditGroupDao::$roleTypeName['审计组长']) {
+                            $tempPeople['typeid'] = self::$assessTypeName['审计成员给审计组长的评价'];
+                            $tempPeople['status'] = self::$accessStatusName['未评分'];
+                        }
+                        //审计成员给主审的评价
+                        if ($inGroup && $inRole == AuditGroupDao::$roleTypeName['审计组员']
+                            && $onePeople['roletype'] == AuditGroupDao::$roleTypeName['主审']) {
+                            $tempPeople['typeid'] = self::$assessTypeName['审计成员给主审的评价'];
+                            $tempPeople['status'] = self::$accessStatusName['未评分'];
+                        }
+                        //审计组长给审计成员的评价
+                        if ($inGroup && $inRole == AuditGroupDao::$roleTypeName['审计组长']
+                            && $onePeople['roletype'] == AuditGroupDao::$roleTypeName['审计组员']) {
+                            $tempPeople['typeid'] = self::$assessTypeName['审计组长给审计成员的评价'];
+                            $tempPeople['status'] = self::$accessStatusName['未评分'];
+                        }
+                        //审计组长给第三方审计人员的评价
+                        if ($inGroup && $inRole == AuditGroupDao::$roleTypeName['审计组长']
+                            && $onePeople['role'] != UserDao::$typeToName['审计机关']) {
+                            $tempPeople['typeid'] = self::$assessTypeName['审计组长给第三方审计人员的评价'];
+                            $tempPeople['status'] = self::$accessStatusName['未评分'];
+                        }
+                        //审理处给第三方审计人员的评价
+                        if (isset($organPeopleListDict[$pid]) && in_array('审理处', $userRoleList)
+                            && $onePeople['role'] != UserDao::$typeToName['审计机关']) {
+                            $tempPeople['typeid'] = self::$assessTypeName['审理处给第三方审计人员的评价'];
+                            $tempPeople['status'] = self::$accessStatusName['未评分'];
+                        }
+                        //业务处给第三方审计人员的评价（牵头业务部门）
+                        if (isset($leadPeopleListDict[$pid])
+                            && $onePeople['role'] != UserDao::$typeToName['审计机关']) {
+                            $tempPeople['typeid'] = self::$assessTypeName['业务处给第三方审计人员的评价'];
+                            $tempPeople['status'] = self::$accessStatusName['未评分'];
+                        }
+                        //审理处给第三方审计人员的评价
+                        if (isset($organPeopleListDict[$pid]) && in_array('法规处', $userRoleList)
+                            && $onePeople['role'] != UserDao::$typeToName['审计机关']) {
+                            $tempPeople['typeid'] = self::$assessTypeName['法规处给第三方审计人员的评价'];
+                            $tempPeople['status'] = self::$accessStatusName['未评分'];
+                        }
+                    }
+                    //todo 计算分数
+                    if ($returnData['isleader']) {
+                        $tempPeople['objectivescore'] = 0;
+                        $tempPeople['subjectivescore'] = 0;
+                        $tempPeople['totalscore'] = 0;
+                    }
+                    $groupInfo['memList'][] = $tempPeople;
+                }
+                $list[] = $groupInfo;
             }
         }
+        $returnData['list'] = $list;
+        return $returnData;
     }
 }
