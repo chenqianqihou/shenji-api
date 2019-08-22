@@ -225,7 +225,7 @@ class UserController extends BaseController
         $organService = new OrganizationService();
         $organInfo = $organService->getOrganizationInfo($organization);
         if (!$organInfo) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属机构填写错误');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '所属机构填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
@@ -234,28 +234,37 @@ class UserController extends BaseController
         if ($cardid) {
             $existIdCard = $userService->getPeopleByIdCard($cardid);
             if ($existIdCard) {
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '身份证号已经注册过用户！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '身份证号已经注册过用户！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
         }
+        if ($phone) {
+            $existIdPhone = UserDao::find()->where(['phone' => $phone])->one();
+            if ($existIdPhone) {
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '电话已经注册过用户！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
+        }
+
         if (!isset(UserDao::$type[$type])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '人员类型填写错误');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '人员类型填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if (!isset(UserDao::$sex[$sex])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '性别填写错误');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '性别填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if (!isset(UserDao::$education[$education])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '学历填写错误');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '学历填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if (!isset(UserDao::$political[$political])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '政治面貌填写错误');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '政治面貌填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
@@ -278,7 +287,7 @@ class UserController extends BaseController
             }
         }
         if (!$unique) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户名重复01-09已分配完成，不在分配，请联系管理员处理');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '用户名重复01-09已分配完成，不在分配，请联系管理员处理');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
@@ -312,23 +321,23 @@ class UserController extends BaseController
                 //校验所属部门信息
                 $organInfo = $organService->getOrganizationInfo($department);
                 if (!$organInfo) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属部门填写错误');
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '所属部门填写错误');
                     $ret = $this->outputJson('', $error);
                     return $ret;
                 }
                 if ($organInfo['parentid'] != $organization) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属部门不在所属机构下');
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '所属部门不在所属机构下');
                     $ret = $this->outputJson('', $error);
                     return $ret;
                 }
                 //校验审计机构的其他信息
                 if (!isset(UserDao::$position[$position])) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '现任职务填写错误');
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '现任职务填写错误');
                     $ret = $this->outputJson('', $error);
                     return $ret;
                 }
                 if (!isset(UserDao::$nature[$nature])) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '岗位性质填写错误');
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '岗位性质填写错误');
                     $ret = $this->outputJson('', $error);
                     return $ret;
                 }
@@ -360,7 +369,7 @@ class UserController extends BaseController
                             $trainDao->addTrain($pid, $train);
                         }
                     }else {
-                        $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '业务培训情况填写错误');
+                        $error = ErrorDict::getError(ErrorDict::G_PARAM, '业务培训情况填写错误');
                         $ret = $this->outputJson('', $error);
                         return $ret;
                     }
@@ -384,7 +393,7 @@ class UserController extends BaseController
                             $qualificationDao->addQualification($pid, $one['info'], $one['time']);
                         }
                     }else {
-                        $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '专业技术资质信息填写错误');
+                        $error = ErrorDict::getError(ErrorDict::G_PARAM, '专业技术资质信息填写错误');
                         $ret = $this->outputJson('', $error);
                         return $ret;
                     }
@@ -397,7 +406,7 @@ class UserController extends BaseController
             $tr->commit();
         }catch (Exception $e) {
             $tr->rollBack();
-            Log::addLogNode('addException', serialize($e->errorInfo));
+            Log::fatal($e->getMessage());
             $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
             $ret = $this->outputJson('', $error);
             return $ret;
