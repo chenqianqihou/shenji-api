@@ -742,9 +742,11 @@ class ProjectController extends BaseController
         $countCon = clone $con;
         $list = $con->orderBy(['id' => SORT_DESC])->limit($length)->offset(($page - 1) * $length)->asArray()->all();
         $rewService = new ReviewService();
-        $list = array_map(function($e )use ($rewService){
+        $pro = new ProjectDao();
+        $list = array_map(function($e )use ($rewService, $pro){
             $e['medium'] = $rewService->getMediumStatus($e['id']);
             $e['internal'] = $rewService->getInternalStatus($e['id']);
+            $e['operate'] = $pro->getProjTimeline($e['status']);
             return $e;
         }, $list);
         $total = $countCon->count();
