@@ -23,6 +23,18 @@ class AssessService
         '1' => '法规处给第三方审计人员的评价',
     ];
 
+    public static $accessStatus = [
+        '无需评分' => 0,
+        '未评分' => 1,
+        '已评分' => 2,
+    ];
+
+    public static $accessStatusName = [
+        0 => '无需评分',
+        1 => '未评分',
+        2 => '已评分',
+    ];
+
     public function AssessType() {
         return self::ASSESSTYPE;
     }
@@ -236,4 +248,32 @@ class AssessService
         return ObjectivescoreDao::find()->where(['id'=>$configid])->one()->delete();
     }
 
+    //查询用户在某个项目下已经答题的列表
+    public function queryProjectAnswersList($pid, $projectId) {
+        $answers = QanswerDao::find()->where(['pid'=>$pid, 'projectid'=>$projectId])->asArray()->all();
+        return $answers;
+    }
+
+    //基于用户查询某项目下所有审计人员是否需要被评分
+    public function assessList($pid, $projectId) {
+        //审计组列表
+        $auditGroupService = new AuditGroupService();
+        $groupList = $auditGroupService->listByProjectId($projectId);
+        //已经评价列表
+        $answeredDict = [];
+        $answers = $this->queryProjectAnswersList($pid, $projectId);
+        foreach ($answers as $oneAnswer) {
+            $answeredDict[$oneAnswer['objpid']] = $oneAnswer;
+        }
+        foreach ($groupList as $oneGroup) {
+            if (isset($oneGroup['group']) && $oneGroup['group']) {
+                foreach ($oneGroup['group'] as $onePeople) {
+                    //判断是否已评分
+                    if (isset($answeredDict[$onePeople['pid']])) {
+                        $oneGroup['status'] = self::$accessStatusName['已评分'];
+                    }
+                }
+            }
+        }
+    }
 }
