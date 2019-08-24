@@ -90,8 +90,13 @@ class AssessService
             unset($q['qoptions']);
             if( !isset($result[$qtype])){
                 $result[$qtype] = [];    
-            }    
-            $result[$qtype][$q['id']] = $q['options'];
+            }
+            $questionInfo = [
+                'id' => $q['id'],
+                'title' => $q['title'],
+                'options' => $q['options'],
+            ];
+            $result[$qtype][] = $questionInfo;
         }
         return $result;
     }
