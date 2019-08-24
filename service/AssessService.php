@@ -39,15 +39,15 @@ class AssessService
     ];
 
     public static $accessStatus = [
-        '无需评分' => 0,
-        '未评分' => 1,
-        '已评分' => 2,
-    ];
-
-    public static $accessStatusName = [
         0 => '无需评分',
         1 => '未评分',
         2 => '已评分',
+    ];
+
+    public static $accessStatusName = [
+        '无需评分' => 0,
+        '未评分' => 1,
+        '已评分' => 2,
     ];
 
     public function AssessType() {
@@ -318,10 +318,10 @@ class AssessService
                 //判断用户是否在此组中，以及确定用户的角色
                 $inGroup = false;
                 $inRole = 0;
-                foreach ($oneGroup['memList'] as $onePeople) {
-                    if ($onePeople['pid'] == $pid) {
+                foreach ($oneGroup['memList'] as $oneUser) {
+                    if ($oneUser['pid'] == $pid) {
                         $inGroup = true;
-                        $inRole = $onePeople['roletype'];
+                        $inRole = $oneUser['roletype'];
                     }
                 }
                 $groupInfo = [
@@ -336,7 +336,7 @@ class AssessService
                         'sex' => $onePeople['sex'],
                         'ptype' => $onePeople['role'],
                         'location' => $onePeople['location'],
-                        'projrole' => $onePeople['role'],
+                        'projrole' => $onePeople['roletype'],
                         'status' => 0,
                     ];
                     //判断是否已评分
