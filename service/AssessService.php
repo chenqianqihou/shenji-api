@@ -346,6 +346,7 @@ class AssessService
                     ];
                     //判断是否已评分
                     if (isset($answeredDict[$onePeople['pid']])) {
+                        $tempPeople['typeid'] = $answeredDict[$onePeople['pid']]['configid'];
                         $tempPeople['status'] = self::$accessStatusName['已评分'];
                     }else {
                         //审计成员给审计组长的评价
