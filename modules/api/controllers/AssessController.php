@@ -13,6 +13,7 @@ use Yii;
 
 class AssessController extends BaseController
 {
+    //项目评价中的评价状态列表
     public function actionStatlist()
     {
         $this->defineMethod = 'POST';
@@ -28,8 +29,6 @@ class AssessController extends BaseController
         }
         $pid = $this->data['ID'];
         $projectId = $this->getParam('projectid');
-        //todo 判断用户是否是领导
-        $isLeader = true;
         $projDao = new ProjectDao();
         $projInfo = $projDao->queryByID($projectId);
         if( $projInfo == false){
@@ -45,14 +44,11 @@ class AssessController extends BaseController
         return $ret;
     }
 
+    //项目评价详情表中的选项及状态
     public function actionForm()
     {
         $this->defineMethod = 'POST';
         $this->defineParams = array (
-                'uid' => array (
-                    'require' => true,
-                    'checker' => 'noCheck',
-                    ),
                 'objuid' => array (
                     'require' => true,
                     'checker' => 'noCheck',
@@ -71,7 +67,7 @@ class AssessController extends BaseController
             return $ret;
         }
 
-        $uid = $this->getParam('uid');
+        $uid = $this->data['ID'];
         $objuid = $this->getParam('objuid');
         $typeid = $this->getParam('typeid');
         $projectid = $this->getParam('projectid');
@@ -124,10 +120,6 @@ class AssessController extends BaseController
     public function actionSubmit() {
         $this->defineMethod = 'POST';
         $this->defineParams = array (
-                'uid' => array (
-                    'require' => true,
-                    'checker' => 'noCheck',
-                    ),
                 'objuid' => array (
                     'require' => true,
                     'checker' => 'noCheck',
@@ -150,7 +142,7 @@ class AssessController extends BaseController
             return $ret;
         }
 
-        $uid = $this->getParam('uid');
+        $uid = $this->data['ID'];
         $objuid = $this->getParam('objuid');
         $typeid = $this->getParam('typeid');
         $projectid = $this->getParam('projectid');
@@ -180,7 +172,7 @@ class AssessController extends BaseController
                     ErrorDict::getError(ErrorDict::G_PARAM, "不存在的用户！")
                     );    
         }
-
+        //判断项目状态，只在指定状态时可以进行评价
         $assessService = new AssessService();
         $formcontent = $assessService->SubmitFormContent( $uid,$objuid,$projectid,$typeid,$answers);
 
