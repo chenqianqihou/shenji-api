@@ -17,10 +17,6 @@ class AssessController extends BaseController
     {
         $this->defineMethod = 'POST';
         $this->defineParams = array (
-                'uid' => array (
-                    'require' => true,
-                    'checker' => 'noCheck',
-                    ),
                 'projectid' => array (
                     'require' => true,
                     'checker' => 'noCheck',
@@ -30,7 +26,6 @@ class AssessController extends BaseController
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
-
         $pid = $this->data['ID'];
         $projectId = $this->getParam('projectid');
         //todo 判断用户是否是领导
