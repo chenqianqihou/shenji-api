@@ -3,6 +3,7 @@
 namespace app\service;
 
 use app\classes\Log;
+use app\models\AuditGroupDao;
 use app\models\ExpertiseDao;
 use app\models\OrganizationDao;
 use app\models\PeopleProjectDao;
@@ -257,7 +258,25 @@ class ProjectService
         try {
             $pro::deleteAll(['in', 'id', $ids]);
 
+
+            $pids = PeopleProjectDao::find()
+                ->where(['in', 'projid', $ids])
+                ->groupBy(['pid'])
+                ->asArray()
+                ->all();
+            $pids = array_map(function($e){
+                return $e['pid'];
+            }, $pids);
+            $users = UserDao::find()
+                ->where(['in', 'id', $pids])
+                ->all();
+            foreach ($users as $e){
+                $e->isjob = UserDao::$isJobToName['不在点'];
+                $e->save();
+            }
+
             PeopleProjectDao::deleteAll(['in', 'projid', $ids]);
+            AuditGroupDao::deleteAll(['in', 'pid', $ids]);
         } catch(\Exception $e) {
             $transaction->rollBack();
             throw $e;
