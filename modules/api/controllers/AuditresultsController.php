@@ -453,6 +453,7 @@ class AuditresultsController extends BaseController
             ->innerJoin('project', 'peopleproject.projid = project.id')
             ->select('project.*, peopleproject.roletype')
             ->where(['peopleproject.pid' => $peopleInfo['id']])
+            ->groupBy('projid')
             ->all();
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($projects, $error);
