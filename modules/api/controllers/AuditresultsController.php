@@ -61,10 +61,6 @@ class AuditresultsController extends BaseController
                 'require' => true,
                 'checker' => 'noCheck',
             ),
-            'peopleid' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
             'problemid' => array (
                 'require' => true,
                 'checker' => 'noCheck',
@@ -80,7 +76,7 @@ class AuditresultsController extends BaseController
         }
 
         $projectid = $this->getParam('projectid');
-        $peopleid = $this->getParam('peopleid');
+        $peopleid = $this->data['ID'];
         $problemid = $this->getParam('problemid');
         $problemdetailid = $this->getParam('problemdetailid');
 
@@ -120,6 +116,7 @@ class AuditresultsController extends BaseController
         }
 
         $params = $this->getParams();
+        $params['peopleid'] = $peopleid;
 
         $arservice = new AuditresultsService();
         
@@ -138,10 +135,6 @@ class AuditresultsController extends BaseController
                 'require' => true,
                 'checker' => 'noCheck',
             ),
-            'peopleid' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
             'problemid' => array (
                 'require' => true,
                 'checker' => 'noCheck',
@@ -157,7 +150,7 @@ class AuditresultsController extends BaseController
         }
 
         $projectid = $this->getParam('projectid');
-        $peopleid = $this->getParam('peopleid');
+        $peopleid = $this->data['ID'];
         $problemid = $this->getParam('problemid');
         $problemdetailid = $this->getParam('problemdetailid');
 
@@ -197,6 +190,7 @@ class AuditresultsController extends BaseController
         }
 
         $params = $this->getParams();
+        $params['peopleid'] = $peopleid;
 
         $arservice = new AuditresultsService();
         
@@ -239,12 +233,12 @@ class AuditresultsController extends BaseController
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
-        $projectids = $this->getParam('projectid',[]);
+        $projectid = $this->getParam('projectid','');
         $status = intval($this->getParam('status',-1));
         $start = $this->getParam('start',0);
         $length = $this->getParam('length',10);
         $arService = new AuditresultsService();
-        $arList = $arService->getAuditResultsList( $projectids,$status,$start,$length );
+        $arList = $arService->getAuditResultsList( $projectid,$status,$start,$length );
         $projectDao = new ProjectDao();
         $userDao = new UserDao();
         foreach( $arList['list'] as $ak=>$av ) {

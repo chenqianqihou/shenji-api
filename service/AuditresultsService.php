@@ -10,15 +10,22 @@ use Yii;
 
 class AuditresultsService
 {
-    const STATUSTYPE = [
+    public static $statusType = [
         '1' => '待提审',
         '2' => '待审核',
         '3' => '审核通过',
         '4' => '审核未通过',
     ];
 
+    public static $statusTypeName = [
+        '待提审' => '1',
+        '待审核' => '2',
+        '审核通过' => '3',
+        '审核未通过' => '4',
+    ];
+
     public function StatusType() {
-        return self::ASSESSTYPE;
+        return self::$statusType;
     }
 
     public function GetAuditResultById( $id ) {
@@ -33,14 +40,17 @@ class AuditresultsService
             return AuditresultsDao::deleteAll(['id'=>$ids]);    
     }
 
-    public function getAuditResultsList( $projectids,$status,$start,$length) {
-        $res = AuditresultsDao::find()->where(1);
+    public function getAuditResultsList($projectid, $status, $start, $length) {
+        $res = (new \yii\db\Query())
+            ->from('auditresults')
+            ->innerJoin('project', 'auditresults.projectid = project.id')
+            ->select('project.name, project.projectnum, auditresults.*')
+            ->where(1);
         if( $status > 0 ){
             $res = $res->andWhere(['status'=>$status]);    
         }
-
-        if( !empty($projectids) ){
-            $res = $res->andWhere(['projectid'=>$projectids]);    
+        if ($projectid) {
+            $res = $res->andwhere(['or', ['like', 'projectnum', $projectid], ['like', 'name', $projectid]]);
         }
         $total = $res->count();
         $list = $res->orderBy('id desc')->offset( $start )->limit($length)->asArray()->all();
@@ -61,7 +71,7 @@ class AuditresultsService
                 $auditdao->$pk=$pv;    
             }    
         }
-        $auditdao->status = 1;
+        $auditdao->status = self::$statusTypeName['待提审'];
 
         return $auditdao->save();
     }
@@ -80,7 +90,7 @@ class AuditresultsService
                 $auditdao->$pk=$pv;    
             }    
         }
-        $auditdao->status = 2;
+        $auditdao->status = self::$statusTypeName['待审核'];
 
         $auditdao->operatorid = $this->getOperator($params['peopleid'], $params['projectid']);
 
@@ -93,7 +103,7 @@ class AuditresultsService
         }
 
         $auditdao = AuditresultsDao::find()->where(['id' => $id])->one();    
-        $auditdao->status = 3;
+        $auditdao->status = self::$statusTypeName['审核通过'];
 
         return $auditdao->save();
     }
