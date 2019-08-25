@@ -108,6 +108,9 @@ class AssessService
         //计算分数
         $totalscore = 0;
         foreach( $answers as $av) {
+            if (!is_array($av)) {
+                continue;
+            }
             foreach($av as $aitem) {
                 $sc = isset($aitem['score']) ? $aitem['score'] : 0;
                 $isselect = empty( $aitem['selected'] ) ? 0 : 1;
