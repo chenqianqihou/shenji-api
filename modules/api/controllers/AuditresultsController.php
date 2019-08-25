@@ -10,6 +10,7 @@ use app\models\ViolationDao;
 use app\models\UserDao;
 use app\models\PeopleProjectDao;
 use app\classes\ErrorDict;
+use app\service\UserService;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
@@ -433,6 +434,28 @@ class AuditresultsController extends BaseController
 
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson(true, $error);
+        return $ret;
+    }
+
+    //查询用户参与的项目列表
+    public function actionProjectlist() {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array ();
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $pid = $this->data['ID'];
+        $userService = new UserService();
+        $peopleInfo = $userService->getPeopleInfo($pid);
+        $projects = (new \yii\db\Query())
+            ->from('peopleproject')
+            ->innerJoin('project', 'peopleproject.projid = project.id')
+            ->select('project.*, peopleproject.roletype')
+            ->where(['peopleproject.pid' => $peopleInfo['id']])
+            ->all();
+        $error = ErrorDict::getError(ErrorDict::SUCCESS);
+        $ret = $this->outputJson($projects, $error);
         return $ret;
     }
 }

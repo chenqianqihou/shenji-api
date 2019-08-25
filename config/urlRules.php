@@ -79,4 +79,5 @@ return [
     'api/auditresults/delresult' => 'api/auditresults/delresult',
     'api/auditresults/excel' => 'api/auditresults/excel',
     'api/auditresults/excelupload' => 'api/auditresults/excelupload',
+    'api/auditresults/projectlist' => 'api/auditresults/projectlist',
 ];
