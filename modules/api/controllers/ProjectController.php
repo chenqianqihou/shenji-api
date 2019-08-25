@@ -148,10 +148,11 @@ class ProjectController extends BaseController
             //预分配人员
 
             $orgIds = (new OrganizationService)->getSubordinateIds($projorgan);
-
             $allMatchPeoples = UserDao::find()
-                ->where(['isjob' => 2])
+                ->where(['isjob' => UserDao::$isJobToName['不在点']])
                 ->andWhere(['in', 'organid', $orgIds])
+                ->andWhere(['isaudit' => UserDao::$isAuditToName['是']])
+                ->andWhere(['type' => UserDao::$typeToName['审计机关']])
                 ->limit($leadernum + $auditornum + $masternum)
                 ->all();
             if (count($allMatchPeoples) == 0) {
@@ -169,8 +170,9 @@ class ProjectController extends BaseController
                 $group = new AuditGroupDao();
                 $groups[] = [
                     'id' => $group->addAuditGroup($projectId),
-                    'leader' => $allMatchPeoples[$i]->id
+                    'leader' => $allMatchPeoples[$i]['id'],
                 ];
+                $allMatchPeoples[$i]->isjob = UserDao::$isJobToName['在点'];
                 unset($allMatchPeoples[$i]);
             }
 
@@ -181,14 +183,14 @@ class ProjectController extends BaseController
             $preMasterNum = intval($masternum/$leadernum);
             for($i = $leadernum - 1; $i >= 0; $i--) {
                 for($j = 0; $j < $preMasterNum; $j++){
-                    $groups[$i]['master_ids'][] = $allMatchPeoples[$i]->id;
+                    $groups[$i]['master_ids'][] = $allMatchPeoples[$i]['id'];
                     unset($allMatchPeoples[$i]);
                 }
             }
             $allMatchPeoples = array_values($allMatchPeoples);
             $surplusMasterNum = $masternum - $preMasterNum * $leadernum;
             for($i = 0; $i < $surplusMasterNum; $i++) {
-                $groups[$i]['master_ids'][] = $allMatchPeoples[$i]->id;
+                $groups[$i]['master_ids'][] = $allMatchPeoples[$i]['id'];
                 unset($allMatchPeoples[$i]);
             }
 
@@ -199,14 +201,14 @@ class ProjectController extends BaseController
             $preAuditorNum = intval($auditornum/$leadernum);
             for($i = 0; $i < $leadernum; $i++) {
                 for($j = 0; $j < $preAuditorNum; $j++){
-                    $groups[$i]['auditor_ids'][] = $allMatchPeoples[$i]->id;
+                    $groups[$i]['auditor_ids'][] = $allMatchPeoples[$i]['id'];
                     unset($allMatchPeoples[$i]);
                 }
             }
             $allMatchPeoples = array_values($allMatchPeoples);
             $surplusAuditorNum = $auditornum - $preAuditorNum * $leadernum;
             for($i = 0; $i < $surplusAuditorNum; $i++) {
-                $groups[$i]['auditor_ids'][] = $allMatchPeoples[$i]->id;
+                $groups[$i]['auditor_ids'][] = $allMatchPeoples[$i]['id'];
                 unset($allMatchPeoples[$i]);
             }
 
@@ -910,7 +912,7 @@ class ProjectController extends BaseController
             $peoples = (new \yii\db\Query())
                 ->from('peopleproject')
                 ->innerJoin('people', 'peopleproject.pid = people.id')
-                ->select('people.id, people.pid, people.name, people.sex, peopleproject.roletype, people.address as location, peopleproject.roletype as role, people.level, peopleproject.islock')
+                ->select('people.id, people.pid, people.name, people.sex, people.type, peopleproject.roletype, people.address as location, peopleproject.roletype as role, people.level, peopleproject.islock')
                 ->where(['peopleproject.groupid' => $e['id']])
                 ->andWhere(['peopleproject.projid' => $id])
                 ->all();

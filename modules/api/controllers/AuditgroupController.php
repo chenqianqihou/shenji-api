@@ -149,6 +149,7 @@ class AuditgroupController extends BaseController {
         $pid = intval($this->getParam('pid', 0));
 
         $proDao = new PeopleProjectDao();
+        $trans = $proDao::getDb()->beginTransaction();
         $peoPro = $proDao::find()
             ->where(['groupid' => $id])
             ->andwhere(['pid' => $pid])
@@ -156,10 +157,19 @@ class AuditgroupController extends BaseController {
         if(!$peoPro){
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '未找不到合适的人员!'));
         }
+        try{
+            $peoPro->delete();
 
+            $use = UserDao::findOne($pid);
+            $use->isjob = UserDao::$isJobToName['不在点'];
+            $use->save();
 
-        $peoPro->delete();
-
+            $trans->commit();
+        }catch (\Exception $e){
+            $trans->rollBack();
+            Log::fatal(printf("delete tables error! %s", $e->getMessage()));
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
+        }
 
         return $this->outputJson('',
             ErrorDict::getError(ErrorDict::SUCCESS)
