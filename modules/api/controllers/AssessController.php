@@ -13,14 +13,11 @@ use Yii;
 
 class AssessController extends BaseController
 {
+    //项目评价中的评价状态列表
     public function actionStatlist()
     {
         $this->defineMethod = 'POST';
         $this->defineParams = array (
-                'uid' => array (
-                    'require' => true,
-                    'checker' => 'noCheck',
-                    ),
                 'projectid' => array (
                     'require' => true,
                     'checker' => 'noCheck',
@@ -30,11 +27,8 @@ class AssessController extends BaseController
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
-
         $pid = $this->data['ID'];
         $projectId = $this->getParam('projectid');
-        //todo 判断用户是否是领导
-        $isLeader = true;
         $projDao = new ProjectDao();
         $projInfo = $projDao->queryByID($projectId);
         if( $projInfo == false){
@@ -43,32 +37,18 @@ class AssessController extends BaseController
                     ErrorDict::getError(ErrorDict::G_PARAM, "不存在的项目单位！")
                     );    
         }
-        $result = [];
-        $list = [];
-
-        $result['stat'] = false;
-        //根据项目状态判断当前评论的状态
-        if( in_array($projInfo['status'],[3,4,5]) ){
-            $result['stat'] = true;    
-        }
-
-        //todo 根据人员的角色和项目中审计组人员的列表分别给出评价状态
-
-        //todo end
-
+        $assessService = new AssessService();
+        $result = $assessService->assessList($pid, $projectId);
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
-        $ret = $this->outputJson(true, $error);
+        $ret = $this->outputJson($result, $error);
         return $ret;
     }
 
+    //项目评价详情表中的选项及状态
     public function actionForm()
     {
         $this->defineMethod = 'POST';
         $this->defineParams = array (
-                'uid' => array (
-                    'require' => true,
-                    'checker' => 'noCheck',
-                    ),
                 'objuid' => array (
                     'require' => true,
                     'checker' => 'noCheck',
@@ -87,7 +67,7 @@ class AssessController extends BaseController
             return $ret;
         }
 
-        $uid = $this->getParam('uid');
+        $uid = $this->data['ID'];
         $objuid = $this->getParam('objuid');
         $typeid = $this->getParam('typeid');
         $projectid = $this->getParam('projectid');
@@ -140,10 +120,6 @@ class AssessController extends BaseController
     public function actionSubmit() {
         $this->defineMethod = 'POST';
         $this->defineParams = array (
-                'uid' => array (
-                    'require' => true,
-                    'checker' => 'noCheck',
-                    ),
                 'objuid' => array (
                     'require' => true,
                     'checker' => 'noCheck',
@@ -166,7 +142,7 @@ class AssessController extends BaseController
             return $ret;
         }
 
-        $uid = $this->getParam('uid');
+        $uid = $this->data['ID'];
         $objuid = $this->getParam('objuid');
         $typeid = $this->getParam('typeid');
         $projectid = $this->getParam('projectid');
@@ -196,7 +172,7 @@ class AssessController extends BaseController
                     ErrorDict::getError(ErrorDict::G_PARAM, "不存在的用户！")
                     );    
         }
-
+        //判断项目状态，只在指定状态时可以进行评价
         $assessService = new AssessService();
         $formcontent = $assessService->SubmitFormContent( $uid,$objuid,$projectid,$typeid,$answers);
 

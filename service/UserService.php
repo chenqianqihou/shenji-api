@@ -495,4 +495,22 @@ class UserService
             return UserService::$jobStatusToName['不在点'];
         }
     }
+
+    //查询机构下人员列表
+    public function getOrganPeopleList($organId) {
+        $peopleList = UserDao::find()
+            ->where(['organid' => $organId])
+            ->asArray()
+            ->all();
+        return $peopleList;
+    }
+
+    //查询部门下人员列表
+    public function getDepartmentPeopleList($departmentId) {
+        $peopleList = UserDao::find()
+            ->where(['department' => $departmentId])
+            ->asArray()
+            ->all();
+        return $peopleList;
+    }
 }
