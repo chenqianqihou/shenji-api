@@ -178,7 +178,9 @@ class AuditresultsController extends BaseController
         }
 
         //判断用户是否存在
-        if ( UserDao::find()->where(['pid'=>$peopleid])->count() <= 0 ) {
+        $userService = new UserService();
+        $userInfo = $userService->getPeopleInfo($peopleid);
+        if ( !$userInfo ) {
             $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
             $ret = $this->outputJson('', $error);
             return $ret;    
@@ -217,7 +219,7 @@ class AuditresultsController extends BaseController
         }
 
         $params = $this->getParams();
-        $params['peopleid'] = $peopleid;
+        $params['peopleid'] = $userInfo['id'];
 
         $arservice = new AuditresultsService();
         
@@ -272,7 +274,7 @@ class AuditresultsController extends BaseController
             $projid = $av['projectid'];    
             $userid = $av['peopleid'];
             $arList['list'][$ak]['project_msg'] = $projectDao->queryByID( $projid );
-            $arList['list'][$ak]['people_msg'] = $userDao->queryByID( $userid );
+            $arList['list'][$ak]['people_msg'] = $userDao->queryInfo( $userid );
         }
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($arList, $error);

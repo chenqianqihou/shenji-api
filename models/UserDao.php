@@ -222,6 +222,19 @@ class UserDao extends ActiveRecord{
         return $ret;
     }
 
+    //查询用户信息通过ID
+    public function queryInfo($id) {
+        $sql=sprintf('SELECT * FROM %s WHERE id = :id',
+            self::tableName()
+        );
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
+        $stmt->execute();
+        $ret = $stmt->queryOne();
+        return $ret;
+    }
+
     //查询用户信息通过身份证号
     public function queryByIDCard($cardId) {
         $sql=sprintf('SELECT * FROM %s WHERE cardid = :cardid',

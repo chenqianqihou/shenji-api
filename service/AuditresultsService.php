@@ -47,13 +47,13 @@ class AuditresultsService
             ->select('project.name, project.projectnum, auditresults.*')
             ->where(1);
         if( $status > 0 ){
-            $res = $res->andWhere(['status'=>$status]);    
+            $res = $res->andWhere(['auditresults.status'=>$status]);
         }
         if ($projectid) {
             $res = $res->andwhere(['or', ['like', 'projectnum', $projectid], ['like', 'name', $projectid]]);
         }
         $total = $res->count();
-        $list = $res->orderBy('id desc')->offset( $start )->limit($length)->asArray()->all();
+        $list = $res->orderBy('id desc')->offset( $start )->limit($length)->all();
         return ['total'=>$total,'list'=>$list];
     }
 
