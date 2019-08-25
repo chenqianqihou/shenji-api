@@ -82,10 +82,12 @@ class AuditresultsController extends BaseController
         $problemdetailid = $this->getParam('problemdetailid');
 
         //判断项目是否存在
-        if ( ProjectDao::find()->where(['id'=>$projectid])->count() <= 0 ) {
+        $projectDao = new ProjectDao();
+        $projectInfo = $projectDao->queryByID($projectid);
+        if (!$projectInfo) {
             $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '项目不存在');
             $ret = $this->outputJson('', $error);
-            return $ret;    
+            return $ret;
         }
 
         //判断用户是否存在
@@ -99,16 +101,27 @@ class AuditresultsController extends BaseController
         $assessService = new AssessService();
         $violations = $assessService->Violations();
         $isvalid = false;
+        $projectType = json_decode($projectInfo['projtype']);
         foreach( $violations as $p){
-            if( $p['id'] == $problemid ){
+            if( $p['name'] == $projectType[0] ){
                 foreach( $p['list'] as $pd ){
-                    if( $pd['id'] == $problemdetailid ){
-                        $isvalid = true;
-                        break;    
-                    }  
-                }    
+                    if( $pd['name'] == $projectType[1] ){
+                        foreach( $pd['list'] as $pda ){
+                            if ($pda['id'] == $problemid) {
+                                foreach ($pda['list'] as $pdab) {
+                                    if ($pdab['id'] == $problemdetailid) {
+                                        $isvalid = true;
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
                 break;
-            }    
+            }
         }
         if( $isvalid == false ){
             $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '问题性质或问题明细不合法');
