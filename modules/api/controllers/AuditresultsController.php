@@ -270,11 +270,22 @@ class AuditresultsController extends BaseController
         $arList = $arService->getAuditResultsList( $projectid,$status,$start,$length );
         $projectDao = new ProjectDao();
         $userDao = new UserDao();
+        $peopleProjectRoleType = [];
+        $peopleProjectDao = new PeopleProjectDao();
+        $peopleProjects = $peopleProjectDao::find()->all();
+        foreach ($peopleProjects as $one) {
+            if (!isset($peopleProjectRoleType[$one['pid']])) {
+                $peopleProjectRoleType[$one['pid']] = [];
+            }
+            $peopleProjectRoleType[$one['pid']][$one['projid']] = $one['roletype'];
+        }
+
         foreach( $arList['list'] as $ak=>$av ) {
             $projid = $av['projectid'];    
             $userid = $av['peopleid'];
             $arList['list'][$ak]['project_msg'] = $projectDao->queryByID( $projid );
             $arList['list'][$ak]['people_msg'] = $userDao->queryInfo( $userid );
+            $arList['list'][$ak]['roletype'] = $peopleProjectRoleType[$userid][$projid];
         }
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($arList, $error);
