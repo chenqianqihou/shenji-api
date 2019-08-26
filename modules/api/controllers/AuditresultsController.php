@@ -47,7 +47,7 @@ class AuditresultsController extends BaseController
         $projid = $arres['projectid'];    
         $userid = $arres['peopleid'];
         $arres['project_msg'] = $projectDao->queryByID( $projid );
-        $arres['people_msg'] = $userDao->queryByID( $userid );
+        $arres['people_msg'] = $userDao->queryInfo( $userid );
 
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($arres, $error);
