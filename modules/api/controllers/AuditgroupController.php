@@ -365,6 +365,25 @@ class AuditgroupController extends BaseController {
                     $pro->status = ProjectDao::$statusToName['报告阶段'];
                     $pro->save();
 
+                    $peoplePros = PeopleProjectDao::find()
+                        ->where(['projid' => $audit['pid']])
+                        ->andWhere(['groupid' => $id])
+                        ->groupBy(['pid'])
+                        ->all();
+                    $pids = array_map(function($e){
+                        return $e['pid'];
+                    }, $peoplePros);
+
+                    $uses = UserDao::find()
+                        ->where(['in', 'id', $pids])
+                        ->andWhere(['isaudit' => UserDao::$isAuditToName['是']])
+                        ->all();
+                    foreach ($uses as $e){
+                        $e->isjob = UserDao::$isJobToName['不在点'];
+                        $e->save();
+                    }
+
+
                     $transaction->commit();
 
                     return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
