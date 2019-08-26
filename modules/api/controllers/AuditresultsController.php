@@ -285,7 +285,11 @@ class AuditresultsController extends BaseController
             $userid = $av['peopleid'];
             $arList['list'][$ak]['project_msg'] = $projectDao->queryByID( $projid );
             $arList['list'][$ak]['people_msg'] = $userDao->queryInfo( $userid );
-            $arList['list'][$ak]['roletype'] = $peopleProjectRoleType[$userid][$projid];
+            if (isset($peopleProjectRoleType[$userid]) && isset($peopleProjectRoleType[$userid][$projid])) {
+                $arList['list'][$ak]['roletype'] = $peopleProjectRoleType[$userid][$projid];
+            }else {
+                unset($arList['list'][$ak]);
+            }
         }
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($arList, $error);
