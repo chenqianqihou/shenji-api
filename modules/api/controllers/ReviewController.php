@@ -156,8 +156,93 @@ class ReviewController extends BaseController{
         ], ErrorDict::SUCCESS);
     }
 
+
     /**
-     * 人员调配审核列表搜索项信息
+     * 项目详情接口
+     *
+     * @return array
+     */
+    public function actionInfo() {
+        $this->defineMethod = 'GET';
+        $this->defineParams = array (
+            'id' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $id = intval($this->getParam('id', 0));
+        $rew = ReviewDao::findOne($id);
+        if (!$rew){
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, 'id错误!'));
+        }
+        $proid = $rew->projid;
+
+
+        $projectDao = new ProjectDao();
+        $data = $projectDao->queryByID($proid);
+        if(!$data){
+            $error = ErrorDict::getError(ErrorDict::G_PARAM);
+            $ret = $this->outputJson("", $error);
+            return $ret;
+        }
+        $ret['project'] = [
+            'projectnum' => $data['projectnum'],
+            'projname' => $data['name'],
+            'projyear' => $data['projyear'],
+            'projtype' => $data['projtype'],
+            'projlevel' => $projectDao->getProjectLevelMsg($data['projlevel']),
+            'leadernum' => $data['leadernum'],
+            'auditornum' => $data['auditornum'],
+            'masternum' => $data['masternum'],
+            'plantime' => $data['plantime'],
+            'projdesc' => $data['projdesc'],
+            'projstart' => $data['projstart'],
+            'projauditcontent' => $data['projauditcontent'],
+
+        ];
+        $orgDao = new OrganizationDao();
+        $org = $orgDao::find()
+            ->where(['id' => $data['leadorgan']])->one();
+        $ret['project']['leadorgan'] = $org['name'] ?? "";
+        $org = $orgDao::find()
+            ->where(['id' => $data['projorgan']])->one();
+        $ret['project']['projorgan'] = $org['name'] ?? "";
+
+        $peoples = PeopleReviewDao::find()
+            ->where(['rid' => $id])
+            ->select('pid')
+            ->all();
+        $ret['people'] = [
+            'num' => count($peoples),
+            'type' => $rew->ptype,
+        ];
+
+        if(count($peoples) <= 0){
+            $error = ErrorDict::getError(ErrorDict::SUCCESS);
+            $ret = $this->outputJson($ret, $error);
+            return $ret;
+        }
+
+        $peoples = (new \yii\db\Query())
+            ->from('peopleproject')
+            ->innerJoin('people', 'peopleproject.pid = people.id')
+            ->select('people.pid, people.name, people.sex, people.address as location, peopleproject.roletype as projrole')
+            ->where('in', 'peopleproject.groupid', $peoples)
+            ->andWhere(['peopleproject.projid' => $proid])
+            ->all();
+        $ret['people']['list'] = $peoples;
+
+        return $this->outputJson($ret, ErrorDict::getError(ErrorDict::SUCCESS));
+    }
+
+
+
+    /**
+     * 人员调配审核
      *
      * @return mixed]
      */
@@ -351,7 +436,7 @@ class ReviewController extends BaseController{
     }
 
     /**
-     * 审计成果详情
+     * 审核
      *
      * @return array
      */
