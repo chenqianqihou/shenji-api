@@ -7,6 +7,8 @@
  * Time: 11:29 AM
  */
 
+namespace app\modules\api\controllers;
+
 use \app\models\ProjectDao;
 use \app\models\UserDao;
 use \app\models\ReviewDao;
@@ -24,7 +26,7 @@ class ReviewController extends BaseController{
      *
      * @return mixed
      */
-    public function actionReviewlist(){
+    public function actionList(){
         $this->defineMethod = 'GET';
         $this->defineParams = array (
             'projyear' => array (
@@ -60,7 +62,7 @@ class ReviewController extends BaseController{
 
         $con = (new \yii\db\Query())
             ->from('review')
-            ->select('review.id, project.projectnum, project.name, project.projyear, project.projorgan, project.projlevel, project.plantime')
+            ->select('review.id, project.projectnum, project.name, project.projyear, project.projorgan, project.projlevel, project.plantime, project.projtype')
             ->innerJoin('project', 'project.id = review.projid');
 
         if ($projyear) {
@@ -95,24 +97,25 @@ class ReviewController extends BaseController{
         $list = $con->limit($length)->offset(($page - 1) * $length)->all();
         $list = array_map(function($e){
             $tmp = [
-                "id" => $e->id,
-                "projectnum" => $e->projectnum,
-                "name" => $e->name,
-                "projyear" => $e->projyear,
-                "projlevel" => $e->projlevel,
+                "id" => $e['id'],
+                "projectnum" => $e['projectnum'],
+                "name" => $e['name'],
+                "projyear" => $e['projyear'],
+                "projlevel" => $e['projlevel'],
             ];
-            if($e['projtype'] == UserDao::$type['审计机关']){
+            if($e['projtype'] == UserDao::$typeToName['审计机关']){
                 $tmp['status'] = PeopleReviewDao::REVIEW_NO_NEED_TYPE;
             }else {
                 $rew = ReviewDao::find()
-                    ->where(['projid' => $e->id])
+                    ->where(['projid' => $e['id']])
                     ->one();
                 if(!$rew){
                     $tmp['status'] = PeopleReviewDao::REVIEW_NOT_SURE_TYPE;
                 }else{
-                    $tmp['status'] = $rew->status;
+                    $tmp['status'] = $rew['status'];
                 }
             }
+            return $tmp;
 
 
         }, $list);
@@ -179,13 +182,17 @@ class ReviewController extends BaseController{
         if (!$rew){
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, 'id错误!'));
         }
+        if ($rew->type != ReviewDao::PEOPLE_TYPE) {
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '审核类型不对！'));
+        }
+
         $proid = $rew->projid;
 
 
         $projectDao = new ProjectDao();
         $data = $projectDao->queryByID($proid);
         if(!$data){
-            $error = ErrorDict::getError(ErrorDict::G_PARAM);
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '未找到此项目!');
             $ret = $this->outputJson("", $error);
             return $ret;
         }
@@ -216,6 +223,10 @@ class ReviewController extends BaseController{
             ->where(['rid' => $id])
             ->select('pid')
             ->all();
+        $pids = array_map(function($e){
+            return $e['pid'];
+        }, $peoples);
+
         $ret['people'] = [
             'num' => count($peoples),
             'type' => $rew->ptype,
@@ -231,9 +242,10 @@ class ReviewController extends BaseController{
             ->from('peopleproject')
             ->innerJoin('people', 'peopleproject.pid = people.id')
             ->select('people.pid, people.name, people.sex, people.address as location, peopleproject.roletype as projrole')
-            ->where('in', 'peopleproject.groupid', $peoples)
-            ->andWhere(['peopleproject.projid' => $proid])
+            ->where(['peopleproject.projid' => $proid])
+            ->andWhere(['in', 'people.id', $pids])
             ->all();
+
         $ret['people']['list'] = $peoples;
 
         return $this->outputJson($ret, ErrorDict::getError(ErrorDict::SUCCESS));
