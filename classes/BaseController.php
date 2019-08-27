@@ -100,8 +100,11 @@ class BaseController extends Controller {
                 return;
             }
             //获取数据
-            $this->data['ID'] = $parse->getClaim('ID');
-            $this->data['name'] = $parse->getClaim('name');
+
+            $this->data = [
+                'ID' => $parse->getClaim('ID'),
+                'name' => $parse->getClaim('name')
+            ];
         } catch (Exception $e) {
             Log::addLogNode('Invalid token', '');
             $this->noLogin();
