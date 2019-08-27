@@ -53,12 +53,12 @@ class UserController extends BaseController
         $userService = new UserService();
         $userInfo = $userService->getPeopleInfo($account);
         if (!$userInfo) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '用户不存在');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if ($pwd != $userInfo['passwd']) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'sorry, account or password error.');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, 'sorry, account or password error.');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
@@ -454,8 +454,7 @@ class UserController extends BaseController
             return $ret;
         }else {
             Log::addLogNode('delete user fail pid:', json_encode($failPid));
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '',
-                '部分人员删除成功');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '部分人员删除成功');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
@@ -605,7 +604,7 @@ class UserController extends BaseController
         $organService = new OrganizationService();
         $organInfo = $organService->getOrganizationInfo($organization);
         if (!$organInfo) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属机构填写错误');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '所属机构填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
@@ -613,35 +612,35 @@ class UserController extends BaseController
         $userService = new UserService();
         $oldPeopleInfo = $userService->getPeopleInfo($pid);
         if (!$oldPeopleInfo) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '不存在此用户');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM,  '不存在此用户');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if ($oldPeopleInfo['cardid'] != $cardid) {
             $existIdCard = $userService->getPeopleByIdCard($cardid);
             if ($existIdCard) {
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '身份证号已经注册过用户！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '身份证号已经注册过用户！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
         }
         if (!isset(UserDao::$type[$type])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '人员类型填写错误');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '人员类型填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if (!isset(UserDao::$sex[$sex])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '性别填写错误');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '性别填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if (!isset(UserDao::$education[$education])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '学历填写错误');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '学历填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if (!isset(UserDao::$political[$political])) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '政治面貌填写错误');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '政治面貌填写错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
@@ -672,23 +671,23 @@ class UserController extends BaseController
                 //校验所属部门信息
                 $organInfo = $organService->getOrganizationInfo($department);
                 if (!$organInfo) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属部门填写错误');
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '所属部门填写错误');
                     $ret = $this->outputJson('', $error);
                     return $ret;
                 }
                 if ($organInfo['parentid'] != $organization) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '所属部门不在所属机构下');
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '所属部门不在所属机构下');
                     $ret = $this->outputJson('', $error);
                     return $ret;
                 }
                 //校验审计机构的其他信息
                 if (!isset(UserDao::$position[$position])) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '现任职务填写错误');
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '现任职务填写错误');
                     $ret = $this->outputJson('', $error);
                     return $ret;
                 }
                 if (!isset(UserDao::$nature[$nature])) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '岗位性质填写错误');
+                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '岗位性质填写错误');
                     $ret = $this->outputJson('', $error);
                     return $ret;
                 }
@@ -721,7 +720,7 @@ class UserController extends BaseController
                 $trainDao->deleteTrain($pid);
                 if ($train) {
                     if (!is_array($train)) {
-                        $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '业务培训情况填写错误');
+                        $error = ErrorDict::getError(ErrorDict::G_PARAM, '业务培训情况填写错误');
                         $ret = $this->outputJson('', $error);
                         return $ret;
                     }
@@ -745,7 +744,7 @@ class UserController extends BaseController
                 $curTime = date('Y-m-d H:i:s');
                 if ($qualificationArr) {
                     if (!is_array($qualificationArr)) {
-                        $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '专业技术资质信息填写错误');
+                        $error = ErrorDict::getError(ErrorDict::G_PARAM, '专业技术资质信息填写错误');
                         $ret = $this->outputJson('', $error);
                         return $ret;
                     }
@@ -850,7 +849,7 @@ class UserController extends BaseController
         $length = $this->getParam('length');
         $page = $this->getParam('page');
         if (!in_array($organization, $organizationArr)) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'organization is error');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, 'organization is error');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
@@ -897,17 +896,17 @@ class UserController extends BaseController
         $userService = new UserService();
         $userInfo = $userService->getPeopleInfo($pid);
         if (!$userInfo) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '用户不存在');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if ($old != $userInfo['passwd']) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', 'old password is error');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, 'old password is error');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
         if ($old == $new) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '新旧密码一致，无需修改！');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '新旧密码一致，无需修改！');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
@@ -944,7 +943,7 @@ class UserController extends BaseController
         $userDao = new UserDao();
         $userInfo = $userDao->queryByID($pid);
         if (!$userInfo) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '用户不存在');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '用户不存在');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
@@ -1276,7 +1275,7 @@ class UserController extends BaseController
             }
             $tmpdata['cardid'] = $data['B'];
             if( !Util::checkIdCard( $data['B'] )) {
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['B'].' 身份证号格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['B'].' 身份证号格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
@@ -1286,7 +1285,7 @@ class UserController extends BaseController
             $tmpdata['address'] = $data['E'];
             $tmpdata['education'] = explode(':',$data['F'])[0];
             if( empty($tmpdata['education']) || !isset( $selectConfig['education'][$tmpdata['education']] ) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['F'].' 学历格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['F'].' 学历格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
@@ -1294,25 +1293,25 @@ class UserController extends BaseController
             $tmpdata['major'] = $data['H'];
             $tmpdata['political'] = explode(':',$data['I'])[0];
             if( empty($tmpdata['political']) || !isset( $selectConfig['political'][$tmpdata['political']] ) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['I'].' 政治面貌格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['I'].' 政治面貌格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
             $shen = explode('_',$data['J']);
             if( count($shen) != 3 || !isset( $districts[$shen[1]] )){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['J'].' 地区格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['J'].' 地区格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
             $shi = explode('_',$data['K']);
             if( count($shi) != 3 || !isset( $districts[$shi[1]] )){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['K'].' 地区格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['K'].' 地区格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
             $qu = explode('_',$data['L']);
             if( count($qu) != 3 ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['L'].' 地区格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['L'].' 地区格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
@@ -1324,13 +1323,13 @@ class UserController extends BaseController
             //$tmpdata[''] = $data['O'];
             $tmpdata['position'] = explode(':',$data['P'])[0];
             if( empty($tmpdata['position']) || !isset( $selectConfig['position'][$tmpdata['position']] ) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['P'].' 职务格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['P'].' 职务格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
             $tmpdata['nature'] = explode(':',$data['Q'])[0];
             if( empty($tmpdata['nature']) || !isset( $selectConfig['nature'][$tmpdata['nature']] ) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['Q'].' 岗位性质格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['Q'].' 岗位性质格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
@@ -1594,7 +1593,7 @@ class UserController extends BaseController
             }
             $tmpdata['cardid'] = $data['B'];
             if( !Util::checkIdCard( $data['B'] )) {
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['B'].' 身份证号格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['B'].' 身份证号格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
@@ -1604,7 +1603,7 @@ class UserController extends BaseController
             $tmpdata['address'] = $data['E'];
             $tmpdata['education'] = explode(':',$data['F'])[0];
             if( empty($tmpdata['education']) || !isset( $selectConfig['education'][$tmpdata['education']] ) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['F'].' 学历格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['F'].' 学历格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
@@ -1612,25 +1611,25 @@ class UserController extends BaseController
             $tmpdata['major'] = $data['H'];
             $tmpdata['political'] = explode(':',$data['I'])[0];
             if( empty($tmpdata['political']) || !isset( $selectConfig['political'][$tmpdata['political']] ) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['I'].' 政治面貌格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['I'].' 政治面貌格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
             $shen = explode('_',$data['J']);
             if( count($shen) != 3 || !isset( $districts[$shen[1]] )){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['J'].' 地区格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['J'].' 地区格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
             $shi = explode('_',$data['K']);
             if( count($shi) != 3 || !isset( $districts[$shi[1]] )){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['K'].' 地区格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['K'].' 地区格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
             $qu = explode('_',$data['L']);
             if( count($qu) != 3 ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', $data['L'].' 地区格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['L'].' 地区格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
