@@ -88,13 +88,13 @@ class ReviewController extends BaseController{
             $con->where(['or', ['like', 'project.projectnum', $query], ['like', 'project.name', $query]]);
         }
         if (!$page_size) {
-            $length = 20;
+            $page_size = 20;
         }
         if (!$page) {
             $page = 1;
         }
         $countCon = clone $con;
-        $list = $con->limit($length)->offset(($page - 1) * $length)->all();
+        $list = $con->limit($page_size)->offset(($page - 1) * $page_size)->all();
         $list = array_map(function($e){
             $tmp = [
                 "id" => $e['id'],
