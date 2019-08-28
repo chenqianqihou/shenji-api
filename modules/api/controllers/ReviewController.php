@@ -88,13 +88,13 @@ class ReviewController extends BaseController{
             $con->where(['or', ['like', 'project.projectnum', $query], ['like', 'project.name', $query]]);
         }
         if (!$page_size) {
-            $length = 20;
+            $page_size = 20;
         }
         if (!$page) {
             $page = 1;
         }
         $countCon = clone $con;
-        $list = $con->limit($length)->offset(($page - 1) * $length)->all();
+        $list = $con->limit($page_size)->offset(($page - 1) * $page_size)->all();
         $list = array_map(function($e){
             $tmp = [
                 "id" => $e['id'],
@@ -349,17 +349,26 @@ class ReviewController extends BaseController{
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
-        $useid = intval($this->data['ID']);
+
+        $useCode = $this->data['ID'];
         $query = $this->getParam('query', '');
         $page_size = intval($this->getParam('page_size', 0));
         $page = intval($this->getParam('page', 0));
 
+        $user = UserDao::find()
+            ->where(['pid' => $useCode])
+            ->one();
+        if(!$user){
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '登录用户未知！'));
+        }
+
         $con = (new \yii\db\Query())
             ->from('auditresults')
-            ->innerJoin('project', 'project.id = auditresults.id')
-            ->innerJoin('people', 'people.pid = auditresults.pid')
-            ->select('auditresults.id, project.projectnum, project.name, project.projyear, project.projlevel, people.id as pid, people.name as pname, people.projrole, auditresults.status')
-            ->where(['auditresults.operatorid' => $useid]);
+            ->innerJoin('project', 'project.id = auditresults.projectid')
+            ->innerJoin('people', 'people.id = auditresults.peopleid')
+            ->innerJoin('peopleproject', 'peopleproject.pid = people.id')
+            ->select('auditresults.id, project.projectnum, project.name, project.projyear, project.projlevel, people.id as pid, people.name as pname, peopleproject.roletype as projrole, auditresults.status')
+            ->where(['auditresults.operatorid' => $user['id']]);
 
         if($query){
             $con = $con->where(['or', ['like', 'project.projectnum', "%{$query}%"], ['like', 'project.name', "%{$query}%"]]);
