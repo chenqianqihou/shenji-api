@@ -305,7 +305,8 @@ class AuditresultsController extends BaseController
 
 
         // Redirect output to a client’s web browser (Xlsx)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+//        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment;filename="审计成果录入.xlsx"');
         header('Cache-Control: max-age=0');
         // If you're serving to IE 9, then the following may be needed
