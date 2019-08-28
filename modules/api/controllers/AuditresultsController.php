@@ -358,9 +358,9 @@ class AuditresultsController extends BaseController
 
             //判断用户和项目是否有关联
             if( PeopleProjectDao::find()->where(['pid'=>$tmpdata['peopleid'],'projid'=>$tmpdata['projectid']])->count() <= 0) {
-                //$error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行，找不到人员和项目编号的对应关系！');
-                //$ret = $this->outputJson('', $error);
-                //return $ret;
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行，找不到人员和项目编号的对应关系！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
             }
 
             $tmpdata['havereport'] = explode(':',$data['E'])[0];
