@@ -97,6 +97,10 @@ class AuditresultsService
         return $auditdao->save();    
     }
 
+    public function calResultScore($params = []) {
+
+    }
+
     public function AuditSuccess( $id) {
         if( !is_numeric($id) || AuditresultsDao::find()->where(['id' => $id])->count() <= 0 ){
             return false;
