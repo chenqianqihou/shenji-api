@@ -306,9 +306,10 @@ class AuditresultsController extends BaseController
 
         // Redirect output to a client’s web browser (Xlsx)
 //        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Type: application/octet-stream');
+        //header('Content-Type: application/octet-stream');
+        header('Content-Type: application/x-download;charset=utf-8');
         header('Access-Control-Expose-Headers: Content-Disposition');
-        header('Content-Disposition: attachment;filename="审计成果录入.xlsx"');
+        header('Content-Disposition: attachment;filename="shenjichengguo.xlsx"');
         header('Cache-Control: max-age=0');
         // If you're serving to IE 9, then the following may be needed
         header('Cache-Control: max-age=1');
@@ -316,11 +317,17 @@ class AuditresultsController extends BaseController
         header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
         header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
         header('Pragma: public'); // HTTP/1.0
+        Header ( "Accept-Ranges: bytes" );
+        $file = APP_PATH."/static/shenjichengguo.xlsx";
+        header ( "Accept-Length: " . filesize ( $file ) );
+        header('Access-Control-Allow-Origin: *');
 
         //$writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         //$writer->save('php://output');
-        readfile( APP_PATH."/static/shenjichengguo.xlsx");
-        Yii::$app->end();
+        $fp = fopen($file, "rb");
+        echo fread ( $fp, filesize ( $file ) );
+        fclose ( $fp );
+        exit ();
     }
 
     public function actionExcelupload() {
@@ -457,6 +464,9 @@ class AuditresultsController extends BaseController
                 $tmpdata['transferpeopletype'] = 0;
             }
             $tmpdata['transferresult'] = $data['V'];
+            if (empty($tmpdata['transferresult'])) {
+                $tmpdata['transferresult'] = "";
+            }
             $tmpdata['bringintoone'] = explode(':',$data['W'])[0];
             if( empty($tmpdata['bringintoone']) ||!is_numeric($tmpdata['bringintoone']) || !in_array($tmpdata['bringintoone'],[1,2]) ){
                 $tmpdata['bringintoone'] = 0;
