@@ -1112,7 +1112,7 @@ class ProjectController extends BaseController
             $pro = ProjectDao::findOne($id);
             switch ($operate) {
                 case ProjectDao::OPERATOR_STATUS_SURE:
-
+                    $pro->status = ProjectDao::$statusToName['计划阶段'];
                     $pepProGroups = PeopleProjectDao::find()
                         ->where(["projid" => $id])
                         ->groupBy('groupid')

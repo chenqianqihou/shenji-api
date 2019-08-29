@@ -306,9 +306,10 @@ class AuditresultsController extends BaseController
 
         // Redirect output to a client’s web browser (Xlsx)
 //        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Type: application/octet-stream');
+        //header('Content-Type: application/octet-stream');
+        header('Content-Type: application/x-download;charset=utf-8');
         header('Access-Control-Expose-Headers: Content-Disposition');
-        header('Content-Disposition: attachment;filename="审计成果录入.xlsx"');
+        header('Content-Disposition: attachment;filename="shenjichengguo.xlsx"');
         header('Cache-Control: max-age=0');
         // If you're serving to IE 9, then the following may be needed
         header('Cache-Control: max-age=1');
@@ -318,7 +319,8 @@ class AuditresultsController extends BaseController
         header('Pragma: public'); // HTTP/1.0
         Header ( "Accept-Ranges: bytes" );
         $file = APP_PATH."/static/shenjichengguo.xlsx";
-        Header ( "Accept-Length: " . filesize ( $file ) );
+        header ( "Accept-Length: " . filesize ( $file ) );
+        header('Access-Control-Allow-Origin: *');
 
         //$writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         //$writer->save('php://output');
