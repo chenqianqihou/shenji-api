@@ -29,11 +29,13 @@ class UserController extends Controller{
         foreach ($peopleProjects as $one) {
             if (!in_array($one['projid'], $projectIds)) {
                 $projectIds[] = $one['projid'];
-                $projectIdRoleLevel[$one['projid']] = [];
-                $projectIdRoleLevel[$one['projid']]['pid'] = [];
-                $projectIdRoleLevel[$one['projid']]['pid']['projlevel'] = $one['projlevel'];
-                $projectIdRoleLevel[$one['projid']]['pid']['roletype'] = $one['roletype'];
             }
+            if (!isset($projectIdRoleLevel[$one['projid']])) {
+                $projectIdRoleLevel[$one['projid']] = [];
+            }
+            $projectIdRoleLevel[$one['projid']][$one['pid']] = [];
+            $projectIdRoleLevel[$one['projid']][$one['pid']]['projlevel'] = $one['projlevel'];
+            $projectIdRoleLevel[$one['projid']][$one['pid']]['roletype'] = $one['roletype'];
         }
         if (count($projectIds) == 0) {
             return;
@@ -41,7 +43,7 @@ class UserController extends Controller{
         $qanswers = (new \yii\db\Query())
             ->from('qanswer')
             ->innerJoin('people', 'people.pid = qanswer.objpid')
-            ->select('qanswer.*, people.type')
+            ->select('qanswer.*, people.type, people.id as peopleid')
             ->where(['in', 'projectid', $projectIds])
             ->all();
         $peopleProjectScore = [];
@@ -49,21 +51,21 @@ class UserController extends Controller{
             if (!isset($peopleProjectScore[$answer['projectid']])) {
                 $peopleProjectScore[$answer['projectid']] = [];
             }
-            if (!isset($peopleProjectScore[$answer['projectid']][$answer['objpid']])) {
-                $peopleProjectScore[$answer['projectid']][$answer['objpid']] = [];
+            if (!isset($peopleProjectScore[$answer['projectid']][$answer['peopleid']])) {
+                $peopleProjectScore[$answer['projectid']][$answer['peopleid']] = [];
             }
-            $peopleProjectScore[$answer['projectid']][$answer['objpid']]['role'] = $answer['type'];
-            if (!isset($peopleProjectScore[$answer['projectid']][$answer['objpid']]['score'])) {
-                $peopleProjectScore[$answer['projectid']][$answer['objpid']]['score'] = [];
+            $peopleProjectScore[$answer['projectid']][$answer['peopleid']]['role'] = $answer['type'];
+            if (!isset($peopleProjectScore[$answer['projectid']][$answer['peopleid']]['score'])) {
+                $peopleProjectScore[$answer['projectid']][$answer['peopleid']]['score'] = [];
             }
-            $peopleProjectScore[$answer['projectid']][$answer['objpid']]['score'][] = $answer['score'];
+            $peopleProjectScore[$answer['projectid']][$answer['peopleid']]['score'][] = $answer['score'];
         }
 
         //计算主观分数
         foreach ($peopleProjects as $one) {
             if (isset($peopleProjectScore[$one['projid']])
                 && isset($peopleProjectScore[$one['projid']][$one['pid']])) {
-                $score = $peopleProjectScore[$one['projid']][$one['pid']]['role']['score'];
+                $score = $peopleProjectScore[$one['projid']][$one['pid']]['score'];
                 if ($peopleProjectScore[$one['projid']][$one['pid']]['role']
                     == UserDao::$typeToName['审计机关']) {
                     $subjectScore = intval(array_sum($score) / count($score));
@@ -83,7 +85,7 @@ class UserController extends Controller{
             ->select('*')
             ->where(['in', 'projectid', $projectIds])
             ->all();
-        $redis_conn = Yii::$app->redis;
+        $redis_conn = \Yii::$app->redis;
         $cache_value = $redis_conn->get("objectiveScoreRule");
         $obejectiveScoreInfo = json_decode($cache_value, true);
         foreach ($auditResults as $one) {
@@ -250,7 +252,7 @@ class UserController extends Controller{
         $single01Score = [];//项目层级
         $single02Score = [];//项目角色
         $single03Score = [];//报告撰写
-        $single04Score = [];//是否单独查出
+        $single04Score = [];//是否单独查出set
         $single05Score = [];//是否有移送事项
         $single06Score = [];//移送处理机关
         $single07Score = [];//送处理人员情况
@@ -295,7 +297,7 @@ class UserController extends Controller{
                         $single02Score[AuditGroupDao::$roleTypeName['主审']] = $one['score'];
                         break;
                     case '审计成员':
-                        $single02Score[AuditGroupDao::$roleTypeName['审计成员']] = $one['score'];
+                        $single02Score[AuditGroupDao::$roleTypeName['审计组员']] = $one['score'];
                         break;
                     default:
                         break;
@@ -325,7 +327,7 @@ class UserController extends Controller{
                     $single06Score[2] = $one['score'];
                 }
                 if ($one['twotype'] == '移送处理机关' && $one['nameone'] == '有关部门') {
-                    $single06Score[2] = $one['score'];
+                    $single06Score[3] = $one['score'];
                 }
                 if ($one['twotype'] == '送处理人员情况' && $one['nameone'] == '地厅级以上') {
                     $single07Score[1] = $one['score'];
@@ -334,10 +336,10 @@ class UserController extends Controller{
                     $single07Score[2] = $one['score'];
                 }
                 if ($one['twotype'] == '送处理人员情况' && $one['nameone'] == '乡科级') {
-                    $single07Score[1] = $one['score'];
+                    $single07Score[3] = $one['score'];
                 }
                 if ($one['twotype'] == '送处理人员情况' && $one['nameone'] == '其他') {
-                    $single07Score[2] = $one['score'];
+                    $single07Score[4] = $one['score'];
                 }
                 if ($one['twotype'] == '是否纳入本级工作报告' && $one['nameone'] == '是') {
                     $single08Score[1] = $one['score'];
@@ -358,22 +360,22 @@ class UserController extends Controller{
                     $single10Score[2] = $one['score'];
                 }
                 if ($one['twotype'] == '评优' && $one['nameone'] == '省表彰') {
-                    $single10Score[1] = $one['score'];
+                    $single10Score[3] = $one['score'];
                 }
                 if ($one['twotype'] == '评优' && $one['nameone'] == '市表彰') {
-                    $single10Score[2] = $one['score'];
+                    $single10Score[4] = $one['score'];
                 }
                 if ($one['twotype'] == '评优' && $one['nameone'] == '县优秀') {
-                    $single10Score[1] = $one['score'];
+                    $single10Score[5] = $one['score'];
                 }
                 if ($one['twotype'] == '评优' && $one['nameone'] == '省优秀') {
-                    $single10Score[2] = $one['score'];
+                    $single10Score[6] = $one['score'];
                 }
                 if ($one['twotype'] == '评优' && $one['nameone'] == '市优秀') {
-                    $single10Score[1] = $one['score'];
+                    $single10Score[7] = $one['score'];
                 }
                 if ($one['twotype'] == '评优' && $one['nameone'] == '县表彰') {
-                    $single10Score[2] = $one['score'];
+                    $single10Score[8] = $one['score'];
                 }
 
 
@@ -497,6 +499,7 @@ class UserController extends Controller{
         ];
         $objectiveScoreRuleJson = json_encode($objectiveScoreRule);
         $key = 'objectiveScoreRule';
+        $redis_conn = \Yii::$app->redis;
         $redis_conn->set($key, $objectiveScoreRuleJson);
         $redis_conn->EXPIRE($key, 3600 * 24 * 365 * 10); //设置过期时间为10年
     }
