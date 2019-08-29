@@ -316,11 +316,16 @@ class AuditresultsController extends BaseController
         header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
         header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
         header('Pragma: public'); // HTTP/1.0
+        Header ( "Accept-Ranges: bytes" );
+        $file = APP_PATH."/static/shenjichengguo.xlsx";
+        Header ( "Accept-Length: " . filesize ( $file ) );
 
         //$writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         //$writer->save('php://output');
-        readfile( APP_PATH."/static/shenjichengguo.xlsx");
-        Yii::$app->end();
+        $fp = fopen($file, "rb");
+        echo fread ( $fp, filesize ( $file ) );
+        fclose ( $fp );
+        exit ();
     }
 
     public function actionExcelupload() {
@@ -457,6 +462,9 @@ class AuditresultsController extends BaseController
                 $tmpdata['transferpeopletype'] = 0;
             }
             $tmpdata['transferresult'] = $data['V'];
+            if (empty($tmpdata['transferresult'])) {
+                $tmpdata['transferresult'] = "";
+            }
             $tmpdata['bringintoone'] = explode(':',$data['W'])[0];
             if( empty($tmpdata['bringintoone']) ||!is_numeric($tmpdata['bringintoone']) || !in_array($tmpdata['bringintoone'],[1,2]) ){
                 $tmpdata['bringintoone'] = 0;
