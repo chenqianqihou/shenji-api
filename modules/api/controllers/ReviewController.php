@@ -62,8 +62,9 @@ class ReviewController extends BaseController{
 
         $con = (new \yii\db\Query())
             ->from('review')
-            ->select('review.id, project.projectnum, project.name, project.projyear, project.projorgan, project.projlevel, project.plantime, project.projtype')
-            ->innerJoin('project', 'project.id = review.projid');
+            ->select('review.id, project.projectnum, project.name, project.projyear, project.projlevel, project.plantime, project.projtype, organization.name as projorgan')
+            ->innerJoin('project', 'project.id = review.projid')
+            ->innerJoin('organization', 'organization.id = project.projorgan');
 
         if ($projyear) {
             if ( !is_numeric( $projyear) ) {
@@ -100,8 +101,10 @@ class ReviewController extends BaseController{
                 "id" => $e['id'],
                 "projectnum" => $e['projectnum'],
                 "name" => $e['name'],
+                "projorgan" => $e['projorgan'],
                 "projyear" => $e['projyear'],
                 "projlevel" => $e['projlevel'],
+                "plantime" => $e['plantime']
             ];
             if($e['projtype'] == UserDao::$typeToName['审计机关']){
                 $tmp['status'] = PeopleReviewDao::REVIEW_NO_NEED_TYPE;
