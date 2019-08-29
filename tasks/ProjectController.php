@@ -1,14 +1,11 @@
-<?php
-/**
- * Created by PhpStorm.
- * User: ryugou
- * Date: 2019/8/2
- * Time: 2:53 PM
- */
+﻿<?php
+
 namespace app\tasks;
 
 use app\models\AuditGroupDao;
+use app\models\PeopleProjectDao;
 use app\models\ProjectDao;
+use app\models\UserDao;
 use linslin\yii2\curl\Curl;
 use yii\console\Controller;
 
@@ -65,22 +62,5 @@ class ProjectController extends Controller{
             }
         }
 
-    }
-
-    /**
-     * 计算审计人员=》客观分+主观分
-     * 1、项目结束时计算
-     */
-    public function actionAuditPeopleScore()
-    {
-        $peopleProjects = (new \yii\db\Query())
-            ->from('peopleproject')
-            ->innerJoin('project', 'peopleproject.projid = project.id')
-            ->select('peopleproject.*')
-            ->where(['status' => ProjectDao::$statusToName['项目结束']])
-            ->andWhere(['peopleproject.projid' => $id])
-            ->all();
-        //计算审计组长的主观分数
-        foreach ()
     }
 }

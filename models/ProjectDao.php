@@ -43,6 +43,13 @@ class ProjectDao extends ActiveRecord{
         4 => "县级",
     ];
 
+    public static $projLevelName = [
+        "省厅统一组织" => 1,
+        "市州本级" => 2,
+        "市州统一组织" => 3,
+        "县级" => 4,
+    ];
+
     const OPERATOR_STATUS_NO = 0;
     const OPERATOR_STATUS_SURE = 1;
     const OPERATOR_STATUS_START = 2;

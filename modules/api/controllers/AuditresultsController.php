@@ -305,7 +305,9 @@ class AuditresultsController extends BaseController
 
 
         // Redirect output to a client’s web browser (Xlsx)
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+//        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Type: application/octet-stream');
+        header('Access-Control-Expose-Headers: Content-Disposition');
         header('Content-Disposition: attachment;filename="审计成果录入.xlsx"');
         header('Cache-Control: max-age=0');
         // If you're serving to IE 9, then the following may be needed
@@ -358,9 +360,9 @@ class AuditresultsController extends BaseController
 
             //判断用户和项目是否有关联
             if( PeopleProjectDao::find()->where(['pid'=>$tmpdata['peopleid'],'projid'=>$tmpdata['projectid']])->count() <= 0) {
-                //$error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行，找不到人员和项目编号的对应关系！');
-                //$ret = $this->outputJson('', $error);
-                //return $ret;
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行，找不到人员和项目编号的对应关系！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
             }
 
             $tmpdata['havereport'] = explode(':',$data['E'])[0];

@@ -58,7 +58,7 @@ class UserController extends BaseController
             return $ret;
         }
         if ($pwd != $userInfo['passwd']) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, 'sorry, account or password error.');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '密码错误');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
