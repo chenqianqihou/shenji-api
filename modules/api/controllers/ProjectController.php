@@ -748,7 +748,26 @@ class ProjectController extends BaseController
         $list = array_map(function($e )use ($rewService, $pro){
             $e['medium'] = $rewService->getMediumStatus($e['id']);
             $e['internal'] = $rewService->getInternalStatus($e['id']);
-            $e['operate'] = $pro->getProjTimeline($e['status']);
+
+            switch ($e['status']){
+                case ProjectDao::$statusToName['未开始']:
+                    $e['operate'] = 1;
+                    break;
+                case ProjectDao::$statusToName['计划阶段']:
+                    $e['operate'] = 2;
+                    break;
+                case ProjectDao::$statusToName['实施阶段']:
+                    $e['operate'] = 3;
+                    break;
+                case ProjectDao::$statusToName['审理阶段']:
+                    $e['operate'] = 4;
+                    break;
+                default:
+                    $e['operate'] = 0;
+                    break;
+            }
+
+
             return $e;
         }, $list);
         $total = $countCon->count();
