@@ -236,9 +236,11 @@ class ReviewController extends BaseController{
             ->where(['id' => $data['projorgan']])->one();
         $ret['project']['projorgan'] = $org['name'] ?? "";
 
-        $peoples = PeopleReviewDao::find()
-            ->where(['rid' => $id])
-            ->andWhere([''])
+        $peoples = (new \yii\db\Query())
+            ->from('peoplereview')
+            ->innerJoin("review", 'review.id = peoplereview.rid')
+            ->where(['peoplereview.rid' => $id])
+            ->andWhere(['review.status' => ReviewDao::STATUS_DEFAULT])
             ->select('pid')
             ->all();
         $pids = array_map(function($e){
