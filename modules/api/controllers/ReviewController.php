@@ -116,7 +116,19 @@ class ReviewController extends BaseController{
                 if(!$rew){
                     $tmp['status'] = PeopleReviewDao::REVIEW_NOT_SURE_TYPE;
                 }else{
-                    $tmp['status'] = $rew['status'];
+                    switch ($rew['status']){
+                        case ReviewDao::STATUS_DEFAULT:
+                            $tmp['status'] = PeopleReviewDao::REVIEW_WAIT_TYPE;
+                            break;
+                        case ReviewDao::STATUS_SUCCESS:
+                            $tmp['status'] = PeopleReviewDao::REVIEW_SUCCESS_TYPE;
+                            break;
+                        case ReviewDao::STATUS_FAILED:
+                            $tmp['status'] = PeopleReviewDao::REVIEW_SUCCESS_TYPE;
+                            break;
+                        default:
+                            $tmp['status'] = PeopleReviewDao::REVIEW_NO_NEED_TYPE;
+                    }
                 }
             }
             return $tmp;
