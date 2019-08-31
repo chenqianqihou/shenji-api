@@ -111,7 +111,7 @@ class ReviewController extends BaseController{
                 $tmp['status'] = PeopleReviewDao::REVIEW_NO_NEED_TYPE;
             }else {
 
-                if(!$e['status']){
+                if(is_null($e['status'])){
                     $tmp['status'] = PeopleReviewDao::REVIEW_NOT_SURE_TYPE;
                 }else{
                     switch ($e['status']){
