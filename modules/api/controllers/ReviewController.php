@@ -9,6 +9,7 @@
 
 namespace app\modules\api\controllers;
 
+use app\classes\Log;
 use \app\models\ProjectDao;
 use \app\models\UserDao;
 use \app\models\ReviewDao;
@@ -181,7 +182,10 @@ class ReviewController extends BaseController{
             return $ret;
         }
         $id = intval($this->getParam('id', 0));
-        $rew = ReviewDao::findOne($id);
+        $rew = ReviewDao::find()
+            ->where(['id' => $id])
+            ->andWhere(['status' => ReviewDao::STATUS_DEFAULT])
+            ->one();
         if (!$rew){
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, 'id错误!'));
         }
@@ -224,6 +228,7 @@ class ReviewController extends BaseController{
 
         $peoples = PeopleReviewDao::find()
             ->where(['rid' => $id])
+            ->andWhere([''])
             ->select('pid')
             ->all();
         $pids = array_map(function($e){
@@ -248,6 +253,7 @@ class ReviewController extends BaseController{
             ->where(['peopleproject.projid' => $proid])
             ->andWhere(['in', 'people.id', $pids])
             ->all();
+
 
         $ret['people']['list'] = $peoples;
 
@@ -297,15 +303,19 @@ class ReviewController extends BaseController{
 
             if($status == ReviewDao::STATUS_FAILED){
                 $pids = PeopleReviewDao::find()
-                    ->where(['rid' => $rew->projid])
+                    ->where(['rid' => $id])
                     ->groupBy('pid')
                     ->select('pid')
+                    ->asArray()
                     ->all();
+                $pids = array_map(function($e){
+                    return $e["pid"];
+                }, $pids);
 
                 if(count($pids) > 0){
                     $pros = PeopleProjectDao::find()
                         ->where(['projid' => $rew->projid])
-                        ->andWhere('in', 'pid', $pids)
+                        ->andWhere(['in', 'pid', $pids])
                         ->all();
                     foreach ($pros as $pro){
                         $pro->delete();
@@ -317,9 +327,11 @@ class ReviewController extends BaseController{
             $transaction->commit();
         } catch(\Exception $e) {
             $transaction->rollBack();
+            Log::fatal($e->getTrace());
             return $this->outputJson('', ErrorDict::ERR_INTERNAL);
         } catch(\Throwable $e) {
             $transaction->rollBack();
+            Log::fatal($e->getTrace());
             return $this->outputJson('', ErrorDict::ERR_INTERNAL);
         }
 
