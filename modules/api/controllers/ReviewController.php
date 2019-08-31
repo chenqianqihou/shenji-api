@@ -63,7 +63,7 @@ class ReviewController extends BaseController{
 
         $con = (new \yii\db\Query())
             ->from('review')
-            ->select('review.id, project.projectnum, project.name, project.projyear, project.projlevel, project.plantime, project.projtype, organization.name as projorgan')
+            ->select('review.id, project.projectnum, project.name, project.projyear, project.projlevel, project.plantime, project.projtype, organization.name as projorgan, project.id as projid, review.status')
             ->innerJoin('project', 'project.id = review.projid')
             ->innerJoin('organization', 'organization.id = project.projorgan');
 
@@ -110,13 +110,11 @@ class ReviewController extends BaseController{
             if($e['projtype'] == UserDao::$typeToName['审计机关']){
                 $tmp['status'] = PeopleReviewDao::REVIEW_NO_NEED_TYPE;
             }else {
-                $rew = ReviewDao::find()
-                    ->where(['projid' => $e['id']])
-                    ->one();
-                if(!$rew){
+
+                if(!$e['status']){
                     $tmp['status'] = PeopleReviewDao::REVIEW_NOT_SURE_TYPE;
                 }else{
-                    switch ($rew['status']){
+                    switch ($e['status']){
                         case ReviewDao::STATUS_DEFAULT:
                             $tmp['status'] = PeopleReviewDao::REVIEW_WAIT_TYPE;
                             break;
@@ -124,7 +122,7 @@ class ReviewController extends BaseController{
                             $tmp['status'] = PeopleReviewDao::REVIEW_SUCCESS_TYPE;
                             break;
                         case ReviewDao::STATUS_FAILED:
-                            $tmp['status'] = PeopleReviewDao::REVIEW_SUCCESS_TYPE;
+                            $tmp['status'] = PeopleReviewDao::REVIEW_FAILED_TYPE;
                             break;
                         default:
                             $tmp['status'] = PeopleReviewDao::REVIEW_NO_NEED_TYPE;
