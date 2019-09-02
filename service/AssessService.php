@@ -397,9 +397,17 @@ class AssessService
                     }
                     //todo 计算分数
                     if ($returnData['isleader']) {
-                        $tempPeople['objectivescore'] = 0;
-                        $tempPeople['subjectivescore'] = 0;
-                        $tempPeople['totalscore'] = 0;
+                        if ($onePeople['objectscore'] == -1) {
+                            $tempPeople['objectivescore'] = 0;
+                        }else {
+                            $tempPeople['objectivescore'] = $onePeople['objectscore'];
+                        }
+                        if ($onePeople['subjectscore'] == -1) {
+                            $tempPeople['subjectivescore'] = 0;
+                        }else {
+                            $tempPeople['subjectivescore'] = $onePeople['subjectscore'];
+                        }
+                        $tempPeople['totalscore'] = $tempPeople['objectivescore'] + $tempPeople['subjectivescore'];
                     }
                     $groupInfo['memList'][] = $tempPeople;
                 }
