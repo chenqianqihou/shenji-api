@@ -1296,4 +1296,36 @@ class ProjectController extends BaseController
         $writer->save('php://output');
         Yii::$app->end();
     }
+
+    public function actionExcelupload() {
+        if( empty($_FILES["file"]) ){
+            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+
+
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($_FILES['file']['tmp_name']);
+        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+        unset( $sheetData[1]);
+
+        $insertData = [];
+        foreach( $sheetData as $data) {
+            $tmpdata = [];
+            if( empty($data['A']) ){
+                continue;    
+            }
+            $tmpdata['name'] = $data['A'];
+            $tmpdata['plantime'] = intval( $data['B'] );
+            $tmpdata['projyear'] = intval( $data['C'] );
+            $tmpdata['projdesc'] = intval( $data['D'] );
+            /************
+                to be continue
+            ************/
+        }
+
+            /************
+                to be continue
+            ************/
+    }
 }

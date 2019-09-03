@@ -1372,10 +1372,10 @@ class UserController extends BaseController
         }
 
 
+        $user = new UserService();
         foreach($insertData as $attributes) {
             $type = $attributes['type'];
             unset($attributes['type']);
-            $user = new UserService();
             $user->addNewUser($attributes, $type);
         }
 
