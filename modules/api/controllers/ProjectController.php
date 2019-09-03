@@ -27,6 +27,9 @@ use \Lcobucci\JWT\Builder;
 use \Lcobucci\JWT\Signer\Hmac\Sha256;
 use yii\db\Exception;
 use app\service\ReviewService;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 
 class ProjectController extends BaseController
 {
@@ -1235,5 +1238,94 @@ class ProjectController extends BaseController
 
     }
 
+    public function actionExcel() {
+        $this->defineMethod = 'GET';
 
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load(APP_PATH."/static/projectexcel.xlsx");
+
+        $organizationService = new OrganizationService();
+        $organList = $organizationService->getDepartsByType(3);
+        $departlist = [];
+        foreach($organList as $org){
+            if( count($org['partment']) <= 0 ){
+                $departlist[] = $org['id'].':'.$org['name'];    
+            }
+            foreach( $org['partment'] as $pm ){
+                $departlist[] = array_keys($pm)[0].':'.$org['name'].'-'.array_values($pm)[0];    
+            }    
+        }
+        //$departstr = join("\n",$departlist);
+        //print_r( $departstr );die;
+        $nowdk = 0;
+        foreach( $departlist as $dk=>$dv){
+            $nowdk = $dk+1;
+            $spreadsheet->getActiveSheet()->getCell('AA'.$nowdk)->setValue( $dv );    
+        }
+
+        $ss = 2;
+        $se = 1140;
+        for($ss = 2; $ss < $se;$ss++){
+            $validation = $spreadsheet->getActiveSheet()->getCell('E'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list.');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a value from the drop-down list.');
+            $validation->setFormula1('=$AA$1:$AA$'.$nowdk);
+        }
+
+        // Redirect output to a client’s web browser (Xlsx)
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="项目计划批量导入.xlsx"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Expose-Headers: Content-Disposition');
+
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $writer->save('php://output');
+        Yii::$app->end();
+    }
+
+    public function actionExcelupload() {
+        if( empty($_FILES["file"]) ){
+            $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
+            $ret = $this->outputJson('', $error);
+            return $ret;
+        }
+
+
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($_FILES['file']['tmp_name']);
+        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+        unset( $sheetData[1]);
+
+        $insertData = [];
+        foreach( $sheetData as $data) {
+            $tmpdata = [];
+            if( empty($data['A']) ){
+                continue;    
+            }
+            $tmpdata['name'] = $data['A'];
+            $tmpdata['plantime'] = intval( $data['B'] );
+            $tmpdata['projyear'] = intval( $data['C'] );
+            $tmpdata['projdesc'] = intval( $data['D'] );
+            /************
+                to be continue
+            ************/
+        }
+
+            /************
+                to be continue
+            ************/
+    }
 }

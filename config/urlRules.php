@@ -45,8 +45,10 @@ return [
     'api/project/listselect' => 'api/project/listselect',
     'api/project/editinfo' => 'api/project/editinfo',
     'api/project/listselect' => 'api/project/listselect',
-    'api/auditgroup/jugechange' => 'api/auditgroup/jugechange',
+    'api/project/excel' => 'api/project/excel',
+    'api/project/excelupload' => 'api/project/excelupload',
 
+    'api/auditgroup/jugechange' => 'api/auditgroup/jugechange',
     'api/auditgroup/add' => 'api/auditgroup/add',
     'api/auditgroup/updaterole' => 'api/auditgroup/updaterole',
     'api/auditgroup/delete' => 'api/auditgroup/delete',

@@ -598,6 +598,8 @@ class OrganizationController extends BaseController
         header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
         header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
         header('Pragma: public'); // HTTP/1.0
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Expose-Headers: Content-Disposition');
 
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $writer->save('php://output');
