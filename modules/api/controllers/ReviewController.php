@@ -19,6 +19,7 @@ use \app\models\PeopleProjectDao;
 use \app\models\OrganizationDao;
 use app\classes\BaseController;
 use \app\models\AuditresultsDao;
+use app\models\ViolationDao;
 
 class ReviewController extends BaseController{
 
@@ -432,29 +433,33 @@ class ReviewController extends BaseController{
 
         $info = (new \yii\db\Query())
             ->from('auditresults')
-            ->innerJoin('project', 'project.id = auditresults.id')
-            ->innerJoin('people', 'people.pid = auditresults.pid')
+            ->innerJoin('project', 'project.id = auditresults.projectid')
+            ->innerJoin('people', 'people.id = auditresults.peopleid')
             ->select('auditresults.*, project.projectnum, project.name as projname, project.projyear, project.projlevel, project.projtype, people.id as pid, people.name as pname, people.pid as pnum')
             ->where(['auditresults.id' => $id])
             ->one();
 
         if(!$info){
-            return $this->outputJson('', ErrorDict::G_PARAM);
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '参数不合法！未找到合适的审计成果!'));
         }
         $ret['basic_info'] = [
             "pnum" => $info['pnum'], #人员cod
             "pname" => $info['pname'], #姓名
             "projname" => $info['projname'], #项目名称
-            "projnum" => $info['projnum'], #项目编号
+            "projnum" => $info['projectnum'], #项目编号
             "projyear" => $info['projyear'], #项目年度
             "projtype" =>  $info['projtype'], #项目类型
             "projlevel" => $info['projlevel'], # 1省厅统一组织 2市州本级 3市州统一组织 4县级
             "havereport" =>  $info['havereport'], #0不填1是2否
-            "projrole" => $info['projrole'], #1审计组长,2主审,3审计组员
         ];
+
+        $peoRro = PeopleProjectDao::find()
+            ->where(['pid' => $info['peopleid']])
+            ->andWhere(['projid' => $info['projectid']])
+            ->one();
+        $ret['basic_info']['projrole'] = $peoRro['roletype'] ?? 0;
+
         $ret['audit_result'] = [
-            "problemtype" => $info['problemtype'], #查出问题性质
-            "problemdetail" =>  $info['problemdetail'] , #查出问题明细
             "amountone" =>  $info['amountone'], #处理金额
             "amounttwo" =>  $info['amounttwo'], #审计期间整改金额
             "amountthree" =>  $info['amountthree'], #审计促进整改落实有关问题资金
@@ -465,6 +470,13 @@ class ReviewController extends BaseController{
             "isfindout" =>  $info['isfindout'], #是否单独查出0为不填1是2否
             "findoutnum" => $info['findoutnum'], #查出人数
         ];
+
+        $violation = ViolationDao::findOne($info['problemid']);
+        $ret['audit_result']['problemtype'] = $violation['name'] ?? '';
+
+        $violation = ViolationDao::findOne($info['problemdetailid']);
+        $ret['audit_result']['problemdetail'] = $violation['name'] ?? '';
+
         $ret['move_result_info'] = [
             "istransfer" =>  $info['istransfer'], #是否移送事项0为不填1是2否
             "processorgans" =>  $info['processorgans'] , #移送机关，1司法机关2纪检监察机关3有关部门
