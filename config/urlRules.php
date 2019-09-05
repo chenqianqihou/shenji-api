@@ -84,4 +84,6 @@ return [
     'api/auditresults/excel' => 'api/auditresults/excel',
     'api/auditresults/excelupload' => 'api/auditresults/excelupload',
     'api/auditresults/projectlist' => 'api/auditresults/projectlist',
+
+    'api/dashbord/expertise' => 'api/dashbord/expertise'
 ];

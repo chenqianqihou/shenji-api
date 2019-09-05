@@ -17,7 +17,7 @@ class ProjectDao extends ActiveRecord{
 
     //项目阶段
     public static $status = [
-        0 => "未开始",
+        0 => "计划阶段",
         1 => "计划阶段",
         2 => "实施阶段",
         3 => "审理阶段",
