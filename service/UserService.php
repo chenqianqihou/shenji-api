@@ -151,10 +151,15 @@ class UserService
             $position = ''; $techtitle = ''; $expertise = ''; $auditBeginLeft = ''; $auditBeginRight = '';
         }
         //判断按行政区查询还是审计机构查询
+        $organids = [];
+        $regNum = intval($regNum);
         if ($regNum) {
             //查询行政区编码下面的机构ID
             $organizationService = new OrganizationService();
-            $organids = $organizationService->getOrganIdByRegNum($regNum);
+            $organInfos = $organizationService->getOrganIdByRegnumAndType($type, $regNum);
+            foreach ($organInfos as $one) {
+                $organids[] = $one['id'];
+            }
             if (count($organids) == 0) {
                 return $data;
             }
@@ -162,16 +167,15 @@ class UserService
         }else {
             $organid = intval($organid);
             $departid = 0;
-            if (empty($organid)) {
-                return $data;
-            }
-            $organizationService = new OrganizationService();
-            $organInfo = $organizationService->getOrganizationInfo($organid);
-            if ($organInfo['parentid'] != 0) {
-                $departid = $organid;
-                $organids = [];
-            }else {
-                $organids = [$organid];
+            if (!empty($organid)) {
+                $organizationService = new OrganizationService();
+                $organInfo = $organizationService->getOrganizationInfo($organid);
+                if ($organInfo['parentid'] != 0) {
+                    $departid = $organid;
+                    $organids = [];
+                }else {
+                    $organids = [$organid];
+                }
             }
         }
         $userDao = new UserDao();

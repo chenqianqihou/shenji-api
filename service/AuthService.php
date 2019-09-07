@@ -3,6 +3,7 @@ namespace app\service;
 
 use app\classes\Log;
 use app\models\RoleAuthDao;
+use app\models\RoleDao;
 use yii\db\Exception;
 
 class AuthService {
@@ -37,6 +38,33 @@ class AuthService {
     public function getRoleAuthList(){
         $roleAuthList = (new \yii\db\Query())
             ->from('roleauth')
+            ->all();
+        return $roleAuthList;
+    }
+
+    //判断某URL是否需要进行权限控制
+    public function judgeUrlNeedAuth($url){
+        $ret = (new \yii\db\Query())
+            ->from('auth')
+            ->where('url like "%' . $url . '%"')
+            ->all();
+        return $ret;
+    }
+
+    //查询某些角色是否拥有某个url的权限
+    public function getAuthListByRole($pid, $url){
+        $roleDao = new RoleDao();
+        $roleInfo = $roleDao->queryByPid($pid);
+        $roleIds = [];
+        foreach ($roleInfo as $one) {
+            $roleIds[] = $one['id'];
+        }
+        $roleIds = implode(',', $roleIds);
+        $roleAuthList = (new \yii\db\Query())
+            ->from('auth')
+            ->leftJoin('roleauth', 'auth.id = roleauth.authid')
+            ->where(['in', 'rid', $roleIds])
+            ->where('url like "%' . $url . '%"')
             ->all();
         return $roleAuthList;
     }

@@ -359,8 +359,8 @@ class UserDao extends ActiveRecord{
         $condition = " type = :type ";
         if ($departid != 0) {
             $condition = $condition . " and department = :department";
-        }else {
-            $condition = $condition . " and organid in (:organid)";
+        }elseif ($organids != ''){
+            $condition = $condition . " and organid in (" . $organids . ")";
         }
         if ($sex) {
             $condition = $condition . " and sex = :sex";
@@ -387,8 +387,9 @@ class UserDao extends ActiveRecord{
             $condition = $condition . " and (name like '%$query%' or pid like '%$query%')";
         }
         $sql = sprintf('SELECT people.*, peopletitle.tid as techtitle, peopleexpertise.eid as expertise 
-                FROM %s, peopletitle, peopleexpertise WHERE 
-                people.pid = peopletitle.pid and people.pid = peopleexpertise.pid and %s ',
+                FROM %s LEFT JOIN peopletitle ON people.pid = peopletitle.pid
+                LEFT JOIN peopleexpertise ON people.pid = peopletitle.pid 
+                WHERE %s group by people.pid',
             self::tableName(), $condition
         );
         $sql = $sql . " order by ctime desc limit $start, $length";
@@ -397,8 +398,6 @@ class UserDao extends ActiveRecord{
         $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
         if ($departid != 0) {
             $stmt->bindParam(':department', $departid, \PDO::PARAM_INT);
-        }else {
-            $stmt->bindParam(':organid', $organids, \PDO::PARAM_STR);
         }
         if ($sex) {
             $stmt->bindParam(':sex', $sex, \PDO::PARAM_INT);
@@ -433,8 +432,8 @@ class UserDao extends ActiveRecord{
         $condition = " type = :type ";
         if ($departid != 0) {
             $condition = $condition . " and department = :department";
-        }else {
-            $condition = $condition . " and organid in (:organid)";
+        }elseif ($organids != '') {
+            $condition = $condition . " and organid in (" . $organids . ")";
         }
         if ($sex) {
             $condition = $condition . " and sex = :sex";
@@ -460,8 +459,10 @@ class UserDao extends ActiveRecord{
         if ($query != "") {
             $condition = $condition . " and (name like '%$query%' or pid like '%$query%')";
         }
-        $sql = sprintf('SELECT count(1) as c FROM %s, peopletitle, peopleexpertise
-              WHERE people.pid = peopletitle.pid and people.pid = peopleexpertise.pid and %s ',
+        $sql = sprintf('select count(1) as c from (SELECT count(1)  
+              FROM %s LEFT JOIN peopletitle ON people.pid = peopletitle.pid
+                LEFT JOIN peopleexpertise ON people.pid = peopletitle.pid
+              WHERE %s group by people.pid) as b',
             self::tableName(), $condition
         );
         $stmt = self::getDb()->createCommand($sql);
@@ -469,8 +470,6 @@ class UserDao extends ActiveRecord{
         $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
         if ($departid != 0) {
             $stmt->bindParam(':department', $departid, \PDO::PARAM_INT);
-        }else {
-            $stmt->bindParam(':organid', $organids, \PDO::PARAM_STR);
         }
         if ($sex) {
             $stmt->bindParam(':sex', $sex, \PDO::PARAM_INT);

@@ -301,78 +301,17 @@ class BaseController extends Controller {
     }
 
     function authControl($pid, $url) {
-        //权限控制第一层，基于URL判断
-        $roleDao = new RoleDao();
-        //查询用户角色列表
-        $roleList = $roleDao->queryByPid($pid);
         $authService = new AuthService();
-        //查询所有权限点列表
-        $authList = $authService->getAuthList();
-        //两层循环，遍历某一角色访问某个权限点的黑名单URL列表
-        foreach ($roleList as $roleInfo) {
-            foreach ($authList as $authInfo) {
-                $blackUrlList = self::blackUrlList($roleInfo['name'], $authInfo['id']);
-                if (in_array($url, $blackUrlList)) {
-                    return false; //无权限
-                }
+        //判断此url是否需要权限校验
+        $needJudge = $authService->judgeUrlNeedAuth($url);
+        if ($needJudge) {
+            //判断此用户是否有此URL的权限
+            $haveAuth = $authService->getAuthListByRole($pid, $url);
+            if (!$haveAuth) {
+                return false;
             }
         }
-        return true; //有权限
-    }
-
-    //返回角色对某功能点，哪些url不可访问
-    function blackUrlList($roleName, $authId) {
-        $authService = new AuthService();
-        $authInfo = $authService->getAuthInfo($authId);
-        $condition = $authInfo['menu'] . ':' . $authInfo['function'];
-        switch ($condition) {
-            case "Dashboard:Dashboard":
-                return [];
-            case "个人中心:个人中心":
-                return [];
-            case "审核管理:中介人员审核":
-                return [];
-            case "审核管理:内审人员审核":
-                return [];
-            case "审核管理:审计成果审核":
-                return [];
-            case "成果管理:新建/导入/下载":
-                if ($roleName == '审计组成员') {
-                    return [];
-                }else {
-                    return [
-                        'api/auditresults/submitresult',
-                        'api/auditresults/excel',
-                        'api/auditresults/excelupload',
-                    ];
-                }
-            case "成果管理:查看所有人审计成果":
-                return [];
-            case "配置管理:人员配置":
-                return [];
-            case "配置管理:客观分数配置":
-                return [];
-            case "配置管理:机构配置":
-                return [];
-            case "配置管理:权限角色配置":
-                return [];
-            case "项目管理:启动项目":
-                return [];
-            case "项目管理:审理阶段":
-                return [];
-            case "项目管理:审计组人员调整":
-                return [];
-            case "项目管理:审计评价":
-                return [];
-            case "项目管理:新建/导入/下载":
-                return [];
-            case "项目管理:确认计划":
-                return [];
-            case "项目管理:项目实施阶段":
-                return [];
-            default:
-                return [];
-        }
+        return true;
     }
 
 } 

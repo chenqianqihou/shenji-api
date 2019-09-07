@@ -591,4 +591,28 @@ class OrganizationService
         }
         return $organIdArr;
     }
+
+    //根据审计机构类型和行政区域编码，返回机构list
+    public function getOrganIdByRegnumAndType( $otype, $regnum) {
+        $res = [];    
+        if( $otype == 3) {
+            if( $regnum == '520000' ){
+                $organs = OrganizationDao::find()->where('parentid = 0 and otype = 3 and regnum >= :regnum', [':regnum' => $regnum])->asArray()->all();
+            } else {
+                $organs = OrganizationDao::find()->where('parentid = 0 and otype = 3 and regnum = :regnum', [':regnum' => $regnum])->asArray()->all();
+            }
+            foreach ($organs as $one) {
+                $res[] = $one;
+            }
+        }
+
+        if( $otype == 2 || $otype == 1) {
+            $organs = OrganizationDao::find()->where('parentid = 0 and otype = :otype and regnum like "%' . $regnum . '%"', [':otype'=>$otype])->asArray()->all();
+            foreach ($organs as $one) {
+                $res[] = $one;
+            }
+        }
+
+        return $res;
+    }
 }
