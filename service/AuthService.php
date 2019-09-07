@@ -38,8 +38,9 @@ class AuthService {
         try {
             $roleAuthDao = new RoleAuthDao();
             $roleAuthDao::deleteAll();
-            foreach ($roleAuthList as $roleId => $authIdList) {
-                foreach ($authIdList as $authId) {
+            foreach ($roleAuthList as $roleAuth) {
+                $roleId = $roleAuth['roleid'];
+                foreach ($roleAuth['authid'] as $authId) {
                     $roleAuthDao->rid = $roleId;
                     $roleAuthDao->authid = $authId;
                     $roleAuthDao->save();
