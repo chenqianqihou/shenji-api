@@ -581,4 +581,14 @@ class OrganizationService
         return $ret;
 
     }
+
+    //查询行政区下的一级审计机构列表
+    public function getOrganIdByRegNum($regNum){
+        $organs = OrganizationDao::find()->where('parentid = 0 and regnum = :regnum', [':regnum' => $regNum])->asArray()->all();
+        $organIdArr = [];
+        foreach ($organs as $one) {
+            $organIdArr[] = $one['id'];
+        }
+        return $organIdArr;
+    }
 }

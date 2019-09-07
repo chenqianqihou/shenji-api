@@ -349,6 +349,157 @@ class UserDao extends ActiveRecord{
         }
     }
 
+
+    //人员列表(新)
+    public function queryPeopleListNew($type, $organids, $departid, $query, $status, $sex, $education, $position,
+                                       $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $start, $length) {
+        $condition = " type = :type ";
+        if ($departid != 0) {
+            $condition = $condition . " and department = :department";
+        }else {
+            $condition = $condition . " and organid in (:organid)";
+        }
+        if ($sex) {
+            $condition = $condition . " and sex = :sex";
+        }
+        if ($education) {
+            $condition = $condition . " and education = :education";
+        }
+        if ($position) {
+            $condition = $condition . " and position = :position";
+        }
+        if ($techtitle) {
+            $condition = $condition . " and techtitle = :techtitle";
+        }
+        if ($expertise) {
+            $condition = $condition . " and expertise = :expertise";
+        }
+        if ($auditBeginLeft && $auditBeginRight) {
+            $condition = $condition . " and auditbegin >= :auditbeginleft and auditbegin <= :auditbeginright";
+        }
+        if (isset(self::$isJob[$status])) {
+            $condition = $condition . "and isjob = :isjob ";
+        }
+        if ($query != "") {
+            $condition = $condition . " and (name like '%$query%' or pid like '%$query%')";
+        }
+        $sql = sprintf('SELECT people.*, peopletitle.tid as techtitle, peopleexpertise.eid as expertise 
+                FROM %s, peopletitle, peopleexpertise WHERE 
+                people.pid = peopletitle.pid and people.pid = peopleexpertise.pid and %s ',
+            self::tableName(), $condition
+        );
+        $sql = $sql . " order by ctime desc limit $start, $length";
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
+        if ($departid != 0) {
+            $stmt->bindParam(':department', $departid, \PDO::PARAM_INT);
+        }else {
+            $stmt->bindParam(':organid', $organids, \PDO::PARAM_STR);
+        }
+        if ($sex) {
+            $stmt->bindParam(':sex', $sex, \PDO::PARAM_INT);
+        }
+        if ($education) {
+            $stmt->bindParam(':education', $education, \PDO::PARAM_INT);
+        }
+        if ($position) {
+            $stmt->bindParam(':position', $position, \PDO::PARAM_INT);
+        }
+        if ($techtitle) {
+            $stmt->bindParam(':techtitle', $techtitle, \PDO::PARAM_INT);
+        }
+        if ($expertise) {
+            $stmt->bindParam(':expertise', $expertise, \PDO::PARAM_INT);
+        }
+        if ($auditBeginLeft && $auditBeginRight) {
+            $stmt->bindParam(':auditbeginleft', $auditbeginleft, \PDO::PARAM_STR);
+            $stmt->bindParam(':auditbeginright', $auditbeginright, \PDO::PARAM_STR);
+        }
+        if (isset(self::$isJob[$status])) {
+            $stmt->bindParam(':isjob', $status, \PDO::PARAM_INT);
+        }
+        $stmt->execute();
+        $ret = $stmt->queryAll();
+        return $ret;
+    }
+
+    //人员列表总数(新)
+    public function countPeopleListNew($type, $organids, $departid, $query, $status, $sex, $education, $position,
+                                       $techtitle, $expertise, $auditBeginLeft, $auditBeginRight) {
+        $condition = " type = :type ";
+        if ($departid != 0) {
+            $condition = $condition . " and department = :department";
+        }else {
+            $condition = $condition . " and organid in (:organid)";
+        }
+        if ($sex) {
+            $condition = $condition . " and sex = :sex";
+        }
+        if ($education) {
+            $condition = $condition . " and education = :education";
+        }
+        if ($position) {
+            $condition = $condition . " and position = :position";
+        }
+        if ($techtitle) {
+            $condition = $condition . " and techtitle = :techtitle";
+        }
+        if ($expertise) {
+            $condition = $condition . " and expertise = :expertise";
+        }
+        if ($auditBeginLeft && $auditBeginRight) {
+            $condition = $condition . " and auditbegin >= :auditbeginleft and auditbegin <= :auditbeginright";
+        }
+        if (isset(self::$isJob[$status])) {
+            $condition = $condition . "and isjob = :isjob ";
+        }
+        if ($query != "") {
+            $condition = $condition . " and (name like '%$query%' or pid like '%$query%')";
+        }
+        $sql = sprintf('SELECT count(1) as c FROM %s, peopletitle, peopleexpertise
+              WHERE people.pid = peopletitle.pid and people.pid = peopleexpertise.pid and %s ',
+            self::tableName(), $condition
+        );
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
+        if ($departid != 0) {
+            $stmt->bindParam(':department', $departid, \PDO::PARAM_INT);
+        }else {
+            $stmt->bindParam(':organid', $organids, \PDO::PARAM_STR);
+        }
+        if ($sex) {
+            $stmt->bindParam(':sex', $sex, \PDO::PARAM_INT);
+        }
+        if ($education) {
+            $stmt->bindParam(':education', $education, \PDO::PARAM_INT);
+        }
+        if ($position) {
+            $stmt->bindParam(':position', $position, \PDO::PARAM_INT);
+        }
+        if ($techtitle) {
+            $stmt->bindParam(':techtitle', $techtitle, \PDO::PARAM_INT);
+        }
+        if ($expertise) {
+            $stmt->bindParam(':expertise', $expertise, \PDO::PARAM_INT);
+        }
+        if ($auditBeginLeft && $auditBeginRight) {
+            $stmt->bindParam(':auditbeginleft', $auditbeginleft, \PDO::PARAM_STR);
+            $stmt->bindParam(':auditbeginright', $auditbeginright, \PDO::PARAM_STR);
+        }
+        if (isset(self::$isJob[$status])) {
+            $stmt->bindParam(':isjob', $status, \PDO::PARAM_INT);
+        }
+        $stmt->execute();
+        $ret = $stmt->queryOne();
+        if ($ret) {
+            return $ret['c'];
+        }else {
+            return 0;
+        }
+    }
+
     //删除用户
     public function deletePeople($pid) {
         $sql=sprintf('DELETE FROM %s WHERE pid = :pid', self::tableName());

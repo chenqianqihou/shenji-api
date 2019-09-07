@@ -133,29 +133,33 @@ class UserService
     }
 
     // 用户列表
-    public function getUserList($organization, $type, $organid, $query, $status, $length, $page) {
+    public function getUserList($type, $regNum, $organid, $query, $status, $sex, $education,
+                                $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $length, $page) {
         $data = [
             'list' => [],
             'total' => 0,
         ];
         $list = [];
-        //查询类型 1 所有 2 人员类型 3 具体机构
-        if ($organization == 1) {
-            $type = "";
-            $organid = 0;
-            $departid = 0;
-        }elseif ($organization == 2) {
-            $type = intval($type);
-            if (empty($type)) {
+        $type = intval($type);
+        if (empty($type)) {
+            return $data;
+        }
+        if (!isset(UserDao::$type[$type])) {
+            return $data;
+        }
+        if ($type != UserDao::$typeToName['审计机关']) {
+            $position = ''; $techtitle = ''; $expertise = ''; $auditBeginLeft = ''; $auditBeginRight = '';
+        }
+        //判断按行政区查询还是审计机构查询
+        if ($regNum) {
+            //查询行政区编码下面的机构ID
+            $organizationService = new OrganizationService();
+            $organIds = $organizationService->getOrganIdByRegNum($regNum);
+            if (count($organIds) == 0) {
                 return $data;
             }
-            if (!isset(UserDao::$type[$type])) {
-                return $data;
-            }
-            $organid = 0;
             $departid = 0;
         }else {
-            $type = "";
             $organid = intval($organid);
             $departid = 0;
             if (empty($organid)) {
@@ -165,7 +169,9 @@ class UserService
             $organInfo = $organizationService->getOrganizationInfo($organid);
             if ($organInfo['parentid'] != 0) {
                 $departid = $organid;
-                $organid = 0;
+                $organids = [];
+            }else {
+                $organids = [$organid];
             }
         }
         $userDao = new UserDao();
@@ -174,7 +180,9 @@ class UserService
             $page = 1;
         }
         $start = $length * ($page - 1);
-        $userList = $userDao->queryPeopleList($type, $organid, $departid, $query, $status, $start, $length);
+        $organids = implode(',', $organids);
+        $userList = $userDao->queryPeopleListNew($type, $organids, $departid, $query, $status, $sex, $education,
+            $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $start, $length);
         $organizationService = new OrganizationService();
         $organizationInfo = [];
         $allOrganization = $organizationService->getAllOrganization();
@@ -214,7 +222,7 @@ class UserService
             $list[] = $one;
         }
         $userDao = new UserDao();
-        $count = $userDao->countPeopleList($type, $organid, $departid, $query, $status, $start, $length);
+        $count = $userDao->countPeopleListNew($type, $organid, $departid, $query, $status, $start, $length);
         $data['list'] = $list;
         $data['total'] = $count;
         return $data;

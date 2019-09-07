@@ -806,11 +806,11 @@ class UserController extends BaseController
     public function actionList() {
         $this->defineMethod = 'POST';
         $this->defineParams = array (
-            'organization' => array (
-                'require' => true,
+            'type' => array (
+                'require' => false,
                 'checker' => 'noCheck',
             ),
-            'type' => array (
+            'regnum' => array (
                 'require' => false,
                 'checker' => 'noCheck',
             ),
@@ -823,6 +823,34 @@ class UserController extends BaseController
                 'checker' => 'noCheck',
             ),
             'status' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'sex' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'education' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'position' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'techtitle' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'expertise' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'auditbeginleft' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'auditbeginright' => array (
                 'require' => false,
                 'checker' => 'noCheck',
             ),
@@ -839,22 +867,23 @@ class UserController extends BaseController
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
-        //查询类型 1 所有 2 人员类型 3 具体机构
-        $organizationArr = [1, 2, 3];
-        $organization = $this->getParam('organization');
-        $type = $this->getParam('type', '');
+        $type = $this->getParam('type', ''); //人员类型 1 中介机构 2 内审机构 3 审计机关 4 第三方机构
+        $regNum = $this->getParam('regnum', '');
         $organid = $this->getParam('organid', '');
         $query = $this->getParam('query', '');
         $status = intval($this->getParam('status', 0));
+        $sex = $this->getParam('sex', '');
+        $education = intval($this->getParam('education', 0));
+        $position = $this->getParam('position', '');
+        $techtitle = $this->getParam('techtitle', '');
+        $expertise = intval($this->getParam('expertise', 0));
+        $auditBeginLeft = $this->getParam('auditbeginleft', '');
+        $auditBeginRight = $this->getParam('auditbeginright', '');
         $length = $this->getParam('length');
         $page = $this->getParam('page');
-        if (!in_array($organization, $organizationArr)) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, 'organization is error');
-            $ret = $this->outputJson('', $error);
-            return $ret;
-        }
         $userService = new UserService();
-        $data = $userService->getUserList($organization, $type, $organid, $query, $status, $length, $page);
+        $data = $userService->getUserList($type, $regNum, $organid, $query, $status, $sex, $education,
+            $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $length, $page);
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($data, $error);
         return $ret;
