@@ -607,7 +607,7 @@ class OrganizationService
         }
 
         if( $otype == 2 || $otype == 1) {
-            $organs = OrganizationDao::find()->where('parentid = 0 and otype = :otype and regnum like "%:regnum%"', [':otype'=>$otype,':regnum' => $regnum])->asArray()->all();
+            $organs = OrganizationDao::find()->where('parentid = 0 and otype = :otype and regnum like "%' . $regnum . '%"', [':otype'=>$otype])->asArray()->all();
             foreach ($organs as $one) {
                 $res[] = $one;
             }

@@ -152,6 +152,7 @@ class UserService
         }
         //判断按行政区查询还是审计机构查询
         $organids = [];
+        $regNum = intval($regNum);
         if ($regNum) {
             //查询行政区编码下面的机构ID
             $organizationService = new OrganizationService();
