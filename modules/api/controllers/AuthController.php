@@ -47,7 +47,7 @@ class AuthController extends BaseController
 
         $roleAuth = $this->getParam('roleauth');
         $authService = new AuthService();
-        $ret = $authService->updateRoleAuth(json_decode($roleAuth));
+        $ret = $authService->updateRoleAuth($roleAuth);
         if ($ret) {
             $error = ErrorDict::getError(ErrorDict::SUCCESS);
             $ret = $this->outputJson($ret, $error);
