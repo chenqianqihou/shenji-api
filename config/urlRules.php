@@ -44,7 +44,6 @@ return [
     'api/project/auditinfo' => 'api/project/auditinfo',
     'api/project/listselect' => 'api/project/listselect',
     'api/project/editinfo' => 'api/project/editinfo',
-    'api/project/listselect' => 'api/project/listselect',
     'api/project/excel' => 'api/project/excel',
     'api/project/excelupload' => 'api/project/excelupload',
 

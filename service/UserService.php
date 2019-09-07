@@ -154,8 +154,8 @@ class UserService
         if ($regNum) {
             //查询行政区编码下面的机构ID
             $organizationService = new OrganizationService();
-            $organIds = $organizationService->getOrganIdByRegNum($regNum);
-            if (count($organIds) == 0) {
+            $organids = $organizationService->getOrganIdByRegNum($regNum);
+            if (count($organids) == 0) {
                 return $data;
             }
             $departid = 0;
@@ -222,7 +222,8 @@ class UserService
             $list[] = $one;
         }
         $userDao = new UserDao();
-        $count = $userDao->countPeopleListNew($type, $organid, $departid, $query, $status, $start, $length);
+        $count = $userDao->countPeopleListNew($type, $organids, $departid, $query, $status, $sex, $education,
+            $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight);
         $data['list'] = $list;
         $data['total'] = $count;
         return $data;
