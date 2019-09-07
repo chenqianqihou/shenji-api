@@ -356,7 +356,7 @@ class UserDao extends ActiveRecord{
         $condition = " type = :type ";
         if ($departid != 0) {
             $condition = $condition . " and department = :department";
-        }else {
+        }elseif ($organids != ''){
             $condition = $condition . " and organid in (" . $organids . ")";
         }
         if ($sex) {
@@ -429,7 +429,7 @@ class UserDao extends ActiveRecord{
         $condition = " type = :type ";
         if ($departid != 0) {
             $condition = $condition . " and department = :department";
-        }else {
+        }elseif ($organids != '') {
             $condition = $condition . " and organid in (" . $organids . ")";
         }
         if ($sex) {

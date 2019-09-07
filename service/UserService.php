@@ -167,16 +167,15 @@ class UserService
         }else {
             $organid = intval($organid);
             $departid = 0;
-            if (empty($organid)) {
-                return $data;
-            }
-            $organizationService = new OrganizationService();
-            $organInfo = $organizationService->getOrganizationInfo($organid);
-            if ($organInfo['parentid'] != 0) {
-                $departid = $organid;
-                $organids = [];
-            }else {
-                $organids = [$organid];
+            if (!empty($organid)) {
+                $organizationService = new OrganizationService();
+                $organInfo = $organizationService->getOrganizationInfo($organid);
+                if ($organInfo['parentid'] != 0) {
+                    $departid = $organid;
+                    $organids = [];
+                }else {
+                    $organids = [$organid];
+                }
             }
         }
         $userDao = new UserDao();
