@@ -151,10 +151,14 @@ class UserService
             $position = ''; $techtitle = ''; $expertise = ''; $auditBeginLeft = ''; $auditBeginRight = '';
         }
         //判断按行政区查询还是审计机构查询
+        $organids = [];
         if ($regNum) {
             //查询行政区编码下面的机构ID
             $organizationService = new OrganizationService();
-            $organids = $organizationService->getOrganIdByRegNum($regNum);
+            $organInfos = $organizationService->getOrganIdByRegnumAndType($type, $regNum);
+            foreach ($organInfos as $one) {
+                $organids[] = $one['id'];
+            }
             if (count($organids) == 0) {
                 return $data;
             }
