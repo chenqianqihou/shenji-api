@@ -41,6 +41,7 @@ class AuthService {
             foreach ($roleAuthList as $roleAuth) {
                 $roleId = $roleAuth['roleid'];
                 foreach ($roleAuth['authid'] as $authId) {
+                    $roleAuthDao = new RoleAuthDao();
                     $roleAuthDao->rid = $roleId;
                     $roleAuthDao->authid = $authId;
                     $roleAuthDao->save();
