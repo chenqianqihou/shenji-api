@@ -16,6 +16,15 @@ class AuthService {
         return $authList;
     }
 
+    //查询权限信息
+    public function getAuthInfo($authId){
+        $authInfo = (new \yii\db\Query())
+            ->from('auth')
+            ->where(['id' => $authId])
+            ->one();
+        return $authInfo;
+    }
+
     //查询角色列表
     public function getRoleList(){
         $roleList = (new \yii\db\Query())

@@ -73,4 +73,16 @@ class RoleDao extends ActiveRecord{
         $ret = $stmt->queryAll();
         return $ret;
     }
+
+    public function queryRoleInfo($id) {
+        $sql=sprintf('SELECT * FROM %s where id = :id',
+            self::tableName()
+        );
+        $stmt = self::getDb()->createCommand($sql);
+        $stmt->prepare();
+        $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
+        $stmt->execute();
+        $ret = $stmt->queryOne();
+        return $ret;
+    }
 }
