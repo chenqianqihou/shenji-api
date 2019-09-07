@@ -45,6 +45,7 @@ class AuthService {
                     $roleAuthDao->save();
                 }
             }
+            $tr->commit();
         }catch (Exception $e) {
             $tr->rollBack();
             Log::addLogNode('addException', serialize($e->errorInfo));
