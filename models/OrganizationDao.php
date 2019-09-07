@@ -31,4 +31,9 @@ class OrganizationDao extends ActiveRecord{
 
         return "";
     }
+
+    const PROJ_LEVEL_PROVINCE = 1;
+    const PROJ_LEVEL_CITY_LOCAL = 2;
+    const PROJ_LEVEL_CITY_UNIFIED = 3;
+    const PROJ_LEVEL_COUNTRY = 4;
 }

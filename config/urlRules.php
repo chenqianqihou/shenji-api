@@ -85,6 +85,10 @@ return [
     'api/auditresults/projectlist' => 'api/auditresults/projectlist',
 
     'api/dashbord/expertise' => 'api/dashbord/expertise',
+    'api/dashbord/sex' => 'api/dashbord/sex',
+    'api/dashbord/proj' => 'api/dashbord/proj',
+    'api/dashbord/whole' => 'api/dashbord/whole',
+    'api/dashbord/userlocation' => 'api/dashbord/userlocation',
 
     'api/auth/list' => 'api/auth/list',
     'api/auth/update' => 'api/auth/update',

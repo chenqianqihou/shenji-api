@@ -15,6 +15,9 @@ class UserDao extends ActiveRecord{
         return "people";
     }
 
+    const MAN = 1;
+    const FEMALE = 2;
+
     //性别
     public static $sex = [
         1 => "男",
