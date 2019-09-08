@@ -57,14 +57,13 @@ class AuthService {
         $roleInfo = $roleDao->queryByPid($pid);
         $roleIds = [];
         foreach ($roleInfo as $one) {
-            $roleIds[] = $one['id'];
+            $roleIds[] = $one['rid'];
         }
-        $roleIds = implode(',', $roleIds);
         $roleAuthList = (new \yii\db\Query())
             ->from('auth')
             ->leftJoin('roleauth', 'auth.id = roleauth.authid')
             ->where(['in', 'rid', $roleIds])
-            ->where('url like "%' . $url . '%"')
+            ->andWhere('url like "%' . $url . '%"')
             ->all();
         return $roleAuthList;
     }

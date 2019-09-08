@@ -20,7 +20,7 @@ class ErrorDict {
     const ERR_NO_LOGIN = 40100;
 
     // 403
-    const ERR_NOPERMISSION = 40301;
+    const ERR_NOPERMISSION = 403;
 
     // 404
     const ERR_VERSION_NON_EXIST = 40401;
