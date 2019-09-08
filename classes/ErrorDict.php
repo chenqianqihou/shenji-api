@@ -47,6 +47,7 @@ class ErrorDict {
         self::G_SYS_ERR => '内部系统错误',
         self::G_METHOD => '请求方法错误',
         self::G_PARAM => '请求参数不合法',
+        self::ERR_NOPERMISSION => '您没有此操作权限！',
     );
 
     // 返回给用户的错误信息
@@ -58,6 +59,7 @@ class ErrorDict {
         self::G_SYS_ERR => '系统错误，请稍后再试',
         self::G_METHOD => '非法访问',
         self::G_PARAM => '参数错误',
+        self::ERR_NOPERMISSION => '您没有此操作权限！',
     );
 
     protected static $defaultMsg = '未知错误';

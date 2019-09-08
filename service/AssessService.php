@@ -288,7 +288,7 @@ class AssessService
         $roleInfo = $roleDao->queryByPid($pid);
         $userRoleList = [];
         foreach ($roleInfo as $oneRole) {
-            if ($oneRole['name'] == '厅领导' || $oneRole['name'] == '局领导') {
+            if ($oneRole['name'] == '厅/局领导') {
                 $returnData['isleader'] = 1;
             }
             $userRoleList[] = $oneRole['name'];

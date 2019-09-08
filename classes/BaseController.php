@@ -140,7 +140,7 @@ class BaseController extends Controller {
     }
 
     protected function noPower() {
-        $error = ErrorDict::getError(ErrorDict::ERR_NOPERMISSION, '无权限', '无权限');
+        $error = ErrorDict::getError(ErrorDict::ERR_NOPERMISSION);
         $ret = $this->outputJson('', $error);
         Yii::$app->response->data = $ret;
         Yii::$app->end();
