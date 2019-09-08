@@ -384,7 +384,7 @@ class UserDao extends ActiveRecord{
             $condition = $condition . " and isjob = :isjob ";
         }
         if ($query != "") {
-            $condition = $condition . " and (name like '%$query%' or pid like '%$query%')";
+            $condition = $condition . " and (name like '%$query%' or people.pid like '%$query%')";
         }
         $sql = sprintf('SELECT people.*, peopletitle.tid as techtitle, peopleexpertise.eid as expertise 
                 FROM %s LEFT JOIN peopletitle ON people.pid = peopletitle.pid
@@ -457,7 +457,7 @@ class UserDao extends ActiveRecord{
             $condition = $condition . " and isjob = :isjob ";
         }
         if ($query != "") {
-            $condition = $condition . " and (name like '%$query%' or pid like '%$query%')";
+            $condition = $condition . " and (name like '%$query%' or people.pid like '%$query%')";
         }
         $sql = sprintf('select count(1) as c from (SELECT count(1)  
               FROM %s LEFT JOIN peopletitle ON people.pid = peopletitle.pid
