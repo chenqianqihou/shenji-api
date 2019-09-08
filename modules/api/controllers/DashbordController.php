@@ -331,7 +331,7 @@ class DashbordController extends BaseController {
         $originDatas = OrganizationDao::find()
             ->where(["in", "id", $origins]);
         if($address){
-            $originDatas = $originDatas->andWhere(["regnum", $address]);
+            $originDatas = $originDatas->andWhere(["organization.regnum" => $address]);
         }
         $originDatas = $originDatas->asArray()->all();
         $origins = array_map(function($e){
