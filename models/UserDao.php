@@ -381,7 +381,7 @@ class UserDao extends ActiveRecord{
             $condition = $condition . " and auditbegin >= :auditbeginleft and auditbegin <= :auditbeginright";
         }
         if (isset(self::$isJob[$status])) {
-            $condition = $condition . "and isjob = :isjob ";
+            $condition = $condition . " and isjob = :isjob ";
         }
         if ($query != "") {
             $condition = $condition . " and (name like '%$query%' or pid like '%$query%')";
@@ -454,7 +454,7 @@ class UserDao extends ActiveRecord{
             $condition = $condition . " and auditbegin >= :auditbeginleft and auditbegin <= :auditbeginright";
         }
         if (isset(self::$isJob[$status])) {
-            $condition = $condition . "and isjob = :isjob ";
+            $condition = $condition . " and isjob = :isjob ";
         }
         if ($query != "") {
             $condition = $condition . " and (name like '%$query%' or pid like '%$query%')";
