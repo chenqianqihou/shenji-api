@@ -287,34 +287,29 @@ class DashbordController extends BaseController {
                 'require' => false,
                 'checker' => 'noCheck',
             ),
-            'country' => array (
-                'require' => false,
-                'checker' => 'noCheck',
-            ),
+//            'country' => array (
+//                'require' => false,
+//                'checker' => 'noCheck',
+//            ),
         );
         if (false === $this->check()) {
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
         $city = intval($this->getParam('city', 0));
-        $country = intval($this->getParam('country', 0));
+//        $country = intval($this->getParam('country', 0));
 
         $address = "";
         if($city){
-            if($address){
-                $address = "$address,$city";
-            }else{
-                $address = "$city";
-            }
-
+            $address = "$city";
         }
-        if($country){
-            if($address){
-                $address = "$address,$country";
-            }else{
-                $address = "$country";
-            }
-        }
+//        if($country){
+//            if($address){
+//                $address = "$address,$country";
+//            }else{
+//                $address = "$country";
+//            }
+//        }
 
 
         $useCode = $this->data['ID'];
