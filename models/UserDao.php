@@ -393,7 +393,6 @@ class UserDao extends ActiveRecord{
             self::tableName(), $condition
         );
         $sql = $sql . " order by ctime desc limit $start, $length";
-        var_dump($sql);
         $stmt = self::getDb()->createCommand($sql);
         $stmt->prepare();
         $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
