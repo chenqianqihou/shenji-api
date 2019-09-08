@@ -1114,9 +1114,21 @@ class UserController extends BaseController
 
 
         $organService = new OrganizationService();
-        $organList = $organService->getOrganizationListByType(3,false);
-        foreach( $organList as $ok=>$ov){
-            $spreadsheet->setActiveSheetIndex(0)->setCellValue('ZZ'.($ok+1), $ov['id'].':'.$ov['name']);
+        $organList = $organService->getOrganizationListByType(3,true);
+        $organDict = [];
+        foreach( $organList as $ov){
+            $organDict[$ov['id']]  = $ov;   
+        }
+        $i = 0;
+        foreach( $organDict as $odk=>$odv){
+            if($odv['parentid'] == 0){
+                $spreadsheet->setActiveSheetIndex(0)->setCellValue('ZZ'.(++$i), $odk.':'.$odv['name']);
+            } else {
+                if( !isset($organDict[$odv['parentid']]) ){
+                    continue;    
+                }
+                $spreadsheet->setActiveSheetIndex(0)->setCellValue('ZZ'.(++$i), $odk.':'.$organDict[$odv['parentid']]['name'].'-'.$odv['name']);
+            }
         }
 
         $ss = 2;
@@ -1291,6 +1303,14 @@ class UserController extends BaseController
             return $ret;
         }
 
+        //获取机构列表
+        $organService = new OrganizationService();
+        $organList = $organService->getOrganizationListByType(3,true);
+        $organDict = [];
+        foreach( $organList as $ov){
+            $organDict[$ov['id']]  = $ov;   
+        }
+
 
         $userService = new UserService();
         $selectConfig = $userService->getSelectConfig();
@@ -1355,7 +1375,13 @@ class UserController extends BaseController
             $shistr = $shi[1];
             $qustr = $qu[1];
             $tmpdata['location'] = "$shenstr,$shistr,$qustr";
-            $tmpdata['organization'] = explode(':',$data['N'])[0];
+            $organid = explode(':',$data['N'])[0];
+            if( $organDict[$organid]['parentid'] == 0 ){
+                $tmpdata['organization'] = $organid;
+            } else {
+                $tmpdata['organization'] = $organDict[$organid]['parentid'];
+                $tmpdata['department'] = $organid;
+            }
             //$tmpdata[''] = $data['O'];
             $tmpdata['position'] = explode(':',$data['P'])[0];
             if( empty($tmpdata['position']) || !isset( $selectConfig['position'][$tmpdata['position']] ) ){
