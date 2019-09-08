@@ -112,6 +112,11 @@ class BaseController extends Controller {
             $this->noLogin();
             return;
         }
+        $urlAuth = self::authControl($this->data['ID'], $url);
+        if (!$urlAuth) {
+            $this->noPower();
+            return;
+        }
         return parent::beforeAction( $action );
     }
 
@@ -129,6 +134,13 @@ class BaseController extends Controller {
 
     protected function noLogin() {
         $error = ErrorDict::getError(ErrorDict::ERR_NO_LOGIN, '用户未登录', '请您先登录');
+        $ret = $this->outputJson('', $error);
+        Yii::$app->response->data = $ret;
+        Yii::$app->end();
+    }
+
+    protected function noPower() {
+        $error = ErrorDict::getError(ErrorDict::ERR_NOPERMISSION);
         $ret = $this->outputJson('', $error);
         Yii::$app->response->data = $ret;
         Yii::$app->end();
@@ -300,14 +312,15 @@ class BaseController extends Controller {
         return $res[$provinceid];
     }
 
+    //url级别权限
     function authControl($pid, $url) {
         $authService = new AuthService();
         //判断此url是否需要权限校验
         $needJudge = $authService->judgeUrlNeedAuth($url);
-        if ($needJudge) {
+        if (count($needJudge) > 0) {
             //判断此用户是否有此URL的权限
             $haveAuth = $authService->getAuthListByRole($pid, $url);
-            if (!$haveAuth) {
+            if (count($haveAuth) == 0) {
                 return false;
             }
         }

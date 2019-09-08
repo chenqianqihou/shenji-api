@@ -881,6 +881,10 @@ class UserController extends BaseController
         $auditBeginRight = $this->getParam('auditbeginright', '');
         $length = $this->getParam('length');
         $page = $this->getParam('page');
+        if (intval($auditBeginLeft) && intval($auditBeginRight)) {
+            $auditBeginLeft = date('Y-m-d', intval($auditBeginLeft));
+            $auditBeginRight = date('Y-m-d', intval($auditBeginRight));
+        }
         $userService = new UserService();
         $data = $userService->getUserList($type, $regNum, $organid, $query, $status, $sex, $education,
             $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $length, $page);
