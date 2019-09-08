@@ -372,10 +372,10 @@ class UserDao extends ActiveRecord{
             $condition = $condition . " and position = :position";
         }
         if ($techtitle) {
-            $condition = $condition . " and techtitle = :techtitle";
+            $condition = $condition . " and tid = :techtitle";
         }
         if ($expertise) {
-            $condition = $condition . " and expertise = :expertise";
+            $condition = $condition . " and eid = :expertise";
         }
         if ($auditBeginLeft && $auditBeginRight) {
             $condition = $condition . " and auditbegin >= :auditbeginleft and auditbegin <= :auditbeginright";
@@ -386,7 +386,7 @@ class UserDao extends ActiveRecord{
         if ($query != "") {
             $condition = $condition . " and (name like '%$query%' or people.pid like '%$query%')";
         }
-        $sql = sprintf('SELECT people.*, peopletitle.tid as techtitle, peopleexpertise.eid as expertise 
+        $sql = sprintf('SELECT people.* 
                 FROM %s LEFT JOIN peopletitle ON people.pid = peopletitle.pid
                 LEFT JOIN peopleexpertise ON people.pid = peopletitle.pid 
                 WHERE %s group by people.pid',
@@ -445,10 +445,10 @@ class UserDao extends ActiveRecord{
             $condition = $condition . " and position = :position";
         }
         if ($techtitle) {
-            $condition = $condition . " and techtitle = :techtitle";
+            $condition = $condition . " and tid = :techtitle";
         }
         if ($expertise) {
-            $condition = $condition . " and expertise = :expertise";
+            $condition = $condition . " and eid = :expertise";
         }
         if ($auditBeginLeft && $auditBeginRight) {
             $condition = $condition . " and auditbegin >= :auditbeginleft and auditbegin <= :auditbeginright";
