@@ -484,7 +484,7 @@ class AuditgroupController extends BaseController {
         $con = (new \yii\db\Query())
             ->from('people')
             ->join('INNER JOIN', 'organization', 'organization.id = people.organid')
-            ->select('people.id,people.pid, people.name, people.sex, people.isjob, people.type, organization.name AS oname');
+            ->select('people.id,people.pid, people.name, people.sex, people.isjob, people.type, organization.name AS oname, people.location');
 
         $types = [
             UserDao::$typeToName['审计机关']
