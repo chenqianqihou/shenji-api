@@ -114,10 +114,34 @@ class AuditgroupController extends BaseController {
         if(!$peoPro){
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '未找不到合适的人员!'));
         }
+        $transaction = PeopleProjectDao::getDb()->beginTransaction();
 
-        $peoPro->roletype = $role;
-        $peoPro->save();
+        try {
 
+            if($role == PeopleProjectDao::ROLE_TYPE_GROUP_LEADER){
+                $oldLeader = PeopleProjectDao::find()
+                    ->where(['groupid' => $id])
+                    ->andWhere(['roletype' => PeopleProjectDao::ROLE_TYPE_GROUP_LEADER])
+                    ->one();
+                if($oldLeader){
+                    $oldLeader->roletype = PeopleProjectDao::ROLE_TYPE_GROUPER;
+                    $oldLeader->save();
+                }
+
+            }
+
+
+            $peoPro->roletype = $role;
+            $peoPro->save();
+
+            $transaction->commit();
+        } catch (\Exception $e){
+            Log::fatal(printf("更改员工角色错误!%s", $e->getMessage()));
+            $transaction->rollBack();
+            return $this->outputJson('',
+                ErrorDict::getError(ErrorDict::ERR_INTERNAL, "内部错误！")
+            );
+        }
 
         return $this->outputJson('',
             ErrorDict::getError(ErrorDict::SUCCESS)
