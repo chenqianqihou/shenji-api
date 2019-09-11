@@ -58,12 +58,21 @@ class AuditgroupController extends BaseController {
             $newPeop->roletype = PeopleProjectDao::ROLE_TYPE_GROUPER;
             $newPeop->islock = 1;
             $newPeop->save();
+
+            $user = UserDao::findOne($pid);
+            if(!$user){
+                $transaction->rollBack();
+                return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '未找到此人员！'));
+            }
+
+            $user->isjob = UserDao::$isJobToName['在点'];
+            $user->save();
+
             $transaction->commit();
 
         }catch (\Exception $e){
             $transaction->rollBack();
             Log::fatal($e->getMessage());
-            exit();
             return $this->outputJson('', ErrorDict::getError(ErrorDict::ERR_INTERNAL));
         }
 
