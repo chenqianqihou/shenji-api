@@ -51,6 +51,15 @@ class AuditgroupController extends BaseController {
 
         $transaction = AuditGroupDao::getDb()->beginTransaction();
         try{
+            $peopleProjCount = PeopleProjectDao::find()
+                ->where(["groupid" => $id])
+                ->andWhere(["pid" => $pid])
+                ->count();
+            if($peopleProjCount){
+                $transaction->rollBack();
+                return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '此人员已经加入工作组！'));
+            }
+
             $newPeop = new PeopleProjectDao();
             $newPeop->pid = $pid;
             $newPeop->projid = $group['pid'];
