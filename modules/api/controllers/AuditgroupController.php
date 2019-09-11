@@ -614,6 +614,14 @@ class AuditgroupController extends BaseController {
                     $transaction->rollBack();
                     return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '人员已经存在！'));
                 }
+                $isPeoRrojExsit = PeopleProjectDao::find()
+                    ->where(["pid" => $e])
+                    ->andWhere(["groupid" => $id])
+                    ->count();
+                if($isPeoRrojExsit){
+                    $transaction->rollBack();
+                    return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '人员已经存在！'));
+                }
 
                 $prew->pid = $e;
                 $prew->rid = $rew->id;
