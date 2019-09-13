@@ -66,10 +66,6 @@ class AuditresultsController extends BaseController
                 'require' => true,
                 'checker' => 'noCheck',
             ),
-            'problemdetailid' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
         );
         if (false === $this->check()) {
             $ret = $this->outputJson(array(), $this->err);
@@ -79,7 +75,6 @@ class AuditresultsController extends BaseController
         $projectid = $this->getParam('projectid');
         $peopleid = $this->data['ID'];
         $problemid = $this->getParam('problemid');
-        $problemdetailid = $this->getParam('problemdetailid');
 
         //判断项目是否存在
         $projectDao = new ProjectDao();
@@ -99,7 +94,7 @@ class AuditresultsController extends BaseController
             return $ret;    
         }
         
-        //判断problemid和detailid是否合法
+        //判断problemid是否合法
         $assessService = new AssessService();
         $violations = $assessService->Violations();
         $isvalid = false;
@@ -110,12 +105,7 @@ class AuditresultsController extends BaseController
                     if( $pd['name'] == $projectType[1] ){
                         foreach( $pd['list'] as $pda ){
                             if ($pda['id'] == $problemid) {
-                                foreach ($pda['list'] as $pdab) {
-                                    if ($pdab['id'] == $problemdetailid) {
-                                        $isvalid = true;
-                                        break;
-                                    }
-                                }
+                                $isvalid = true;
                                 break;
                             }
                         }
@@ -126,7 +116,7 @@ class AuditresultsController extends BaseController
             }
         }
         if( $isvalid == false ){
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '问题性质或问题明细不合法');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '问题性质不合法');
             $ret = $this->outputJson('', $error);
             return $ret;    
         }
@@ -155,10 +145,6 @@ class AuditresultsController extends BaseController
                 'require' => true,
                 'checker' => 'noCheck',
             ),
-            'problemdetailid' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
         );
         if (false === $this->check()) {
             $ret = $this->outputJson(array(), $this->err);
@@ -168,7 +154,6 @@ class AuditresultsController extends BaseController
         $projectid = $this->getParam('projectid');
         $peopleid = $this->data['ID'];
         $problemid = $this->getParam('problemid');
-        $problemdetailid = $this->getParam('problemdetailid');
 
         //判断项目是否存在
         $projectDao = new ProjectDao();
@@ -188,7 +173,7 @@ class AuditresultsController extends BaseController
             return $ret;    
         }
         
-        //判断problemid和detailid是否合法
+        //判断problemid是否合法
         $assessService = new AssessService();
         $violations = $assessService->Violations();
         $isvalid = false;
@@ -199,12 +184,7 @@ class AuditresultsController extends BaseController
                     if( $pd['name'] == $projectType[1] ){
                         foreach( $pd['list'] as $pda ){
                             if ($pda['id'] == $problemid) {
-                                foreach ($pda['list'] as $pdab) {
-                                    if ($pdab['id'] == $problemdetailid) {
-                                        $isvalid = true;
-                                        break;
-                                    }
-                                }
+                                $isvalid = true;
                                 break;
                             }
                         }
@@ -215,7 +195,7 @@ class AuditresultsController extends BaseController
             }    
         }
         if( $isvalid == false ){
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '问题性质或问题明细不合法');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '问题性质不合法');
             $ret = $this->outputJson('', $error);
             return $ret;    
         }
