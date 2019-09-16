@@ -71,15 +71,35 @@ class ProjectController extends BaseController
                 'checker' => 'noCheck',
             ),
             'leadernum' => array (
-                'require' => true,
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'leader_projtype' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'leader_filternum' => array (
+                'require' => false,
                 'checker' => 'noCheck',
             ),
             'masternum' => array (
-                'require' => true,
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'master_projtype' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'master_filternum' => array (
+                'require' => false,
                 'checker' => 'noCheck',
             ),
             'auditornum' => array (
                 'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'location' => array (
+                'require' => false,
                 'checker' => 'noCheck',
             ),
 
@@ -97,8 +117,15 @@ class ProjectController extends BaseController
         $projlevel = intval($this->getParam('projlevel', 0));
         $leadorganId = intval($this->getParam('leadorgan', 0));
         $leadernum = intval($this->getParam('leadernum', 0));
+        $leaderProjType = $this->getParam('leader_projtype', []);
+        $leaderFilternum = intval($this->getParam('', 0));
         $masternum = intval($this->getParam('masternum', 0));
+        $masterProjType = $this->getParam('master_projtype', []);
+        $masterFilternum = intval($this->getParam('master_filternum', 0));
         $auditornum = intval($this->getParam('auditornum', 0));
+        $locatin = $this->getParam('location', '');
+
+
 
         //如果单位组织不存在，则返回异常
         $organ = OrganizationDao::find()->where(['id' => $projorgan])->one();
@@ -145,19 +172,266 @@ class ProjectController extends BaseController
                 $leadorganId,
                 $leadernum,
                 $auditornum,
-                $masternum
+                $masternum,
+                $locatin
             );
 
             //预分配人员
+            if(!$leadernum){
+                $transaction->commit();
+                return $this->outputJson('',
+                    ErrorDict::getError(ErrorDict::SUCCESS)
+                );
+            }
+            // 包含groupid => [ pid、以及 leader 字段]
+            $group = [];
+            for($i = 0; $i < $leadernum; $i++){
+                $auditGroup = new AuditGroupDao();
+                $group[$auditGroup->addAuditGroup($projectId)] = [];
+            }
+            $leaders = [];
+            $masters = [];
+            $members = [];
+
+
 
             $orgIds = (new OrganizationService)->getSubordinateIds($projorgan);
-            $allMatchPeoples = UserDao::find()
+            $matchMembers = UserDao::find()
                 ->where(['isjob' => UserDao::$isJobToName['不在点']])
-                ->andWhere(['in', 'organid', $orgIds])
-                ->andWhere(['isaudit' => UserDao::$isAuditToName['是']])
-                ->andWhere(['type' => UserDao::$typeToName['审计机关']])
-                ->limit($leadernum + $auditornum + $masternum)
-                ->all();
+                ->andWhere(['in', 'projorgan', $orgIds])
+                ->andWhere(['type' => UserDao::$typeToName['审计机关']]);
+
+
+            if($projlevel === ProjectDao::$projLevelName['省厅本级']){
+                $organization = OrganizationDao::find()
+                    ->where(["name" => "贵州省审计厅"])
+                    ->one();
+                if($organization){
+                    $members = $matchMembers->andWhere(["organid" => $organization->id])->all();
+                }
+
+                if($leadernum ){
+                    if($leaderProjType && $leaderFilternum){
+                        $peoples = (new \yii\db\Query())
+                            ->from("peopleproject")
+                            ->innerJoin("project", "peopleproject.projid == project.id")
+                            ->where(["project.projtype" => $leaderProjType])
+                            ->andWhere(["project.projorgan" => $organization->id])
+                            ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_GROUP_LEADER])
+                            ->groupBy("peopleproject.pid")
+                            ->having([">=", "pidnum", $leaderFilternum])
+                            ->select(["count(*) as pidnum", "peopleproject.pid"])
+                            ->all();
+
+                        if(count($peoples) > 0){
+                            $tmpLeaderIds = array_map(function($e){
+                                return $e['pid'];
+                            }, $peoples);
+
+                            $tmpMatchPeoples = clone $matchMembers;
+                            $leaders = $tmpMatchPeoples
+                                ->andWhere(["in", "id", $tmpLeaderIds])
+                                ->asArray()
+                                ->all();
+                        }
+
+                    } else {
+                        $tmpMatchPeoples = clone $matchMembers;
+                        $leaders = $tmpMatchPeoples
+                            ->limit($leadernum)
+                            ->asArray()
+                            ->all();
+                    }
+                }
+
+                if($masternum){
+                    if($masterProjType && $masterFilternum){
+                        $peoples = (new \yii\db\Query())
+                            ->from("peopleproject")
+                            ->innerJoin("project", "peopleproject.projid == project.id")
+                            ->where(["project.projtype" => $masterProjType])
+                            ->andWhere(["project.projorgan" => $organization->id])
+                            ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_MASTER])
+                            ->groupBy("peopleproject.pid")
+                            ->having([">=", "pidnum", $masterFilternum])
+                            ->select(["count(*) as pidnum", "peopleproject.pid"])
+                            ->all();
+
+                        if(count($peoples) > 0){
+                            $tmpMasterIds = array_map(function($e){
+                                return $e['pid'];
+                            }, $peoples);
+
+                            $tmpMatchPeoples = clone $matchMembers;
+                            $masters = $tmpMatchPeoples->andWhere(["in", "id", $tmpMasterIds])->all();
+                        }
+
+                    } else {
+                        $tmpMatchPeoples = clone $matchMembers;
+                        $masters = $tmpMatchPeoples->limit($masternum)->all();
+                    }
+                }
+
+
+            }elseif($projlevel === ProjectDao::$projLevelName['市州本级']){
+                $organization = OrganizationDao::findOne($projorgan);
+
+                if($organization){
+                    $members = $matchMembers->andWhere(["organid" => $organization->id])->all();
+                }
+
+                if($leadernum ){
+                    if($leaderProjType && $leaderFilternum){
+                        $peoples = (new \yii\db\Query())
+                            ->from("peopleproject")
+                            ->innerJoin("project", "peopleproject.projid == project.id")
+                            ->where(["project.projtype" => $leaderProjType])
+                            ->andWhere(["project.projorgan" => $organization->id])
+                            ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_GROUP_LEADER])
+                            ->groupBy("peopleproject.pid")
+                            ->having([">=", "pidnum", $leaderFilternum])
+                            ->select(["count(*) as pidnum", "peopleproject.pid"])
+                            ->all();
+
+                        if(count($peoples) > 0){
+                            $tmpLeaderIds = array_map(function($e){
+                                return $e['pid'];
+                            }, $peoples);
+
+                            $tmpMatchPeoples = clone $matchMembers;
+                            $leaders = $tmpMatchPeoples
+                                ->andWhere(["in", "id", $tmpLeaderIds])
+                                ->asArray()
+                                ->all();
+                        }
+
+                    } else {
+                        $tmpMatchPeoples = clone $matchMembers;
+                        $leaders = $tmpMatchPeoples
+                            ->limit($leadernum)
+                            ->asArray()
+                            ->all();
+                    }
+                }
+
+                if($masternum){
+                    if($masterProjType && $masterFilternum){
+                        $peoples = (new \yii\db\Query())
+                            ->from("peopleproject")
+                            ->innerJoin("project", "peopleproject.projid == project.id")
+                            ->where(["project.projtype" => $masterProjType])
+                            ->andWhere(["project.projorgan" => $organization->id])
+                            ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_MASTER])
+                            ->groupBy("peopleproject.pid")
+                            ->having([">=", "pidnum", $masterFilternum])
+                            ->select(["count(*) as pidnum", "peopleproject.pid"])
+                            ->all();
+
+                        if(count($peoples) > 0){
+                            $tmpMasterIds = array_map(function($e){
+                                return $e['pid'];
+                            }, $peoples);
+
+                            $tmpMatchPeoples = clone $matchMembers;
+                            $masters = $tmpMatchPeoples->andWhere(["in", "id", $tmpMasterIds])->all();
+                        }
+
+                    } else {
+                        $tmpMatchPeoples = clone $matchMembers;
+                        $masters = $tmpMatchPeoples->limit($masternum)->all();
+                    }
+                }
+
+
+            }elseif($projlevel === ProjectDao::$projLevelName['省厅统一组织']){
+                if(!$locatin){
+                    return $this->outputJson('',
+                        ErrorDict::getError(ErrorDict::G_PARAM, '项目实施地未选择!')
+                    );
+                }
+                $locatin = explode($locatin, ",");
+                if(count($locatin) === 3){
+                    unset($locatin[2]);
+                }
+                $locatin = join($locatin, ",");
+
+                $tmp = clone $matchMembers;
+                $allMatchPeoples = $tmp->andWhere(['organid' => $projorgan])->asArray()->all();
+                if(count($allMatchPeoples) < $leadernum + $masternum + $auditornum){
+                    $tmp = clone $matchMembers;
+                    $tmpPeoples = $tmp
+                        ->andWhere(["not like", "location", "%$locatin%"])
+                        ->asArray()
+                        ->all();
+                    $allMatchPeoples = array_merge($allMatchPeoples, $tmpPeoples);
+                }
+
+                if($leadernum ){
+                    if($leaderProjType && $leaderFilternum){
+                        $peoples = (new \yii\db\Query())
+                            ->from("peopleproject")
+                            ->innerJoin("project", "peopleproject.projid == project.id")
+                            ->where(["project.projtype" => $leaderProjType])
+                            ->andWhere(["project.projorgan" => $projorgan])
+                            ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_GROUP_LEADER])
+                            ->groupBy("peopleproject.pid")
+                            ->having([">=", "pidnum", $leaderFilternum])
+                            ->select(["count(*) as pidnum", "peopleproject.pid"])
+                            ->all();
+
+                        if(count($peoples) > 0){
+                            $tmpLeaderIds = array_map(function($e){
+                                return $e['pid'];
+                            }, $peoples);
+
+                            $tmpMatchPeoples = clone $matchMembers;
+                            $leaders = $tmpMatchPeoples
+                                ->andWhere(["in", "id", $tmpLeaderIds])
+                                ->asArray()
+                                ->all();
+                        }
+
+                    } else {
+                        $tmpMatchPeoples = clone $matchMembers;
+                        $leaders = $tmpMatchPeoples
+                            ->limit($leadernum)
+                            ->asArray()
+                            ->all();
+                    }
+                }
+
+                if($masternum){
+                    if($masterProjType && $masterFilternum){
+                        $peoples = (new \yii\db\Query())
+                            ->from("peopleproject")
+                            ->innerJoin("project", "peopleproject.projid == project.id")
+                            ->where(["project.projtype" => $masterProjType])
+                            ->andWhere(["project.projorgan" => $projorgan])
+                            ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_MASTER])
+                            ->groupBy("peopleproject.pid")
+                            ->having([">=", "pidnum", $masterFilternum])
+                            ->select(["count(*) as pidnum", "peopleproject.pid"])
+                            ->all();
+
+                        if(count($peoples) > 0){
+                            $tmpMasterIds = array_map(function($e){
+                                return $e['pid'];
+                            }, $peoples);
+
+                            $tmpMatchPeoples = clone $matchMembers;
+                            $masters = $tmpMatchPeoples->andWhere(["in", "id", $tmpMasterIds])->all();
+                        }
+
+                    } else {
+                        $tmpMatchPeoples = clone $matchMembers;
+                        $masters = $tmpMatchPeoples->limit($masternum)->all();
+                    }
+                }
+
+            }
+
+
+
             if (count($allMatchPeoples) == 0) {
                 $group = new AuditGroupDao();
                 $group->addAuditGroup($projectId);

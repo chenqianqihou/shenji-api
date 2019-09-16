@@ -41,6 +41,7 @@ class ProjectDao extends ActiveRecord{
         2 => "市州本级",
         3 => "市州统一组织",
         4 => "县级",
+        5 => "省厅本级"
     ];
 
     public static $projLevelName = [
@@ -48,6 +49,7 @@ class ProjectDao extends ActiveRecord{
         "市州本级" => 2,
         "市州统一组织" => 3,
         "县级" => 4,
+        "省厅本级" => 5
     ];
 
     const OPERATOR_STATUS_NO = 0;
@@ -81,13 +83,13 @@ class ProjectDao extends ActiveRecord{
 
     public function addProject($status, $projectnum, $name, $projyear, $plantime, $projdesc,
                                $projorgan, $projtype, $projlevel, $leadorgan,
-                               $leadernum, $auditornum, $masternum) {
+                               $leadernum, $auditornum, $masternum, $locaion) {
         $sql=sprintf('INSERT INTO %s (status, projectnum, name, projyear, plantime, projdesc, 
                               projorgan, projtype, projlevel, leadorgan, projstart, projauditcontent,
-                              leadernum, auditornum, masternum, ctime, utime)
+                              leadernum, auditornum, masternum, locaion, ctime, utime)
                               values (:status, :projectnum, :name, :projyear, :plantime, :projdesc, 
                               :projorgan, :projtype, :projlevel, :leadorgan, :projstart, "",
-                              :leadernum, :auditornum, :masternum, :ctime, :utime)', self::tableName()
+                              :leadernum, :auditornum, :masternum, :locaion, :ctime, :utime)', self::tableName()
         );
         $curTime = date('Y-m-d H:i:s');
         $projstartime = date('Y-m-d');
@@ -106,6 +108,7 @@ class ProjectDao extends ActiveRecord{
         $stmt->bindParam(':leadernum', $leadernum, \PDO::PARAM_INT);
         $stmt->bindParam(':auditornum', $auditornum, \PDO::PARAM_INT);
         $stmt->bindParam(':masternum', $masternum, \PDO::PARAM_INT);
+        $stmt->bindParam(':locaion', $locaion, \PDO::PARAM_STR);
         $stmt->bindParam(':ctime', $curTime, \PDO::PARAM_STR);
         $stmt->bindParam(':utime', $curTime, \PDO::PARAM_STR);
         $stmt->bindParam(':projstart', $projstartime, \PDO::PARAM_STR);
