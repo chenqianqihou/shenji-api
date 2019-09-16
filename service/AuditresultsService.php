@@ -65,6 +65,9 @@ class AuditresultsService
         }
 
         $attrs = $auditdao->attributes();
+        if (isset($params['transferpeople'])) {
+            $params['transferpeople'] = json_encode($params['transferpeople'], JSON_UNESCAPED_UNICODE);
+        }
 
         foreach( $params as $pk=>$pv) {
             if( in_array($pk,$attrs) ){
@@ -84,6 +87,9 @@ class AuditresultsService
         }
 
         $attrs = $auditdao->attributes();
+        if (isset($params['transferpeople'])) {
+            $params['transferpeople'] = json_encode($params['transferpeople'], JSON_UNESCAPED_UNICODE);
+        }
 
         foreach( $params as $pk=>$pv) {
             if( in_array($pk,$attrs) ){
