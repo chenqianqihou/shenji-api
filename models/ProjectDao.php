@@ -83,13 +83,13 @@ class ProjectDao extends ActiveRecord{
 
     public function addProject($status, $projectnum, $name, $projyear, $plantime, $projdesc,
                                $projorgan, $projtype, $projlevel, $leadorgan,
-                               $leadernum, $auditornum, $masternum, $locaion) {
+                               $leadernum, $auditornum, $masternum, $location) {
         $sql=sprintf('INSERT INTO %s (status, projectnum, name, projyear, plantime, projdesc, 
                               projorgan, projtype, projlevel, leadorgan, projstart, projauditcontent,
-                              leadernum, auditornum, masternum, locaion, ctime, utime)
+                              leadernum, auditornum, masternum, location, ctime, utime)
                               values (:status, :projectnum, :name, :projyear, :plantime, :projdesc, 
                               :projorgan, :projtype, :projlevel, :leadorgan, :projstart, "",
-                              :leadernum, :auditornum, :masternum, :locaion, :ctime, :utime)', self::tableName()
+                              :leadernum, :auditornum, :masternum, :location, :ctime, :utime)', self::tableName()
         );
         $curTime = date('Y-m-d H:i:s');
         $projstartime = date('Y-m-d');
@@ -108,7 +108,7 @@ class ProjectDao extends ActiveRecord{
         $stmt->bindParam(':leadernum', $leadernum, \PDO::PARAM_INT);
         $stmt->bindParam(':auditornum', $auditornum, \PDO::PARAM_INT);
         $stmt->bindParam(':masternum', $masternum, \PDO::PARAM_INT);
-        $stmt->bindParam(':locaion', $locaion, \PDO::PARAM_STR);
+        $stmt->bindParam(':location', $location, \PDO::PARAM_STR);
         $stmt->bindParam(':ctime', $curTime, \PDO::PARAM_STR);
         $stmt->bindParam(':utime', $curTime, \PDO::PARAM_STR);
         $stmt->bindParam(':projstart', $projstartime, \PDO::PARAM_STR);

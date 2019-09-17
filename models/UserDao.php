@@ -24,6 +24,11 @@ class UserDao extends ActiveRecord{
         2 => "女",
     ];
 
+    public static $sexName = [
+        "男" => 1,
+        "女" => 2
+    ];
+
     //人员类别
     public static $type = [
         1 => "中介机构",

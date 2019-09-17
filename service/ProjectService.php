@@ -21,11 +21,11 @@ class ProjectService
 {
     public function createProject($status, $projectnum, $name, $projyear, $plantime, $projdesc,
                                   $projorgan, $projtype, $projlevel, $leadorgan,
-                                  $leadernum, $auditornum, $masternum, $locaion) {
+                                  $leadernum, $auditornum, $masternum, $location) {
         $projectDao = new ProjectDao();
         $ret = $projectDao->addProject($status, $projectnum, $name, $projyear, $plantime, $projdesc,
             $projorgan, $projtype, $projlevel, $leadorgan,
-            $leadernum, $auditornum, $masternum, $locaion);
+            $leadernum, $auditornum, $masternum, $location);
         return $ret;
     }
 
