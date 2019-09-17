@@ -122,10 +122,6 @@ class UserController extends Controller{
             if (isset($obejectiveScoreInfo['single06Score'][$one['processorgans']])) {
                 $score = $score + $obejectiveScoreInfo['single06Score'][$one['processorgans']];
             }
-            //移送人员类型，0不选1地厅级以上、2县处级、3乡科级、4其他
-            if (isset($obejectiveScoreInfo['single07Score'][$one['transferpeopletype']])) {
-                $score = $score + $obejectiveScoreInfo['single07Score'][$one['transferpeopletype']];
-            }
             //是否纳入本级工作报告0为不填1是2否
             if (isset($obejectiveScoreInfo['single08Score'][$one['bringintoone']])) {
                 $score = $score + $obejectiveScoreInfo['single08Score'][$one['bringintoone']];
@@ -138,9 +134,17 @@ class UserController extends Controller{
             if (isset($obejectiveScoreInfo['single10Score'][$one['appraisal']])) {
                 $score = $score + $obejectiveScoreInfo['single10Score'][$one['appraisal']];
             }
+            //承担项目综合协调工作
+            if (isset($obejectiveScoreInfo['single11Score'][$one['appraisal']])) {
+                $score = $score + $obejectiveScoreInfo['single11Score'][$one['appraisal']];
+            }
+            //承担项目数据分析工作
+            if (isset($obejectiveScoreInfo['single12Score'][$one['appraisal']])) {
+                $score = $score + $obejectiveScoreInfo['single12Score'][$one['appraisal']];
+            }
             //问题性质id //问题明细id与违规列表关联
-            if (isset($obejectiveScoreInfo['problemScore'][$one['problemdetailid']])) {
-                $score = $score + $obejectiveScoreInfo['problemScore'][$one['problemdetailid']];
+            if (isset($obejectiveScoreInfo['problemScore'][$one['problemid']])) {
+                $score = $score + $obejectiveScoreInfo['problemScore'][$one['problemid']];
             }
             //处理金额
             if (isset($obejectiveScoreInfo['range01Score'])) {
@@ -222,10 +226,40 @@ class UserController extends Controller{
                     }
                 }
             }
-            //移送人数
+            //移送处理情况:移送处理人员情况及人数:地厅级以上
             if (isset($obejectiveScoreInfo['range09Score'])) {
                 $range09Score = $obejectiveScoreInfo['range09Score'];
                 foreach ($range09Score as $rang) {
+                    if ($one['transferpeoplenum'] >= $rang['value'][0] && $one['transferpeoplenum'] <= $rang['value'][1]) {
+                        $score = $score + $rang['score'];
+                        break;
+                    }
+                }
+            }
+            //移送处理情况:移送处理人员情况及人数:县处级
+            if (isset($obejectiveScoreInfo['range10Score'])) {
+                $range10Score = $obejectiveScoreInfo['range10Score'];
+                foreach ($range10Score as $rang) {
+                    if ($one['transferpeoplenum'] >= $rang['value'][0] && $one['transferpeoplenum'] <= $rang['value'][1]) {
+                        $score = $score + $rang['score'];
+                        break;
+                    }
+                }
+            }
+            //移送处理情况:移送处理人员情况及人数:乡科级
+            if (isset($obejectiveScoreInfo['range11Score'])) {
+                $range11Score = $obejectiveScoreInfo['range11Score'];
+                foreach ($range11Score as $rang) {
+                    if ($one['transferpeoplenum'] >= $rang['value'][0] && $one['transferpeoplenum'] <= $rang['value'][1]) {
+                        $score = $score + $rang['score'];
+                        break;
+                    }
+                }
+            }
+            //移送处理情况:移送处理人员情况及人数:其他
+            if (isset($obejectiveScoreInfo['range12Score'])) {
+                $range12Score = $obejectiveScoreInfo['range12Score'];
+                foreach ($range12Score as $rang) {
                     if ($one['transferpeoplenum'] >= $rang['value'][0] && $one['transferpeoplenum'] <= $rang['value'][1]) {
                         $score = $score + $rang['score'];
                         break;
@@ -252,13 +286,14 @@ class UserController extends Controller{
         $single01Score = [];//项目层级
         $single02Score = [];//项目角色
         $single03Score = [];//报告撰写
-        $single04Score = [];//是否单独查出set
+        $single04Score = [];//是否单独查出
         $single05Score = [];//是否有移送事项
         $single06Score = [];//移送处理机关
-        $single07Score = [];//送处理人员情况
         $single08Score = [];//是否纳入本级工作报告
         $single09Score = [];//是否纳入上级审计工作报告
         $single10Score = [];//评优
+        $single11Score = [];//承担项目综合协调工作
+        $single12Score = [];//承担项目数据分析工作
         //区间类型
         $range01Score = [];//审计成果:处理金额
         $range02Score = [];//审计成果:审计期间整改金额
@@ -268,12 +303,15 @@ class UserController extends Controller{
         $range06Score = [];//审计成果:审计后挽回（避免损失）金额
         $range07Score = [];//审计成果:查出人数
         $range08Score = [];//移送处理情况:移送处理金额
-        $range09Score = [];//移送处理情况:移送人数
+        $range09Score = [];//移送处理情况:移送处理人员情况及人数:地厅级以上
+        $range10Score = [];//移送处理情况:移送处理人员情况及人数:县处级
+        $range11Score = [];//移送处理情况:移送处理人员情况及人数:乡科级
+        $range12Score = [];//移送处理情况:移送处理人员情况及人数:其他
         foreach ($objectiveScores as $one) {
             if ($one['kindid'] == 2) {
                 $tmp = json_decode($one['nameone']);
-                if (count($tmp) == 4) {
-                    $problemScore[$tmp[3]] = $one['score'];
+                if (count($tmp) == 3) {
+                    $problemScore[$tmp[2]] = $one['score'];
                 }
 
             }elseif ($one['kindid'] == 1) {
@@ -329,18 +367,6 @@ class UserController extends Controller{
                 if ($one['twotype'] == '移送处理机关' && $one['nameone'] == '有关部门') {
                     $single06Score[3] = $one['score'];
                 }
-                if ($one['twotype'] == '送处理人员情况' && $one['nameone'] == '地厅级以上') {
-                    $single07Score[1] = $one['score'];
-                }
-                if ($one['twotype'] == '送处理人员情况' && $one['nameone'] == '县处级') {
-                    $single07Score[2] = $one['score'];
-                }
-                if ($one['twotype'] == '送处理人员情况' && $one['nameone'] == '乡科级') {
-                    $single07Score[3] = $one['score'];
-                }
-                if ($one['twotype'] == '送处理人员情况' && $one['nameone'] == '其他') {
-                    $single07Score[4] = $one['score'];
-                }
                 if ($one['twotype'] == '是否纳入本级工作报告' && $one['nameone'] == '是') {
                     $single08Score[1] = $one['score'];
                 }
@@ -376,6 +402,18 @@ class UserController extends Controller{
                 }
                 if ($one['twotype'] == '评优' && $one['nameone'] == '县表彰') {
                     $single10Score[8] = $one['score'];
+                }
+                if ($one['twotype'] == '承担项目综合协调工作' && $one['nameone'] == '是') {
+                    $single11Score[1] = $one['score'];
+                }
+                if ($one['twotype'] == '承担项目综合协调工作' && $one['nameone'] == '否') {
+                    $single11Score[2] = $one['score'];
+                }
+                if ($one['twotype'] == '承担项目数据分析工作' && $one['nameone'] == '是') {
+                    $single12Score[1] = $one['score'];
+                }
+                if ($one['twotype'] == '承担项目数据分析工作' && $one['nameone'] == '否') {
+                    $single12Score[2] = $one['score'];
                 }
 
 
@@ -460,7 +498,7 @@ class UserController extends Controller{
                         $range08Score[] = $tmp;
                     }
                 }
-                if ($one['onetype'] == '移送处理情况' && $one['twotype'] == '移送人数') {
+                if ($one['onetype'] == '移送处理情况' && $one['twotype'] == '移送处理人员情况及人数:地厅级以上') {
                     if ($one['nameone'] != '' && $one['nametwo'] != '') {
                         $tmp = [];
                         $tmp['score'] = $one['score'];
@@ -468,6 +506,36 @@ class UserController extends Controller{
                         $tmp['value'][] = $one['nameone'];
                         $tmp['value'][] = $one['nametwo'];
                         $range09Score[] = $tmp;
+                    }
+                }
+                if ($one['onetype'] == '移送处理情况' && $one['twotype'] == '移送处理人员情况及人数:县处级') {
+                    if ($one['nameone'] != '' && $one['nametwo'] != '') {
+                        $tmp = [];
+                        $tmp['score'] = $one['score'];
+                        $tmp['value'] = [];
+                        $tmp['value'][] = $one['nameone'];
+                        $tmp['value'][] = $one['nametwo'];
+                        $range10Score[] = $tmp;
+                    }
+                }
+                if ($one['onetype'] == '移送处理情况' && $one['twotype'] == '移送处理人员情况及人数:乡科级') {
+                    if ($one['nameone'] != '' && $one['nametwo'] != '') {
+                        $tmp = [];
+                        $tmp['score'] = $one['score'];
+                        $tmp['value'] = [];
+                        $tmp['value'][] = $one['nameone'];
+                        $tmp['value'][] = $one['nametwo'];
+                        $range11Score[] = $tmp;
+                    }
+                }
+                if ($one['onetype'] == '移送处理情况' && $one['twotype'] == '移送处理人员情况及人数:其他') {
+                    if ($one['nameone'] != '' && $one['nametwo'] != '') {
+                        $tmp = [];
+                        $tmp['score'] = $one['score'];
+                        $tmp['value'] = [];
+                        $tmp['value'][] = $one['nameone'];
+                        $tmp['value'][] = $one['nametwo'];
+                        $range12Score[] = $tmp;
                     }
                 }
             }
@@ -482,10 +550,11 @@ class UserController extends Controller{
             "single04Score" => $single04Score,//是否单独查出
             "single05Score" => $single05Score,//是否有移送事项
             "single06Score" => $single06Score,//移送处理机关
-            "single07Score" => $single07Score,//送处理人员情况
             "single08Score" => $single08Score,//是否纳入本级工作报告
             "single09Score" => $single09Score,//是否纳入上级审计工作报告
             "single10Score" =>  $single10Score,//评优
+            "single11Score" => $single11Score,//承担项目综合协调工作
+            "single12Score" => $single12Score,//承担项目数据分析工作
             //区间类型
             "range01Score" => $range01Score,//审计成果:处理金额
             "range02Score" => $range02Score,//审计成果:审计期间整改金额
@@ -495,7 +564,10 @@ class UserController extends Controller{
             "range06Score" => $range06Score,//审计成果:审计后挽回（避免损失）金额
             "range07Score" => $range07Score,//审计成果:查出人数
             "range08Score" => $range08Score,//移送处理情况:移送处理金额
-            "range09Score" => $range09Score,//移送处理情况:移送人数
+            "range09Score" => $range09Score,//移送处理情况:移送处理人员情况及人数:地厅级以上
+            "range10Score" => $range10Score,//移送处理情况:移送处理人员情况及人数:县处级
+            "range11Score" => $range11Score,//移送处理情况:移送处理人员情况及人数:乡科级
+            "range12Score" => $range12Score,//移送处理情况:移送处理人员情况及人数:其他
         ];
         $objectiveScoreRuleJson = json_encode($objectiveScoreRule);
         $key = 'objectiveScoreRule';
