@@ -359,103 +359,120 @@ class AuditresultsController extends BaseController
                 return $ret;
             }
 
-            $problemid = ViolationDao::find()->where(['name'=>trim($data['F'])])->one();
-            if( is_null($problemid) ){
+            $tmpdata['havecoordinate'] = explode(':',$data['F'])[0];
+            if( empty($tmpdata['havecoordinate']) ||!is_numeric($tmpdata['havecoordinate']) || !in_array($tmpdata['havecoordinate'],[1,2]) ){
                 $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第F列类型格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
-            $tmpdata['problemid'] = $problemid->id;
-            $problemdetailid = ViolationDao::find()->where(['name'=>trim($data['G'])])->one();
-            if( is_null($problemdetailid) ){
+
+            $tmpdata['haveanalyse'] = explode(':',$data['G'])[0];
+            if( empty($tmpdata['haveanalyse']) ||!is_numeric($tmpdata['haveanalyse']) || !in_array($tmpdata['haveanalyse'],[1,2]) ){
                 $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第G列类型格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
-            $tmpdata['problemdetailid'] = $problemdetailid->id;
 
-            $tmpdata['amountone'] = intval($data['H']);
-            if( !is_numeric($tmpdata['amountone']) ){
+            $problemid = ViolationDao::find()->where(['name'=>trim($data['H'])])->one();
+            if( is_null($problemid) ){
                 $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第H列类型格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
-            $tmpdata['amounttwo'] = intval($data['I']);
-            if( !is_numeric($tmpdata['amounttwo']) ){
+            $tmpdata['problemid'] = $problemid->id;
+
+            $tmpdata['amountone'] = intval($data['I']);
+            if( !is_numeric($tmpdata['amountone']) ){
                 $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第I列类型格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
-            $tmpdata['amountthree'] = intval($data['J']);
-            if( !is_numeric($tmpdata['amountthree']) ){
+            $tmpdata['amounttwo'] = intval($data['J']);
+            if( !is_numeric($tmpdata['amounttwo']) ){
                 $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第J列类型格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
-            $tmpdata['amountfour'] = intval($data['K']);
-            if( !is_numeric($tmpdata['amountfour']) ){
+            $tmpdata['amountthree'] = intval($data['K']);
+            if( !is_numeric($tmpdata['amountthree']) ){
                 $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第K列类型格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
-            $tmpdata['amountfive'] = intval($data['L']);
-            if( !is_numeric($tmpdata['amountfive']) ){
+            $tmpdata['amountfour'] = intval($data['L']);
+            if( !is_numeric($tmpdata['amountfour']) ){
                 $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第L列类型格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
-            $tmpdata['amountsix'] = intval($data['M']);
-            if( !is_numeric($tmpdata['amountsix']) ){
+            $tmpdata['amountfive'] = intval($data['M']);
+            if( !is_numeric($tmpdata['amountfive']) ){
                 $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第M列类型格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
+            $tmpdata['amountsix'] = intval($data['N']);
+            if( !is_numeric($tmpdata['amountsix']) ){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第N列类型格式错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
 
-            $tmpdata['desc'] = $data['N'];
+            $tmpdata['desc'] = $data['O'];
 
-            $tmpdata['isfindout'] = explode(':',$data['O'])[0];
+            $tmpdata['isfindout'] = explode(':',$data['P'])[0];
             if( empty($tmpdata['isfindout']) ||!is_numeric($tmpdata['isfindout']) || !in_array($tmpdata['isfindout'],[1,2]) ){
                 $tmpdata['isfindout'] = 0;
             }
             
-            $tmpdata['findoutnum'] = $data['P'];
+            $tmpdata['findoutnum'] = $data['Q'];
             if( empty($tmpdata['findoutnum']) ||!is_numeric($tmpdata['findoutnum']) ){
                 $tmpdata['findoutnum'] = 0;
             }
 
-            $tmpdata['istransfer'] = explode(':',$data['Q'])[0];
+            $tmpdata['istransfer'] = explode(':',$data['R'])[0];
             if( empty($tmpdata['istransfer']) ||!is_numeric($tmpdata['istransfer']) || !in_array($tmpdata['istransfer'],[1,2]) ){
                 $tmpdata['istransfer'] = 0;
             }
-            $tmpdata['processorgans'] = explode(':',$data['R'])[0];
+            $tmpdata['processorgans'] = explode(':',$data['S'])[0];
             if( empty($tmpdata['processorgans']) ||!is_numeric($tmpdata['processorgans']) || !in_array($tmpdata['processorgans'],[1,2,3]) ){
                 $tmpdata['processorgans'] = 0;
             }
-            $tmpdata['transferamount'] = $data['S'];
+            $tmpdata['transferamount'] = $data['T'];
             if( empty($tmpdata['transferamount']) ||!is_numeric($tmpdata['transferamount']) ){
                 $tmpdata['transferamount'] = 0;
             }
-            $tmpdata['transferpeoplenum'] = $data['T'];
-            if( empty($tmpdata['transferpeoplenum']) ||!is_numeric($tmpdata['transferpeoplenum']) ){
-                $tmpdata['transferpeoplenum'] = 0;
+            if (empty($data['U']) ||!is_numeric($data['U']) ) {
+                $data['U'] = 0;
             }
-            $tmpdata['transferpeopletype'] = explode(':',$data['U'])[0];
-            if( empty($tmpdata['transferpeopletype']) ||!is_numeric($tmpdata['transferpeopletype']) || !in_array($tmpdata['transferpeopletype'],[1,2,3,4]) ){
-                $tmpdata['transferpeopletype'] = 0;
+            if (empty($data['V']) ||!is_numeric($data['V']) ) {
+                $data['V'] = 0;
             }
-            $tmpdata['transferresult'] = $data['V'];
+            if (empty($data['W']) ||!is_numeric($data['W']) ) {
+                $data['W'] = 0;
+            }
+            if (empty($data['X']) ||!is_numeric($data['X']) ) {
+                $data['X'] = 0;
+            }
+            $tmpdata['transferpeople'] = json_encode([
+                '地厅级以上' => $data['U'],
+                '县处级' => $data['V'],
+                '乡科级' => $data['W'],
+                '其他' => $data['X'],
+            ]);
+            $tmpdata['transferresult'] = $data['Y'];
             if (empty($tmpdata['transferresult'])) {
                 $tmpdata['transferresult'] = "";
             }
-            $tmpdata['bringintoone'] = explode(':',$data['W'])[0];
+            $tmpdata['bringintoone'] = explode(':',$data['Z'])[0];
             if( empty($tmpdata['bringintoone']) ||!is_numeric($tmpdata['bringintoone']) || !in_array($tmpdata['bringintoone'],[1,2]) ){
                 $tmpdata['bringintoone'] = 0;
             }
-            $tmpdata['bringintotwo'] = explode(':',$data['X'])[0];
+            $tmpdata['bringintotwo'] = explode(':',$data['AA'])[0];
             if( empty($tmpdata['bringintotwo']) ||!is_numeric($tmpdata['bringintotwo']) || !in_array($tmpdata['bringintotwo'],[1,2]) ){
                 $tmpdata['bringintotwo'] = 0;
             }
-            $tmpdata['appraisal'] = explode(':',$data['Y'])[0];
+            $tmpdata['appraisal'] = explode(':',$data['AB'])[0];
             if( empty($tmpdata['appraisal']) ||!is_numeric($tmpdata['appraisal']) || !in_array($tmpdata['appraisal'],[1,2,3,4,5,6,7,8]) ){
                 $tmpdata['appraisal'] = 0;
             }
