@@ -801,29 +801,25 @@ class ProjectController extends BaseController
 
             $group = $this->distribute($group, $leaders, $masters, $members, $auditornum, $masternum);
 
-            var_dump($group);
-            exit();
-
             foreach ($group as $key => $e ){
-                $pepProject = new PeopleProjectDao();
-                $pepProject->pid = $e['user']['id'];
-                $pepProject->groupid = $key;
-                $pepProject->roletype = $pepProject::ROLE_TYPE_GROUP_LEADER;
-                $pepProject->islock = $pepProject::NOT_LOCK;
-                $pepProject->projid = $projectId;
-                $pepProject->save();
-                $person = UserDao::findOne($e['user']['id']);
-                $person->isaudit = UserDao::IS_AUDIT;
-                $person->isjob = UserDao::IS_JOB;
-                $person->save();
-
+                foreach ($e as $user){
+                    $pepProject = new PeopleProjectDao();
+                    $pepProject->pid = $user['user']['id'];
+                    $pepProject->groupid = $key;
+                    $pepProject->roletype = $user['role'];
+                    $pepProject->islock = $pepProject::NOT_LOCK;
+                    $pepProject->projid = $projectId;
+                    $pepProject->save();
+                    $person = UserDao::findOne($user['user']['id']);
+                    $person->isaudit = UserDao::IS_AUDIT;
+                    $person->isjob = UserDao::IS_JOB;
+                    $person->save();
+                }
             }
 
             $transaction->commit();
         } catch(\Exception $e){
-            var_dump($e->getMessage());
-            exit();
-            Log::fatal($e->getMessage());
+            Log::fatal(printf("创建错误！%s, %s", $e->getMessage(), $e->getTraceAsString()));
             $transaction->rollBack();
             return $this->outputJson('',
                 ErrorDict::getError(ErrorDict::ERR_INTERNAL, "创建项目内部错误！")
@@ -841,19 +837,23 @@ class ProjectController extends BaseController
 
 
     private function distribute($group, $leaders, $masters, $members, $membersNum, $masterNum) {
-        $tmp = $group;
-        foreach ($tmp as $key => $e){
+        $tmpGroup = $group;
+        foreach ($tmpGroup as $key => $e){
             if(!empty($leaders)){
                 $group[$key][] = [
                     'user' => array_pop($leaders),
                     'role' => PeopleProjectDao::ROLE_TYPE_GROUP_LEADER
                 ];
+            }else{
+                break;
             }
+
         }
 
-        $tmp = $group;
+        $tmpGroup = $group;
+
         while ($masterNum > 0) {
-            foreach ($tmp as $key => $e){
+            foreach ($tmpGroup as $key => $e){
                 if(!empty($masters)){
                     if(isset($group[$key][0])){
                         $locatin = explode($group[$key][0]['location'], ",");
@@ -869,7 +869,7 @@ class ProjectController extends BaseController
                                 'user' => $tmp,
                                 'role' => PeopleProjectDao::ROLE_TYPE_MASTER
                             ];
-                            $masters = array_values(array_filter($masters, function($e) use($tmp){
+                            $masters = array_values(array_filter($masters ,function($e) use ($tmp){
                                 return $e['id'] !== $tmp['id'];
                             }));
                             $masterNum--;
@@ -879,47 +879,74 @@ class ProjectController extends BaseController
                         $group[$key][] = $masters;
                         $masterNum--;
                     }
+                }else{
+                    $masterNum = 0;
+                    break;
                 }
             }
         }
+
         $members = array_merge($masters, $members);
+        $membersIdMap = [];
+        foreach ($members as $e){
+            $membersIdMap[$e['id']] = $e;
+        }
+        $tmpGroup = $group;
         while ($membersNum > 0){
-            foreach ($tmp as $key => $e){
+            foreach ($tmpGroup as $key => $value){
                 if(!empty($members)){
                     $girls = array_filter($group[$key], function($e){
-                        return $e['sex'] === UserDao::$sexName['女'];
+                        return $e['user']['sex'] === UserDao::$sexName['女'];
                     });
+
                     if(count($girls) > 0 && count($girls) % 2 !== 0){
                         $girlMembers = array_filter($members, function($e){
-                            return $e['sex'] === UserDao::$sexName['女'];
+                            return $e['user']['sex'] === UserDao::$sexName['女'];
                         });
                         $tmp = array_pop($girlMembers);
+                        if(!$tmp){
+                            $group[$key] = array_values(array_filter($group[$key], function($e) use($tmp){
+                                return $e['user']['id'] !== $tmp['user']['id'];
+                            }));
+                            $membersNum++;
+                            continue;
+                        }
                         $group[$key][] = [
                             'user' => $tmp,
                             'role' => PeopleProjectDao::ROLE_TYPE_GROUPER
                         ];
-                        $members = array_filter($members, function($e) use($tmp){
+                        $members = array_values(array_filter($members ,function($e) use ($tmp){
+                            if(!isset($tmp['id']) || !isset($e['id'])){
+                                return false;
+                            }
                             return $e['id'] !== $tmp['id'];
-                        });
+                        }));
                         $membersNum--;
                     }else{
                         if($membersNum >= count($group) ){
                             $tmp = array_pop($members);
                         }else{
                             $menMembers = array_filter($members, function($e){
-                                return $e['sex'] === UserDao::$sexName['男'];
+                                return $e['user']['sex'] === UserDao::$sexName['男'];
                             });
                             $tmp = array_pop($menMembers);
                         }
+
                         $group[$key][] = [
                             'user' => $tmp,
                             'role' => PeopleProjectDao::ROLE_TYPE_GROUPER
                         ];
-                        $members = array_filter($members, function($e) use($tmp){
+                        $members = array_values(array_filter($members ,function($e) use ($tmp){
+                            if(!isset($tmp['id']) || !isset($e['id'])){
+                                return false;
+                            }
                             return $e['id'] !== $tmp['id'];
-                        });
+                        }));
                         $membersNum--;
                     }
+                } else {
+                    $membersNum = 0;
+                    break;
                 }
             }
         }
