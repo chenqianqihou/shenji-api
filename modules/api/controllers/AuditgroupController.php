@@ -535,6 +535,7 @@ class AuditgroupController extends BaseController {
                 'sex' => $e['sex'] == 1 ? "男" : "女",
                 'isjob' => $e['isjob'] == 1 ? "在点" : "不在点",
                 'type' => OrganizationDao::getOTypeMsg($e['type']),
+                'location' => $e['location']
             ];
             if($lockNum > 0){
                 $tmp['islock'] = "锁定";
