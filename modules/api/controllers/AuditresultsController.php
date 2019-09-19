@@ -289,7 +289,7 @@ class AuditresultsController extends BaseController
         //header('Content-Type: application/octet-stream');
         header('Content-Type: application/x-download;charset=utf-8');
         header('Access-Control-Expose-Headers: Content-Disposition');
-        header('Content-Disposition: attachment;filename="shenjichengguo.xlsx"');
+        header('Content-Disposition: attachment;filename="审计成果.xlsx"');
         header('Cache-Control: max-age=0');
         // If you're serving to IE 9, then the following may be needed
         header('Cache-Control: max-age=1');
