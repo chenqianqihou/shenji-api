@@ -480,6 +480,7 @@ class AuditgroupController extends BaseController {
         $jobstatus = intval($this->getParam('jobstatus', 0));
         $length = intval($this->getParam('length', 0));
         $page = intval($this->getParam('page', 0));
+        $query = $this->getParam('query', '');
 
         if(!in_array($ismedium, [1, 2])){
             return $this->outputJson('',
@@ -519,6 +520,13 @@ class AuditgroupController extends BaseController {
         if($jobstatus){
             $con = $con->Where(['people.isjob' => $jobstatus]);
         }
+
+        if($query){
+            $con = $con->orWhere(['like', 'people.pid', $query])
+                ->orWhere(['like', 'people.name', $query])
+                ->orWhere(['like', 'organization.name', $query]);
+        }
+
         $countCon = clone $con;
 
         $peoples = $con->andWhere(['in', 'people.type', $types])->limit($length)->offset(($page - 1) * $length)->all();
@@ -535,7 +543,8 @@ class AuditgroupController extends BaseController {
                 'sex' => $e['sex'] == 1 ? "男" : "女",
                 'isjob' => $e['isjob'] == 1 ? "在点" : "不在点",
                 'type' => OrganizationDao::getOTypeMsg($e['type']),
-                'location' => $e['location']
+                'location' => $e['location'],
+                'oname' => $e['oname']
             ];
             if($lockNum > 0){
                 $tmp['islock'] = "锁定";
