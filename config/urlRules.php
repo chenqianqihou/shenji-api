@@ -46,6 +46,12 @@ return [
     'api/project/editinfo' => 'api/project/editinfo',
     'api/project/excel' => 'api/project/excel',
     'api/project/excelupload' => 'api/project/excelupload',
+    //拆分接口----------------------start
+    'api/project/sure' => 'api/project/sure',
+    'api/project/begin' => 'api/project/begin',
+    'api/project/judge' => 'api/project/judge',
+    'api/project/finishJudge' => 'api/project/finishJudge',
+    //拆分接口----------------------end
 
     'api/auditgroup/jugechange' => 'api/auditgroup/jugechange',
     'api/auditgroup/add' => 'api/auditgroup/add',
