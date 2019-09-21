@@ -2246,7 +2246,7 @@ class ProjectController extends BaseController
      * 审理结束（为了权限暂时拆分）
      *
      */
-    public function actionFinishJudge() {
+    public function actionFinishjudge() {
         $this->defineMethod = 'POST';
         $this->defineParams = array (
             'id' => array (

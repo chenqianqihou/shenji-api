@@ -50,10 +50,10 @@ return [
     'api/project/sure' => 'api/project/sure',
     'api/project/begin' => 'api/project/begin',
     'api/project/judge' => 'api/project/judge',
-    'api/project/finishJudge' => 'api/project/finishJudge',
+    'api/project/finishJudge' => 'api/project/finishjudge',
 
-    'api/review/zhongjie/operate' => 'api/review/zhongjieoperate',
-    'api/review/neishen/operate' => 'api/review/neishenoperate',
+    'api/review/zhongjieoperate' => 'api/review/zhongjieoperate',
+    'api/review/neishenoperate' => 'api/review/neishenoperate',
     //拆分接口----------------------end
 
     'api/auditgroup/jugechange' => 'api/auditgroup/jugechange',
