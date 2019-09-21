@@ -39,6 +39,7 @@ class ReviewDao extends ActiveRecord{
 
     const ZHONGJIE_TYPE = 1;
     const NEISHEN_TYPE = 2;
+
     public static $ptypeMsg = [
         self::ZHONGJIE_TYPE => '中介',
         self::NEISHEN_TYPE => '内审'

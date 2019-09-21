@@ -51,6 +51,9 @@ return [
     'api/project/begin' => 'api/project/begin',
     'api/project/judge' => 'api/project/judge',
     'api/project/finishJudge' => 'api/project/finishJudge',
+
+    'api/review/zhongjie/operate' => 'api/review/zhongjieoperate',
+    'api/review/neishen/operate' => 'api/review/neishenoperate',
     //拆分接口----------------------end
 
     'api/auditgroup/jugechange' => 'api/auditgroup/jugechange',

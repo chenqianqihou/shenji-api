@@ -64,7 +64,7 @@ class ReviewController extends BaseController{
 
         $con = (new \yii\db\Query())
             ->from('review')
-            ->select('review.id, project.projectnum, project.name, project.projyear, project.projlevel, project.plantime, project.projtype, organization.name as projorgan, project.id as projid, review.status')
+            ->select('review.id, project.projectnum, project.name, project.projyear, project.projlevel, project.plantime, project.projtype, organization.name as projorgan, project.id as projid, review.status, review.ptype')
             ->innerJoin('project', 'project.id = review.projid')
             ->innerJoin('organization', 'organization.id = project.projorgan');
 
@@ -106,7 +106,8 @@ class ReviewController extends BaseController{
                 "projorgan" => $e['projorgan'],
                 "projyear" => $e['projyear'],
                 "projlevel" => $e['projlevel'],
-                "plantime" => $e['plantime']
+                "plantime" => $e['plantime'],
+                "ptype" => ReviewDao::$ptypeMsg[$e['ptype']] ?? ''
             ];
             if($e['projtype'] == UserDao::$typeToName['审计机关']){
                 $tmp['status'] = PeopleReviewDao::REVIEW_NO_NEED_TYPE;
@@ -357,6 +358,164 @@ class ReviewController extends BaseController{
 
         return $this->outputJson('', ErrorDict::SUCCESS);
     }
+
+    /**
+     * 人员调配中介审核
+     *
+     * @return mixed]
+     */
+    public function actionZhongjieoperate(){
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'id' => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
+            'status' => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+
+        $id = $this->getParam('id', '');
+        $status = intval($this->getParam('status', 0));
+
+        if(!in_array($status, [1, 2])){
+            return $this->outputJson('', ErrorDict::G_PARAM);
+        }
+
+        $rew = ReviewDao::findOne($id);
+        if(!$rew){
+            return $this->outputJson('', ErrorDict::G_PARAM);
+        }
+
+        $transaction = ReviewDao::getDb()->beginTransaction();
+        try {
+            $rew->status = $status;
+            $rew->save();
+
+            if($status == ReviewDao::STATUS_FAILED){
+                $pids = PeopleReviewDao::find()
+                    ->where(['rid' => $id])
+                    ->groupBy('pid')
+                    ->select('pid')
+                    ->asArray()
+                    ->all();
+                $pids = array_map(function($e){
+                    return $e["pid"];
+                }, $pids);
+
+                if(count($pids) > 0){
+                    $pros = PeopleProjectDao::find()
+                        ->where(['projid' => $rew->projid])
+                        ->andWhere(['in', 'pid', $pids])
+                        ->all();
+                    foreach ($pros as $pro){
+                        $pro->delete();
+                    }
+                }
+            }
+
+
+            $transaction->commit();
+        } catch(\Exception $e) {
+            $transaction->rollBack();
+            Log::fatal($e->getTrace());
+            return $this->outputJson('', ErrorDict::ERR_INTERNAL);
+        } catch(\Throwable $e) {
+            $transaction->rollBack();
+            Log::fatal($e->getTrace());
+            return $this->outputJson('', ErrorDict::ERR_INTERNAL);
+        }
+
+
+        return $this->outputJson('', ErrorDict::SUCCESS);
+    }
+
+
+    /**
+     * 人员调配内审审核
+     *
+     * @return mixed]
+     */
+    public function actionNeishenoperate(){
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'id' => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
+            'status' => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+
+        $id = $this->getParam('id', '');
+        $status = intval($this->getParam('status', 0));
+
+        if(!in_array($status, [1, 2])){
+            return $this->outputJson('', ErrorDict::G_PARAM);
+        }
+
+        $rew = ReviewDao::findOne($id);
+        if(!$rew){
+            return $this->outputJson('', ErrorDict::G_PARAM);
+        }
+
+        $transaction = ReviewDao::getDb()->beginTransaction();
+        try {
+            $rew->status = $status;
+            $rew->save();
+
+            if($status == ReviewDao::STATUS_FAILED){
+                $pids = PeopleReviewDao::find()
+                    ->where(['rid' => $id])
+                    ->groupBy('pid')
+                    ->select('pid')
+                    ->asArray()
+                    ->all();
+                $pids = array_map(function($e){
+                    return $e["pid"];
+                }, $pids);
+
+                if(count($pids) > 0){
+                    $pros = PeopleProjectDao::find()
+                        ->where(['projid' => $rew->projid])
+                        ->andWhere(['in', 'pid', $pids])
+                        ->all();
+                    foreach ($pros as $pro){
+                        $pro->delete();
+                    }
+                }
+            }
+
+
+            $transaction->commit();
+        } catch(\Exception $e) {
+            $transaction->rollBack();
+            Log::fatal($e->getTrace());
+            return $this->outputJson('', ErrorDict::ERR_INTERNAL);
+        } catch(\Throwable $e) {
+            $transaction->rollBack();
+            Log::fatal($e->getTrace());
+            return $this->outputJson('', ErrorDict::ERR_INTERNAL);
+        }
+
+
+        return $this->outputJson('', ErrorDict::SUCCESS);
+    }
+
+
+
 
     /**
      * 审计成果列表
