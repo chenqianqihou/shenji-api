@@ -46,6 +46,7 @@ return [
     'api/project/editinfo' => 'api/project/editinfo',
     'api/project/excel' => 'api/project/excel',
     'api/project/excelupload' => 'api/project/excelupload',
+    'api/project/projtypenum' => 'api/project/projtypenum',
     //拆分接口----------------------start
     'api/project/sure' => 'api/project/sure',
     'api/project/begin' => 'api/project/begin',

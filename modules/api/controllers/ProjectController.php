@@ -214,8 +214,8 @@ class ProjectController extends BaseController
                     if($leaderProjType && $leaderFilternum){
                         $peoples = (new \yii\db\Query())
                             ->from("peopleproject")
-                            ->innerJoin("project", "peopleproject.projid == project.id")
-                            ->where(["project.projtype" => $leaderProjType])
+                            ->innerJoin("project", "peopleproject.projid = project.id")
+                            ->where(["project.projtype" => json_encode($leaderProjType, JSON_UNESCAPED_UNICODE)])
                             ->andWhere(["project.projorgan" => $organization->id])
                             ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_GROUP_LEADER])
                             ->groupBy("peopleproject.pid")
@@ -256,8 +256,8 @@ class ProjectController extends BaseController
                     if($masterProjType && $masterFilternum){
                         $peoples = (new \yii\db\Query())
                             ->from("peopleproject")
-                            ->innerJoin("project", "peopleproject.projid == project.id")
-                            ->where(["project.projtype" => $masterProjType])
+                            ->innerJoin("project", "peopleproject.projid = project.id")
+                            ->where(["project.projtype" => json_encode($masterProjType, JSON_UNESCAPED_UNICODE)])
                             ->andWhere(["project.projorgan" => $organization->id])
                             ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_MASTER])
                             ->groupBy("peopleproject.pid")
@@ -328,7 +328,7 @@ class ProjectController extends BaseController
                     if($leaderProjType && $leaderFilternum){
                         $peoples = (new \yii\db\Query())
                             ->from("peopleproject")
-                            ->innerJoin("project", "peopleproject.projid == project.id")
+                            ->innerJoin("project", "peopleproject.projid = project.id")
                             ->where(["project.projtype" => $leaderProjType])
                             ->andWhere(["project.projorgan" => $organization->id])
                             ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_GROUP_LEADER])
@@ -370,7 +370,7 @@ class ProjectController extends BaseController
                     if($masterProjType && $masterFilternum){
                         $peoples = (new \yii\db\Query())
                             ->from("peopleproject")
-                            ->innerJoin("project", "peopleproject.projid == project.id")
+                            ->innerJoin("project", "peopleproject.projid = project.id")
                             ->where(["project.projtype" => $masterProjType])
                             ->andWhere(["project.projorgan" => $organization->id])
                             ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_MASTER])
@@ -457,7 +457,7 @@ class ProjectController extends BaseController
                     if($leaderProjType && $leaderFilternum){
                         $peoples = (new \yii\db\Query())
                             ->from("peopleproject")
-                            ->innerJoin("project", "peopleproject.projid == project.id")
+                            ->innerJoin("project", "peopleproject.projid = project.id")
                             ->where(["project.projtype" => $leaderProjType])
                             ->andWhere(["project.projorgan" => $projorgan])
                             ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_GROUP_LEADER])
@@ -499,7 +499,7 @@ class ProjectController extends BaseController
                     if($masterProjType && $masterFilternum){
                         $peoples = (new \yii\db\Query())
                             ->from("peopleproject")
-                            ->innerJoin("project", "peopleproject.projid == project.id")
+                            ->innerJoin("project", "peopleproject.projid = project.id")
                             ->where(["project.projtype" => $masterProjType])
                             ->andWhere(["project.projorgan" => $projorgan])
                             ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_MASTER])
@@ -586,7 +586,7 @@ class ProjectController extends BaseController
                     if($leaderProjType && $leaderFilternum){
                         $peoples = (new \yii\db\Query())
                             ->from("peopleproject")
-                            ->innerJoin("project", "peopleproject.projid == project.id")
+                            ->innerJoin("project", "peopleproject.projid = project.id")
                             ->where(["project.projtype" => $leaderProjType])
                             ->andWhere(["project.projorgan" => $projorgan])
                             ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_GROUP_LEADER])
@@ -628,7 +628,7 @@ class ProjectController extends BaseController
                     if($masterProjType && $masterFilternum){
                         $peoples = (new \yii\db\Query())
                             ->from("peopleproject")
-                            ->innerJoin("project", "peopleproject.projid == project.id")
+                            ->innerJoin("project", "peopleproject.projid = project.id")
                             ->where(["project.projtype" => $masterProjType])
                             ->andWhere(["project.projorgan" => $projorgan])
                             ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_MASTER])
@@ -696,7 +696,7 @@ class ProjectController extends BaseController
                     if($leaderProjType && $leaderFilternum){
                         $peoples = (new \yii\db\Query())
                             ->from("peopleproject")
-                            ->innerJoin("project", "peopleproject.projid == project.id")
+                            ->innerJoin("project", "peopleproject.projid = project.id")
                             ->where(["project.projtype" => $leaderProjType])
                             ->andWhere(["project.projorgan" => $projorgan])
                             ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_GROUP_LEADER])
@@ -738,7 +738,7 @@ class ProjectController extends BaseController
                     if($masterProjType && $masterFilternum){
                         $peoples = (new \yii\db\Query())
                             ->from("peopleproject")
-                            ->innerJoin("project", "peopleproject.projid == project.id")
+                            ->innerJoin("project", "peopleproject.projid = project.id")
                             ->where(["project.projtype" => $masterProjType])
                             ->andWhere(["project.projorgan" => $projorgan])
                             ->andWhere(["peopleproject.roletype" => PeopleProjectDao::ROLE_TYPE_MASTER])
@@ -2296,6 +2296,49 @@ class ProjectController extends BaseController
 
 
         return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
+
+    }
+
+
+    /**
+     * 获取项目类型的人数
+     *
+     */
+    public function actionProjtypenum() {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'projtype' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'type' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+        );
+
+        $projtype = $this->getParam('projtype', []);
+        $type = intval($this->getParam('type', 0));
+
+        if(!in_array($type, [PeopleProjectDao::ROLE_TYPE_MASTER, PeopleProjectDao::ROLE_TYPE_GROUP_LEADER])){
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, "类型不对!"));
+        }
+
+
+        $peoples = (new \yii\db\Query())
+            ->from("peopleproject")
+            ->innerJoin("project", "peopleproject.projid = project.id")
+            ->where(["project.projtype" => json_encode($projtype, JSON_UNESCAPED_UNICODE)])
+            ->andWhere(["peopleproject.roletype" => $type])
+            ->groupBy("peopleproject.pid")
+            ->select(["count(*) as pidnum"])
+            ->all();
+
+        $peoples = array_map(function($e){
+            return $e['pidnum'];
+        }, $peoples);
+
+        return $this->outputJson($peoples, ErrorDict::getError(ErrorDict::SUCCESS));
 
     }
 }
