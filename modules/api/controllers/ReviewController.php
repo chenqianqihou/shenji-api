@@ -262,10 +262,16 @@ class ReviewController extends BaseController{
         $peoples = (new \yii\db\Query())
             ->from('peopleproject')
             ->innerJoin('people', 'peopleproject.pid = people.id')
-            ->select('people.pid, people.name, people.sex, people.address as location, peopleproject.roletype as projrole')
+            ->select('people.pid, people.name, people.type, people.sex, people.address as location, peopleproject.roletype as projrole, people.location as organization')
             ->where(['peopleproject.projid' => $proid])
             ->andWhere(['in', 'people.id', $pids])
             ->all();
+        $peoples = array_map(function($e){
+            $e['sex'] = UserDao::$sex[$e['sex']] ?? '';
+            $e['type'] = UserDao::$type[$e['type']] ?? '';
+            $e['projrole'] = PeopleProjectDao::$ROLES[$e['projrole']] ?? '';
+            return $e;
+        }, $peoples);
 
 
         $ret['people']['list'] = $peoples;

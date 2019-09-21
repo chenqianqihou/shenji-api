@@ -26,6 +26,12 @@ class PeopleProjectDao extends ActiveRecord{
     const ROLE_TYPE_GROUP_LEADER = 1;
     const ROLE_TYPE_MASTER = 2;
 
+    public static $ROLES = [
+        self::ROLE_TYPE_GROUPER => "成员",
+        self::ROLE_TYPE_GROUP_LEADER => "组长",
+        self::ROLE_TYPE_MASTER => "主审",
+    ];
+
     const IS_LOCK = 1;
     const NOT_LOCK = 2;
 }
