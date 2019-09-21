@@ -450,13 +450,9 @@ class AuditgroupController extends BaseController {
     public function actionUserlist() {
         $this->defineMethod = 'POST';
         $this->defineParams = array (
-            'ismedium' => array (
-                'require' => true,
-                'checker' => 'isNumber',
-            ),
-            'isinternal' => array (
-                'require' => true,
-                'checker' => 'isNumber',
+            'organType' => array (
+                'require' => false,
+                'checker' => 'noCheck',
             ),
             'jobstatus' => array (
                 'require' => false,
@@ -475,22 +471,27 @@ class AuditgroupController extends BaseController {
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
-        $ismedium = intval($this->getParam('ismedium', 0));
-        $isinternal = intval($this->getParam('isinternal', 0));
+        $organType = $this->getParam('organType', '');
         $jobstatus = intval($this->getParam('jobstatus', 0));
         $length = intval($this->getParam('length', 0));
         $page = intval($this->getParam('page', 0));
         $query = $this->getParam('query', '');
 
-        if(!in_array($ismedium, [1, 2])){
-            return $this->outputJson('',
-                ErrorDict::getError(ErrorDict::G_PARAM, 'ismedium输入不合法！')
-            );
+        $con = (new \yii\db\Query())
+            ->from('people')
+            ->join('INNER JOIN', 'organization', 'organization.id = people.organid')
+            ->select('people.id,people.pid, people.name, people.sex, people.isjob, people.type, organization.name AS oname, people.location');
+
+
+        $organTypes = explode(",", $organType);
+        $types = [];
+        foreach ($organTypes as $ot) {
+            if(is_numeric($ot)){
+                $types[] = $ot;
+            }
         }
-        if(!in_array($isinternal, [1, 2])){
-            return $this->outputJson('',
-                ErrorDict::getError(ErrorDict::G_PARAM, 'isinternal输入不合法！')
-            );
+        if(count($types) != 0){
+            $con = $con->andWhere(['in', 'people.type', $types]);
         }
 
 
@@ -500,36 +501,30 @@ class AuditgroupController extends BaseController {
             );
         }
 
-        $con = (new \yii\db\Query())
-            ->from('people')
-            ->join('INNER JOIN', 'organization', 'organization.id = people.organid')
-            ->select('people.id,people.pid, people.name, people.sex, people.isjob, people.type, organization.name AS oname, people.location');
-
-        $types = [
-            UserDao::$typeToName['审计机关']
-        ];
-        if($ismedium == 1){
-            $types[] = UserDao::$typeToName['中介机构'];
-        }
-
-        if($isinternal == 1){
-            $types[] = UserDao::$typeToName['内审机构'];
-        }
-
 
         if($jobstatus){
             $con = $con->Where(['people.isjob' => $jobstatus]);
         }
 
         if($query){
-            $con = $con->orWhere(['like', 'people.pid', $query])
+            $tmp = (new \yii\db\Query())
+                ->from('people')
+                ->join('INNER JOIN', 'organization', 'organization.id = people.organid')
+                ->select("people.id")
+                ->andWhere(['like', 'people.pid', $query])
                 ->orWhere(['like', 'people.name', $query])
-                ->orWhere(['like', 'organization.name', $query]);
+                ->orWhere(['like', 'organization.name', $query])
+                ->all();
+            $tmp = array_map(function($e){
+                return $e['id'];
+            }, $tmp);
+
+            $con->andWhere(['in', 'people.id', $tmp]);
         }
 
         $countCon = clone $con;
 
-        $peoples = $con->andWhere(['in', 'people.type', $types])->limit($length)->offset(($page - 1) * $length)->all();
+        $peoples = $con->limit($length)->offset(($page - 1) * $length)->all();
 
         $ret = array_map(function($e){
             $lockNum = PeopleProjectDao::find()
