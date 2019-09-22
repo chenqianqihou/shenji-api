@@ -409,6 +409,20 @@ class UserService
         $passwd = md5('12345678');
         $tr = Yii::$app->get('db')->beginTransaction();
         try {
+            $isAudit = UserDao::$isAuditToName['不是'];
+            $roleDao = new RoleDao();
+            foreach ($role as $rid) {
+                //判断是否角色为“审计组员”
+                if ($rid == 8) {
+                    $isAudit = UserDao::$isAuditToName['是'];
+                }
+                $roleDao->addPeopleRole($pid, $rid);
+            }
+            if ($isAudit == UserDao::$isAuditToName['是']) {
+                $isJob = UserDao::$isJobToName['不在点'];
+            }else {
+                $isJob = UserDao::$isJobToName['-'];
+            }
             //不同审计人员类别，填写不同的数据
             if ($type == UserDao::$typeToName['审计机关']) {
                 $department = intval($params['department']);
@@ -462,15 +476,14 @@ class UserService
                             $trainDao->addTrain($pid, $train);
                         }
                     }else {
-                        $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '业务培训情况填写错误');
-                        $ret = $this->outputJson('', $error);
-                        return $ret;
+                        Log::addLogNode('addNewUser', 'train is error');
+                        return false;
                     }
                 }
                 //录入数据
                 $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, $department, $level, $phone, $email,
                     $passwd, $cardid, $address, $education, $school, $major, $political, $nature,
-                    '', '', $position, $location, $workbegin, $auditbegin, $comment);
+                    '', '', $position, $location, $workbegin, $auditbegin, $comment, $isAudit, $isJob);
 
             }else {
                 $specialties = $params['specialties'];
@@ -493,12 +506,7 @@ class UserService
                 $workbegin = date('Y-m-d H:i:s', intval($workbegin));
                 $userService->AddPeopleInfo($pid, $name, $sex, $type, $organization, 0, $level, $phone, $email,
                     $passwd, $cardid, $address, $education, $school, $major, $political, 0,
-                    $specialties, $achievements, $position, $location, $workbegin, $curTime, $comment);
-            }
-            //todo role id 是否准确
-            $roleDao = new RoleDao();
-            foreach ($role as $rid) {
-                $roleDao->addPeopleRole($pid, $rid);
+                    $specialties, $achievements, $position, $location, $workbegin, $curTime, $comment, $isAudit, $isJob);
             }
             $tr->commit();
         }catch (Exception $e) {
