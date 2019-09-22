@@ -1926,18 +1926,40 @@ class ProjectController extends BaseController
                 $departlist[] = array_keys($pm)[0].':'.$org['name'].'-'.array_values($pm)[0];    
             }    
         }
-        //$departstr = join("\n",$departlist);
-        //print_r( $departstr );die;
         $nowdk = 0;
         foreach( $departlist as $dk=>$dv){
             $nowdk = $dk+1;
             $spreadsheet->getActiveSheet()->getCell('AA'.$nowdk)->setValue( $dv );    
         }
 
+        //生成所有贵州省市区列表
+        $districts = json_decode(Yii::$app->params['districts'],true);
+        $guizhou = $districts['520000'];
+        $districts_arr = [];
+        foreach( $guizhou as $gk=>$gv ){
+            foreach( $districts[$gk] as $sk=>$sv ) {
+                $districts_arr[] = $sk.':'.$gv.'_'.$sv;    
+            }
+        }
+
+        $dnowdk = 0;
+        foreach( $districts_arr as $dk=>$dv){
+            $dnowdk = $dk+1;
+            $spreadsheet->getActiveSheet()->getCell('AB'.$dnowdk)->setValue( $dv );    
+        }
+
+
+        $lnowdk = 0;
+        $larr = ["_1.财政类","_2.社会保险基金类","_3.企业金融类","_4.经济责任类","_5.政策跟踪"];
+        foreach($larr as $lk=>$lv) {
+            $lnowdk = $lk+1;
+            $spreadsheet->getActiveSheet()->getCell('AC'.$lnowdk)->setValue( $lv );    
+        }
+
         $ss = 2;
         $se = 1140;
         for($ss = 2; $ss < $se;$ss++){
-            $validation = $spreadsheet->getActiveSheet()->getCell('E'.$ss)->getDataValidation();
+            $validation = $spreadsheet->getActiveSheet()->getCell('G'.$ss)->getDataValidation();
             $validation->setType(DataValidation::TYPE_LIST);
             $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
             $validation->setAllowBlank(true);
@@ -1949,6 +1971,98 @@ class ProjectController extends BaseController
             $validation->setPromptTitle('Pick from list');
             $validation->setPrompt('Please pick a value from the drop-down list.');
             $validation->setFormula1('=$AA$1:$AA$'.$nowdk);
+
+            $validation = $spreadsheet->getActiveSheet()->getCell('F'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list.');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a value from the drop-down list.');
+            $validation->setFormula1('=$AB$1:$AB$'.$dnowdk);
+
+            $validation = $spreadsheet->getActiveSheet()->getCell('H'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list.');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a value from the drop-down list.');
+            $validation->setFormula1('=$AC$1:$AC$'.$lnowdk);
+
+            $validation = $spreadsheet->getActiveSheet()->getCell('I'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list.');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a value from the drop-down list.');
+            $validation->setFormula1('=INDIRECT(H'.$ss.')');
+
+            $validation = $spreadsheet->getActiveSheet()->getCell('K'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list.');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a value from the drop-down list.');
+            $validation->setFormula1('=$AC$1:$AC$'.$lnowdk);
+
+            $validation = $spreadsheet->getActiveSheet()->getCell('L'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list.');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a value from the drop-down list.');
+            $validation->setFormula1('=INDIRECT(K'.$ss.')');
+
+            $validation = $spreadsheet->getActiveSheet()->getCell('O'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list.');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a value from the drop-down list.');
+            $validation->setFormula1('=$AC$1:$AC$'.$lnowdk);
+
+            $validation = $spreadsheet->getActiveSheet()->getCell('P'.$ss)->getDataValidation();
+            $validation->setType(DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+            $validation->setAllowBlank(true);
+            $validation->setShowInputMessage(true);
+            $validation->setShowErrorMessage(true);
+            $validation->setShowDropDown(true);
+            $validation->setErrorTitle('Input error');
+            $validation->setError('Value is not in list.');
+            $validation->setPromptTitle('Pick from list');
+            $validation->setPrompt('Please pick a value from the drop-down list.');
+            $validation->setFormula1('=INDIRECT(O'.$ss.')');
+
         }
 
         // Redirect output to a client’s web browser (Xlsx)
