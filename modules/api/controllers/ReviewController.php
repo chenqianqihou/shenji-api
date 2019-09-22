@@ -639,15 +639,16 @@ class ReviewController extends BaseController{
         $violation = ViolationDao::findOne($info['problemid']);
         $ret['audit_result']['problemtype'] = $violation['name'] ?? '';
 
-        $violation = ViolationDao::findOne($info['problemdetailid']);
-        $ret['audit_result']['problemdetail'] = $violation['name'] ?? '';
+//        $violation = ViolationDao::findOne($info['problemdetailid']);
+//        $ret['audit_result']['problemdetail'] = $violation['name'] ?? '';
 
         $ret['move_result_info'] = [
             "istransfer" =>  $info['istransfer'], #是否移送事项0为不填1是2否
             "processorgans" =>  $info['processorgans'] , #移送机关，1司法机关2纪检监察机关3有关部门
             "transferamount" =>  $info['transferamount'], #移送处理金额
-            "transferpeoplenum" => $info['transferpeoplenum'], #移送人数
-            "transferpeopletype" => $info['transferpeopletype'], #移送人员类型，0不选1地厅级以上、2县处级、3乡科级、4其他
+            "transferpeople" => $info['transferpeople'],
+//            "transferpeoplenum" => $info['transferpeoplenum'], #移送人数
+//            "transferpeopletype" => $info['transferpeopletype'], #移送人员类型，0不选1地厅级以上、2县处级、3乡科级、4其他
             "transferresult" => $info['transferresult'], #移送处理结果
         ];
         $ret['total_result_info'] = [
