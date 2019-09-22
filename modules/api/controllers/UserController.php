@@ -1305,7 +1305,7 @@ class UserController extends BaseController
 
         //获取机构列表
         $organService = new OrganizationService();
-        $organList = $organService->getOrganizationListByType(3,true);
+        $organList = $organService->getOrganizationListByType(UserDao::$typeToName['审计机关'],true);
         $organDict = [];
         foreach( $organList as $ov){
             $organDict[$ov['id']]  = $ov;   
@@ -1324,7 +1324,7 @@ class UserController extends BaseController
         $insertData = [];
         foreach( $sheetData as $data) {
             $tmpdata = [];
-            $tmpdata['type'] = 1; //永远是审计机关;
+            $tmpdata['type'] = UserDao::$typeToName['审计机关']; //永远是审计机关;
             $tmpdata['name'] = $data['A'];
             if( empty($tmpdata['name']) ){
                 continue;    
