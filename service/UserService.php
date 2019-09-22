@@ -2,6 +2,7 @@
 
 namespace app\service;
 
+use app\classes\ErrorDict;
 use app\classes\Log;
 use app\models\AuditGroupDao;
 use app\models\ExpertiseDao;
@@ -308,6 +309,7 @@ class UserService
 
         // 参数校验
         if(!array_key_exists($type, UserDao::$type)){
+            Log::addLogNode('addNewUser', 'type is error');
             return false;
         }
         $needed = [
@@ -328,6 +330,7 @@ class UserService
         }
         foreach ($needed as $e) {
             if (!in_array($e, $params)) {
+                Log::addLogNode('addNewUser', 'lost column is error');
                 return false;
             }
         }
@@ -354,24 +357,30 @@ class UserService
         $organService = new OrganizationService();
         $organInfo = $organService->getOrganizationInfo($organization);
         if (!$organInfo) {
+            Log::addLogNode('addNewUser', 'organization is error');
             return false;
         }
         //校验基本信息
         $userService = new UserService();
         $existIdCard = $userService->getPeopleByIdCard($cardid);
         if ($existIdCard) {
+            Log::addLogNode('addNewUser', 'idCard is error');
             return false;
         }
         if (!isset(UserDao::$type[$type])) {
+            Log::addLogNode('addNewUser', 'type is error');
             return false;
         }
         if (!isset(UserDao::$sex[$sex])) {
+            Log::addLogNode('addNewUser', 'sex is error');
             return false;
         }
         if (!isset(UserDao::$education[$education])) {
+            Log::addLogNode('addNewUser', 'education is error');
             return false;
         }
         if (!isset(UserDao::$political[$political])) {
+            Log::addLogNode('addNewUser', 'political is error');
             return false;
         }
         $namePinyin = Pinyin::utf8_to($name);
@@ -393,6 +402,7 @@ class UserService
             }
         }
         if (!$unique) {
+            Log::addLogNode('addNewUser', 'pid is error');
             return false;
         }
         $passwd = md5('12345678');
@@ -409,19 +419,21 @@ class UserService
                 //校验所属部门信息
                 $organInfo = $organService->getOrganizationInfo($department);
                 if (!$organInfo) {
-                   return false;
+                    Log::addLogNode('addNewUser', 'department is error');
+                    return false;
                 }
                 if ($organInfo['parentid'] != $organization) {
-                   return false;
+                    Log::addLogNode('addNewUser', 'organization is error');
+                    return false;
                 }
                 //校验审计机构的其他信息
                 if (!isset(UserDao::$position[$position])) {
-                   return false;
+                    Log::addLogNode('addNewUser', 'position is error');
+                    return false;
                 }
                 if (!isset(UserDao::$nature[$nature])) {
-                    $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '岗位性质填写错误');
-                    $ret = $this->outputJson('', $error);
-                    return $ret;
+                    Log::addLogNode('addNewUser', 'nature is error');
+                    return false;
                 }
                 $workbegin = date('Y-m-d H:i:s', intval($workbegin));
                 $auditbegin = date('Y-m-d H:i:s', intval($auditbegin));
@@ -475,6 +487,7 @@ class UserService
                             $qualificationDao->addQualification($pid, $one['info'], $one['time']);
                         }
                     }else {
+                        Log::addLogNode('addNewUser', 'qualification is error');
                         return false;
                     }
                 }
