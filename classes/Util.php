@@ -90,7 +90,7 @@ class Util {
     }
 
     public static function getSexByIdcard( $idcard) {
-        $sex = substr($idcard, (strlen($idcard)==15 ? -2 : -1), 1) % 2 ? '1' : '2'; //1为男 2为女   
+        $sex = substr($idcard, (strlen($idcard)==15 ? -1 : -2), 1) % 2 == 0 ? '2' : '1'; //1为男 2为女
         return $sex;
     }
 } 

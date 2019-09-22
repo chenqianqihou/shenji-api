@@ -1414,7 +1414,7 @@ class UserController extends BaseController
                     $tmpdata['expertise'][] = $expertiseDict[$tv];    
                 }
             }
-            $tmpdata['train'] = json_encode([$data['T']]);
+            $tmpdata['train'] = explode('/',$data['T']);
             $tmpdata['workbegin'] = strtotime($data['U']);
             $tmpdata['auditbegin'] = strtotime($data['V']);
             $tmpdata['comment'] = $data['W'];
@@ -1710,15 +1710,7 @@ class UserController extends BaseController
             $tmpdata['achievements'] = $data['T'];
 
             $tmpdata['comment'] = $data['U'];
-            $tmpdata['role'] = [];
-            $roleArr = explode('/',$data['V']);
-            $roleDict = array_flip( $selectConfig['role'] );
-            foreach( $roleArr as $tv ){
-                $tv = trim( $tv );
-                if( isset($roleDict[$tv]) ){
-                    $tmpdata['role'][] = $roleDict[$tv];    
-                }
-            }
+            $tmpdata['role'] = [8];
             $insertData[] = $tmpdata;
         }
 
