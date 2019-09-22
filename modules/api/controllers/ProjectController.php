@@ -2337,7 +2337,7 @@ class ProjectController extends BaseController
             return $e['pidnum'];
         }, $peoples);
 
-        return $this->outputJson($peoples, ErrorDict::getError(ErrorDict::SUCCESS));
+        return $this->outputJson($peoples[0]??0, ErrorDict::getError(ErrorDict::SUCCESS));
 
     }
 }
