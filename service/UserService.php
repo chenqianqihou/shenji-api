@@ -312,6 +312,7 @@ class UserService
             Log::addLogNode('addNewUser', 'type is error');
             return false;
         }
+        $params['level'] = 0;
         $needed = [
             "name", "cardid", "sex", "phone", "email", "address",
             "education", "school", "major", "political", "location", "level",
@@ -329,8 +330,8 @@ class UserService
             $needed = array_merge($needed, $thirdNeeded);
         }
         foreach ($needed as $e) {
-            if (!in_array($e, $params)) {
-                Log::addLogNode('addNewUser', 'lost column is error');
+            if (!in_array($e, array_keys($params))) {
+                Log::addLogNode('addNewUser', $e . ' column lost is error');
                 return false;
             }
         }
@@ -439,8 +440,7 @@ class UserService
                 $auditbegin = date('Y-m-d H:i:s', intval($auditbegin));
                 //todo 判断techtitle ID是否存在
                 $techtitleDao = new TechtitleDao();
-                $techtitleIdArr = explode(',', $techtitle);
-                foreach ($techtitleIdArr as $tid) {
+                foreach ($techtitle as $tid) {
                     $tid = intval($tid);
                     if ($tid) {
                         $techtitleDao->addPeopletitle($pid, $tid);
@@ -448,8 +448,7 @@ class UserService
                 }
                 //todo 判断expertise ID是否存在
                 $expertiseDao = new ExpertiseDao();
-                $expertiseIdArr = explode(',', $expertise);
-                foreach ($expertiseIdArr as $eid) {
+                foreach ($expertise as $eid) {
                     $eid = intval($eid);
                     if ($eid) {
                         $expertiseDao->addPeopleExpertise($pid, $eid);
@@ -498,8 +497,7 @@ class UserService
             }
             //todo role id 是否准确
             $roleDao = new RoleDao();
-            $roleIdArr = explode(',', $role);
-            foreach ($roleIdArr as $rid) {
+            foreach ($role as $rid) {
                 $roleDao->addPeopleRole($pid, $rid);
             }
             $tr->commit();
