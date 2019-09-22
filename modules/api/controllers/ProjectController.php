@@ -2315,10 +2315,15 @@ class ProjectController extends BaseController
                 'require' => true,
                 'checker' => 'isNumber',
             ),
+            'filterNum' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
         );
 
         $projtype = $this->getParam('projtype', []);
         $type = intval($this->getParam('type', 0));
+        $filterNum = intval($this->getParam('filterNum', 0));
 
         if(!in_array($type, [PeopleProjectDao::ROLE_TYPE_MASTER, PeopleProjectDao::ROLE_TYPE_GROUP_LEADER])){
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, "类型不对!"));
@@ -2330,14 +2335,12 @@ class ProjectController extends BaseController
             ->innerJoin("project", "peopleproject.projid = project.id")
             ->where(["project.projtype" => json_encode($projtype, JSON_UNESCAPED_UNICODE)])
             ->andWhere(["peopleproject.roletype" => $type])
+            ->groupBy("peopleproject.pid")
+            ->having([">=", "pidnum", $filterNum])
             ->select(["count(*) as pidnum"])
             ->all();
 
-        $peoples = array_map(function($e){
-            return $e['pidnum'];
-        }, $peoples);
-
-        return $this->outputJson($peoples[0]??0, ErrorDict::getError(ErrorDict::SUCCESS));
+        return $this->outputJson(count($peoples), ErrorDict::getError(ErrorDict::SUCCESS));
 
     }
 }
