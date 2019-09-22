@@ -2330,7 +2330,6 @@ class ProjectController extends BaseController
             ->innerJoin("project", "peopleproject.projid = project.id")
             ->where(["project.projtype" => json_encode($projtype, JSON_UNESCAPED_UNICODE)])
             ->andWhere(["peopleproject.roletype" => $type])
-            ->groupBy("peopleproject.pid")
             ->select(["count(*) as pidnum"])
             ->all();
 
