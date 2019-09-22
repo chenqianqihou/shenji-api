@@ -1710,15 +1710,7 @@ class UserController extends BaseController
             $tmpdata['achievements'] = $data['T'];
 
             $tmpdata['comment'] = $data['U'];
-            $tmpdata['role'] = [];
-            $roleArr = explode('/',$data['V']);
-            $roleDict = array_flip( $selectConfig['role'] );
-            foreach( $roleArr as $tv ){
-                $tv = trim( $tv );
-                if( isset($roleDict[$tv]) ){
-                    $tmpdata['role'][] = $roleDict[$tv];    
-                }
-            }
+            $tmpdata['role'] = [8];
             $insertData[] = $tmpdata;
         }
 
