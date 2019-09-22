@@ -495,7 +495,7 @@ class UserService
                 if ($qualificationArr) {
                     if (is_array($qualificationArr)) {
                         foreach ($qualificationArr as $one) {
-                            $one['time'] = date('Y-m-d', $one['time']);
+                            $one['time'] = date('Y-m-d', strtotime($one['time']));
                             $qualificationDao->addQualification($pid, $one['info'], $one['time']);
                         }
                     }else {
