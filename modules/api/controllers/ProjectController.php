@@ -3189,4 +3189,79 @@ class ProjectController extends BaseController
         return $this->outputJson(count($peoples), ErrorDict::getError(ErrorDict::SUCCESS));
 
     }
+
+
+    public function actionLocationorgan() {
+        $this->defineMethod = 'POST';
+        $this->defineParams = array (
+            'projlevel' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+            'location' => array (
+                'require' => true,
+                'checker' => 'noCheck',
+            ),
+        );
+
+        $projlevel = $this->getParam('projlevel', 0);
+        $location = $this->getParam('location', 0);
+
+
+        if(!in_array($projlevel, [ProjectDao::$projLevelName['省厅统一组织'], ProjectDao::$projLevelName['省厅本级'], ProjectDao::$projLevelName['县级'],
+            ProjectDao::$projLevelName['市州本级'], ProjectDao::$projLevelName['市州统一组织']]) || empty($location)){
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, "类型不对!"));
+        }
+
+
+        $all = OrganizationDao::find()->asArray()->all();
+
+
+        switch ($projlevel){
+            case ProjectDao::$projLevelName['省厅本级']:
+                $ret = array_values(array_filter($all, function($e){
+                    return $e['name'] == "贵州省审计厅";
+                }));
+                break;
+            case ProjectDao::$projLevelName['市州本级']:
+                $ret = array_values(array_filter($all, function($e){
+                    return count(explode($e['regnum'], ",")) == 2;
+                }));
+                break;
+            case ProjectDao::$projLevelName['省厅统一组织']:
+                $ret = array_values(array_filter($all, function($e) use ($location){
+                    $location = explode($location, ",");
+                    $location = [$location[0], $location[1] ?? ''];
+                    $location = join(",", $location);
+
+                    return !strpos($e['regnum'], $location);
+                }));
+                break;
+            case ProjectDao::$projLevelName['市州统一组织']:
+                $ret = array_values(array_filter($all, function($e) use ($location){
+                    $location = explode($location, ",");
+                    $location = [$location[0], $location[1] ?? ''];
+                    $location = join(",", $location);
+
+                    return !strpos($e['regnum'], $location);
+                }));
+                break;
+            case ProjectDao::$projLevelName['县级']:
+                $ret = array_values(array_filter($all, function($e){
+
+                    return count(explode($e['regnum'], ",")) == 3;
+                }));
+                break;
+        }
+
+        $data = [];
+        foreach ($ret as $e){
+            $data[] = [
+                $e['id'] => $e['name']
+            ];
+        }
+
+        return $this->outputJson($data, ErrorDict::getError(ErrorDict::SUCCESS));
+
+    }
 }
