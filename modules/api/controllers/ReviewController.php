@@ -634,6 +634,9 @@ class ReviewController extends BaseController{
             "desc" =>  $info['desc'],#问题描述
             "isfindout" =>  $info['isfindout'], #是否单独查出0为不填1是2否
             "findoutnum" => $info['findoutnum'], #查出人数
+            "havecoordinate" => $info['havecoordinate'],
+            "haveanalyse" => $info['haveanalyse'],
+            "havereport" => $info['havereport']
         ];
 
         $violation = ViolationDao::findOne($info['problemid']);
