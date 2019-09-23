@@ -451,6 +451,7 @@ class OrganizationService
             return $result;
         }
 
+/*
         if( empty($params['contactphone']) || !is_numeric($params['contactphone']) ){
             $result = [
                 'res' => false,
@@ -470,6 +471,7 @@ class OrganizationService
 
             return $result;
         }
+*/
 
         if( empty($params['officenum']) ){
             $result = [
