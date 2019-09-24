@@ -93,4 +93,21 @@ class Util {
         $sex = substr($idcard, (strlen($idcard)==15 ? -1 : -2), 1) % 2 == 0 ? '2' : '1'; //1为男 2为女
         return $sex;
     }
+
+    //根据单一的regnum返回完全的regnum，如参数为522700，返回520000,522700等
+    public static function getFullRegnum( $rn ) {
+        $n3 = $rn % 100;
+        $n2 = $rn % 10000;    
+
+        $arr = [];
+        $arr[] = intval($rn / 10000) * 10000;
+        if( $n2 != 0 ){
+            $arr[] = intval($rn/100) * 100;    
+        }
+        if( $n3 != 0){
+            $arr[] = $rn;    
+        }
+
+        return join(',',$arr);
+    }
 } 

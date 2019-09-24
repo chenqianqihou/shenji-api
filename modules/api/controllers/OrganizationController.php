@@ -4,6 +4,7 @@ namespace app\modules\api\controllers;
 
 use app\classes\BaseController;
 use app\classes\ErrorDict;
+use app\classes\Util;
 use app\models\UserDao;
 use app\service\OrganizationService;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -252,6 +253,8 @@ class OrganizationController extends BaseController
         $useParArr = [];
         foreach( $threelist as $tk=>$tr ){
             $parid = $tr['parentid'];
+            $threelist[$tk]['regnum_str'] = Util::getFullRegnum( $tr['regnum']);
+            $threelist[$tk]['officenum_str'] = Util::getFullRegnum( $tr['officenum']);
             if($parid > 0){
                 if( !isset($useParArr[$parid])){
                     $useParArr[$parid] = [];    
@@ -289,6 +292,8 @@ class OrganizationController extends BaseController
         $useParArr = [];
         foreach( $twolist as $tk=>$tr ){
             $parid = $tr['parentid'];
+            $twolist[$tk]['regnum_str'] = $tr['regnum'];
+            $twolist[$tk]['officenum_str'] = $tr['officenum'];
             if($parid > 0){
                 if( !isset($useParArr[$parid])){
                     $useParArr[$parid] = [];    
@@ -331,6 +336,8 @@ class OrganizationController extends BaseController
         $onelist = $organService->getOrganizationListByType(1);
         $oneres = [];
         foreach( $onelist as $one){
+            $one['regnum_str'] = $one['regnum'];
+            $one['officenum_str'] = $one['officenum'];
             $oneres[ $one['id'] ] = ['id'=>$one['id'],'name'=>$one['name'],'type'=>'parent','data'=>$one,'list'=>[]];
         }
         $result[] = [
