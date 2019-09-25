@@ -3271,9 +3271,8 @@ class ProjectController extends BaseController
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, "类型不对!"));
         }
 
-
-        $all = OrganizationDao::find()->asArray()->all();
-
+        $service = new OrganizationService();
+        $all = $service->getShortOrgans(UserDao::$typeToName['审计机关'], true);
 
         switch ($projlevel){
             case ProjectDao::$projLevelName['省厅本级']:
