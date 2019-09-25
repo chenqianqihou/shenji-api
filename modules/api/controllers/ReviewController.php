@@ -74,7 +74,7 @@ class ReviewController extends BaseController{
                     ErrorDict::getError(ErrorDict::G_PARAM, "projyear 输入格式不对！应为年份格式!")
                 );
             }
-            $con->where(['project.projyear' => $projyear]);
+            $con = $con->andWhere(['project.projyear' => $projyear]);
         }
 
         if ($projlevel) {
@@ -83,12 +83,12 @@ class ReviewController extends BaseController{
                     ErrorDict::getError(ErrorDict::G_PARAM, "projlevel 输入格式不对！")
                 );
             }
-            $con->where(['project.projlevel' => $projlevel]);
+            $con = $con->andWhere(['project.projlevel' => $projlevel]);
         }
 
 
         if ($query) {
-            $con->where(['or', ['like', 'project.projectnum', $query], ['like', 'project.name', $query]]);
+            $con = $con->andWhere(['or', ['like', 'project.projectnum', $query], ['like', 'project.name', $query]]);
         }
         if (!$page_size) {
             $page_size = 20;
