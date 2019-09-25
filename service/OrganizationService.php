@@ -4,6 +4,7 @@ namespace app\service;
 
 use app\models\OrganizationDao;
 use app\models\UserDao;
+use app\classes\Util;
 use Yii;
 
 class OrganizationService
@@ -30,6 +31,21 @@ class OrganizationService
             return OrganizationDao::find()->where(['otype' => $otype])->asArray()->all();
         }
         return OrganizationDao::find()->where(['otype' => $otype])->andWhere('parentid=0')->asArray()->all();
+    }
+
+
+    //只返回机构的名字和行政号码
+    public function getShortOrgans( $type,$isparent = true ) {
+        $organList = $this->getOrganizationListByType( $type,$isparent);    
+        $res = [];
+        foreach( $organList as $ov ){
+            if( $type == 3){
+                $res[] = ['name' => $ov['name'],'regnum' => Util::getFullRegnum( $ov['regnum'])];    
+            } else {
+                $res[] = ['name' => $ov['name'],'regnum' => $ov['regnum']];    
+            }
+        }
+        return $res;
     }
 
     // 查询机构列表
@@ -617,4 +633,5 @@ class OrganizationService
 
         return $res;
     }
+
 }
