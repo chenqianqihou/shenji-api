@@ -545,8 +545,8 @@ class ReviewController extends BaseController{
 
         $useCode = $this->data['ID'];
         $query = $this->getParam('query', '');
-        $page_size = intval($this->getParam('page_size', 0));
-        $page = intval($this->getParam('page', 0));
+        $page_size = intval($this->getParam('page_size', 20));
+        $page = intval($this->getParam('page', 1));
 
         $user = UserDao::find()
             ->where(['pid' => $useCode])
@@ -559,16 +559,25 @@ class ReviewController extends BaseController{
             ->from('auditresults')
             ->innerJoin('project', 'project.id = auditresults.projectid')
             ->innerJoin('people', 'people.id = auditresults.peopleid')
-            ->innerJoin('peopleproject', 'peopleproject.pid = people.id')
-            ->select('auditresults.id, project.projectnum, project.name, project.projyear, project.projlevel, people.id as pid, people.name as pname, peopleproject.roletype as projrole, auditresults.status')
+            ->select('auditresults.id, project.projectnum, project.name, project.projyear, project.projlevel, people.id as pid, people.name as pname, auditresults.status, auditresults.projectid')
             ->where(['auditresults.operatorid' => $user['id']]);
 
         if($query){
             $con = $con->where(['or', ['like', 'project.projectnum', "%{$query}%"], ['like', 'project.name', "%{$query}%"]]);
         }
+
         $countCon = clone $con;
         $total = $countCon->count();
         $list = $con->limit($page_size)->offset(($page - 1) * $page_size)->all();
+        $list = array_map(function($e){
+            $people = PeopleProjectDao::find()
+                ->where(['projid' => $e['projectid']])
+                ->andWhere(['pid' => $e['pid']])
+                ->asArray()
+                ->one();
+            $e['projrole'] = $people['roletype'];
+            return $e;
+        }, $list);
 
 
         return $this->outputJson([
