@@ -624,6 +624,8 @@ class OrganizationController extends BaseController
         $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
         unset( $sheetData[1]);
         
+        $districts = $this->getDistricts();
+
         $insertData = [];
         foreach( $sheetData as $data) {
             $tmpdata = [];
