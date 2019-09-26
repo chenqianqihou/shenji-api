@@ -1432,10 +1432,16 @@ class UserController extends BaseController
 
 
         $user = new UserService();
-        foreach($insertData as $attributes) {
+        foreach($insertData as $index => $attributes) {
             $type = $attributes['type'];
             unset($attributes['type']);
-            $user->addNewUser($attributes, $type);
+            $info = $user->addNewUser($attributes, $type);
+            if ($info['ret'] == false) {
+                $msg = "第" . ($index+1) . "行" . $info['msg'];
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $msg);
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
         }
 
 
@@ -1714,11 +1720,17 @@ class UserController extends BaseController
             $insertData[] = $tmpdata;
         }
 
-        foreach($insertData as $attributes) {
+        foreach($insertData as $index => $attributes) {
             $type = $attributes['type'];
             unset($attributes['type']);
             $user = new UserService();
-            $user->addNewUser($attributes, $type);
+            $info = $user->addNewUser($attributes, $type);
+            if ($info['ret'] == false) {
+                $msg = "第" . ($index+1) . "行" . $info['msg'];
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $msg);
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
         }
 
         $error = ErrorDict::getError(ErrorDict::SUCCESS);

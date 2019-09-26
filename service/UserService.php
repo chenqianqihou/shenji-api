@@ -306,11 +306,15 @@ class UserService
      * @throws \yii\base\InvalidConfigException
      */
     public function addNewUser($params, $type) {
-
+        $info = [
+            'msg' => '',
+            'ret' => false,
+        ];
         // 参数校验
         if(!array_key_exists($type, UserDao::$type)){
             Log::addLogNode('addNewUser', 'type is error');
-            return false;
+            $info['msg'] = '人员类型错误';
+            return $info;
         }
         $params['level'] = 0;
         $needed = [
@@ -332,7 +336,8 @@ class UserService
         foreach ($needed as $e) {
             if (!in_array($e, array_keys($params))) {
                 Log::addLogNode('addNewUser', $e . ' column lost is error');
-                return false;
+                $info['msg'] = '缺少列错误';
+                return $info;
             }
         }
 
@@ -359,30 +364,31 @@ class UserService
         $organInfo = $organService->getOrganizationInfo($organization);
         if (!$organInfo) {
             Log::addLogNode('addNewUser', 'organization is error');
-            return false;
+            $info['msg'] = '所属机构错误';
+            return $info;
         }
         //校验基本信息
         $userService = new UserService();
         $existIdCard = $userService->getPeopleByIdCard($cardid);
         if ($existIdCard) {
             Log::addLogNode('addNewUser', 'idCard is error');
-            return false;
-        }
-        if (!isset(UserDao::$type[$type])) {
-            Log::addLogNode('addNewUser', 'type is error');
-            return false;
+            $info['msg'] = '身份证号错误';
+            return $info;
         }
         if (!isset(UserDao::$sex[$sex])) {
             Log::addLogNode('addNewUser', 'sex is error');
-            return false;
+            $info['msg'] = '性别错误';
+            return $info;
         }
         if (!isset(UserDao::$education[$education])) {
             Log::addLogNode('addNewUser', 'education is error');
-            return false;
+            $info['msg'] = '学历错误';
+            return $info;
         }
         if (!isset(UserDao::$political[$political])) {
             Log::addLogNode('addNewUser', 'political is error');
-            return false;
+            $info['msg'] = '政治面貌错误';
+            return $info;
         }
         $namePinyin = Pinyin::utf8_to($name);
         if ($namePinyin == "") {
@@ -404,7 +410,8 @@ class UserService
         }
         if (!$unique) {
             Log::addLogNode('addNewUser', 'pid is error');
-            return false;
+            $info['msg'] = '账号ID错误';
+            return $info;
         }
         $passwd = md5('12345678');
         $tr = Yii::$app->get('db')->beginTransaction();
@@ -435,20 +442,24 @@ class UserService
                 $organInfo = $organService->getOrganizationInfo($department);
                 if (!$organInfo) {
                     Log::addLogNode('addNewUser', 'department is error');
-                    return false;
+                    $info['msg'] = '所属部门错误';
+                    return $info;
                 }
                 if ($organInfo['parentid'] != $organization) {
                     Log::addLogNode('addNewUser', 'organization is error');
-                    return false;
+                    $info['msg'] = '所属机构错误';
+                    return $info;
                 }
                 //校验审计机构的其他信息
                 if (!isset(UserDao::$position[$position])) {
                     Log::addLogNode('addNewUser', 'position is error');
-                    return false;
+                    $info['msg'] = '现任职务错误';
+                    return $info;
                 }
                 if (!isset(UserDao::$nature[$nature])) {
                     Log::addLogNode('addNewUser', 'nature is error');
-                    return false;
+                    $info['msg'] = '岗位性质错误';
+                    return $info;
                 }
                 $workbegin = date('Y-m-d H:i:s', intval($workbegin));
                 $auditbegin = date('Y-m-d H:i:s', intval($auditbegin));
@@ -477,7 +488,8 @@ class UserService
                         }
                     }else {
                         Log::addLogNode('addNewUser', 'train is error');
-                        return false;
+                        $info['msg'] = '业务培训情况错误';
+                        return $info;
                     }
                 }
                 //录入数据
@@ -500,7 +512,8 @@ class UserService
                         }
                     }else {
                         Log::addLogNode('addNewUser', 'qualification is error');
-                        return false;
+                        $info['msg'] = '专业技术资质错误';
+                        return $info;
                     }
                 }
                 $workbegin = date('Y-m-d H:i:s', intval($workbegin));
@@ -512,9 +525,12 @@ class UserService
         }catch (Exception $e) {
             $tr->rollBack();
             Log::addLogNode('addException', serialize($e->errorInfo));
-            return false;
+            $info['msg'] = '异常错误';
+            return $info;
         }
-        return true;
+        $info['msg'] = '录入完成';
+        $info['ret'] = true;
+        return $info;
     }
 
     //查询人员是否在点
