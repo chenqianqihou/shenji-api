@@ -393,7 +393,7 @@ class UserDao extends ActiveRecord{
         }
         $sql = sprintf('SELECT people.* 
                 FROM %s LEFT JOIN peopletitle ON people.pid = peopletitle.pid
-                LEFT JOIN peopleexpertise ON people.pid = peopletitle.pid 
+                LEFT JOIN peopleexpertise ON people.pid = peopleexpertise.pid 
                 WHERE %s group by people.pid',
             self::tableName(), $condition
         );
@@ -420,8 +420,8 @@ class UserDao extends ActiveRecord{
             $stmt->bindParam(':expertise', $expertise, \PDO::PARAM_INT);
         }
         if ($auditBeginLeft && $auditBeginRight) {
-            $stmt->bindParam(':auditbeginleft', $auditbeginleft, \PDO::PARAM_STR);
-            $stmt->bindParam(':auditbeginright', $auditbeginright, \PDO::PARAM_STR);
+            $stmt->bindParam(':auditbeginleft', $auditBeginLeft, \PDO::PARAM_STR);
+            $stmt->bindParam(':auditbeginright', $auditBeginRight, \PDO::PARAM_STR);
         }
         if (isset(self::$isJob[$status])) {
             $stmt->bindParam(':isjob', $status, \PDO::PARAM_INT);
@@ -466,7 +466,7 @@ class UserDao extends ActiveRecord{
         }
         $sql = sprintf('select count(1) as c from (SELECT count(1)  
               FROM %s LEFT JOIN peopletitle ON people.pid = peopletitle.pid
-                LEFT JOIN peopleexpertise ON people.pid = peopletitle.pid
+                LEFT JOIN peopleexpertise ON people.pid = peopleexpertise.pid
               WHERE %s group by people.pid) as b',
             self::tableName(), $condition
         );
@@ -492,8 +492,8 @@ class UserDao extends ActiveRecord{
             $stmt->bindParam(':expertise', $expertise, \PDO::PARAM_INT);
         }
         if ($auditBeginLeft && $auditBeginRight) {
-            $stmt->bindParam(':auditbeginleft', $auditbeginleft, \PDO::PARAM_STR);
-            $stmt->bindParam(':auditbeginright', $auditbeginright, \PDO::PARAM_STR);
+            $stmt->bindParam(':auditbeginleft', $auditBeginLeft, \PDO::PARAM_STR);
+            $stmt->bindParam(':auditbeginright', $auditBeginRight, \PDO::PARAM_STR);
         }
         if (isset(self::$isJob[$status])) {
             $stmt->bindParam(':isjob', $status, \PDO::PARAM_INT);
