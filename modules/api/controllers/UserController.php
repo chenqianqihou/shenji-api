@@ -691,8 +691,8 @@ class UserController extends BaseController
                     $ret = $this->outputJson('', $error);
                     return $ret;
                 }
-                $workbegin = date('Y-m-d H:i:s', $workbegin);
-                $auditbegin = date('Y-m-d H:i:s', $auditbegin);
+                $workbegin = date('Y-m-d H:i:s', intval($workbegin));
+                $auditbegin = date('Y-m-d H:i:s', intval($auditbegin));
                 //todo 判断techtitle ID是否存在
                 //先删除，再重新插入
                 $techtitleDao = new TechtitleDao();
