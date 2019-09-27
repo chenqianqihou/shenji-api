@@ -874,4 +874,38 @@ class AuditgroupController extends BaseController {
         return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
 
     }
+
+
+    /**
+     * 返回此项目下所有审计组id
+     *
+     */
+    public function actionIds() {
+        $this->defineMethod = 'GET';
+        $this->defineParams = array (
+            'projid' => array (
+                'require' => true,
+                'checker' => 'isNumber',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $projid = intval($this->getParam('projid', 0));
+
+        $projs = AuditGroupDao::find()
+            ->where(['pid' => $projid])
+            ->asArray()
+            ->all();
+        $projs = array_map(function($e){
+            return $e['id'];
+        }, $projs);
+
+
+
+
+        return $this->outputJson($projs, ErrorDict::getError(ErrorDict::SUCCESS));
+
+    }
 }

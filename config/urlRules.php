@@ -69,6 +69,7 @@ return [
     'api/auditgroup/jugebind' => 'api/auditgroup/jugebind',
     'api/auditgroup/jugelist' => 'api/auditgroup/jugelist',
     'api/auditgroup/jugeunbind' => 'api/auditgroup/jugeunbind',
+    'api/auditgroup/ids' => 'api/auditgroup/ids',
     'api/review/list' => 'api/review/list',
     'api/review/info' => 'api/review/info',
     'api/review/listsetting' => 'api/review/listsetting',
