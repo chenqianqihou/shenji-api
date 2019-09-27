@@ -1866,6 +1866,7 @@ class ProjectController extends BaseController
                     break;
                 case ProjectDao::OPERATOR_STATUS_AUDIT:
                     $pro->status = ProjectDao::$statusToName['审理阶段'];
+                    $pro->jugenum = $num;
                     $pro->save();
 
                     $pepProGroups = PeopleProjectDao::find()
@@ -1881,10 +1882,10 @@ class ProjectController extends BaseController
                     );
 
                     $groups = AuditGroupDao::findAll($groupIds);
-                    foreach ($groups as $e){
-                        $e->status = AuditGroupDao::$statusToName['审理中'];
-                        $e->save();
-                    }
+//                    foreach ($groups as $e){
+//                        $e->status = AuditGroupDao::$statusToName['审理中'];
+//                        $e->save();
+//                    }
 
                     $orgIds = (new OrganizationService)->getSubordinateIds($pro->projorgan);
 
