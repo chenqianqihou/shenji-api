@@ -48,6 +48,18 @@ class AuditgroupController extends BaseController {
 
 
         $group = AuditGroupDao::findOne($id);
+        $proj = ProjectDao::findOne($group->pid);
+        if(!$proj){
+            $ret = $this->outputJson(array(), ErrorDict::getError(ErrorDict::G_PARAM, '未找到相关项目！'));
+            return $ret;
+        }
+        $count = PeopleProjectDao::find()
+            ->andWhere(["projid" => $group->pid])
+            ->count();
+        if($count >= ($proj->leadernum + $proj->auditornum + $proj->masternum)){
+            $ret = $this->outputJson(array(), ErrorDict::getError(ErrorDict::G_PARAM, '已经超过最大审计组人数！'));
+            return $ret;
+        }
 
         $transaction = AuditGroupDao::getDb()->beginTransaction();
         try{
