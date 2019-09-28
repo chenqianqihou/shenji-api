@@ -17,7 +17,7 @@ class ProjectDao extends ActiveRecord{
 
     //项目阶段
     public static $status = [
-        0 => "计划阶段",
+        0 => "待确认",
         1 => "计划阶段",
         2 => "实施阶段",
         3 => "审理阶段",
@@ -240,17 +240,5 @@ class ProjectDao extends ActiveRecord{
                 return self::OPERATOR_STATUS_NO;
         }
         return self::OPERATOR_STATUS_NO;
-    }
-
-    /**
-     * 根据项目状态，判断项目所属的时期
-     *
-     * @param $status
-     */
-    public function getProjTimeline($status){
-        if(in_array($status, [self::$statusToName['未开始'], self::$statusToName['计划阶段']])){
-            return self::$statusToName['计划阶段'];
-        }
-        return $status;
     }
 }

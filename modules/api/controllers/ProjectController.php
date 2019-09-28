@@ -1674,7 +1674,7 @@ class ProjectController extends BaseController
             'projstart' => $data['projstart'],
             'projauditcontent' => $data['projauditcontent'],
             'projectname' => $data['name'],
-            'projectstatus' => $projectDao->getProjTimeline($data['status']),
+            'projectstatus' => $data['status'],
         ];
 
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
