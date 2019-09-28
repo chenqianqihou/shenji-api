@@ -40,9 +40,9 @@ class OrganizationService
         $res = [];
         foreach( $organList as $ov ){
             if( $type == 3){
-                $res[] = ['name' => $ov['name'],'regnum' => Util::getFullRegnum( $ov['regnum'])];    
+                $res[] = ['id' => $ov['id'], 'name' => $ov['name'],'regnum' => Util::getFullRegnum( $ov['regnum'])];
             } else {
-                $res[] = ['name' => $ov['name'],'regnum' => $ov['regnum']];    
+                $res[] = [ 'id' => $ov['id'],'name' => $ov['name'],'regnum' => $ov['regnum']];
             }
         }
         return $res;
