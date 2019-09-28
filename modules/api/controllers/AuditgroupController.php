@@ -801,7 +801,7 @@ class AuditgroupController extends BaseController {
     }
 
     /**
-     * 更改审计组
+     * 更改审理组
      *
      */
     public function actionJugechange() {
@@ -834,7 +834,7 @@ class AuditgroupController extends BaseController {
 
         $peopjos = PeopleProjectDao::find()
             ->where(['pid' => $pid])
-            ->andWhere('in', 'groupid', $groupids)
+            ->andWhere(['in', 'groupid', $groupids])
             ->andWhere(['projid' => $projid])
             ->count();
         if($peopjos > 0){
