@@ -538,7 +538,7 @@ class AuditgroupController extends BaseController {
                 'name' => $e['name'],
                 'sex' => $e['sex'] == 1 ? "男" : "女",
                 'isjob' => $e['isjob'] == 1 ? "在点" : "不在点",
-                'type' => OrganizationDao::getOTypeMsg($e['type']),
+                'type' => $e['type'],
                 'location' => $e['location'],
                 'oname' => $e['oname']
             ];
