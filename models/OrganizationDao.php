@@ -15,9 +15,11 @@ class OrganizationDao extends ActiveRecord{
         return "organization";
     }
 
-    const OTYPE_JIGUAN = 1;
+    const OTYPE_ZHONGJIE = 1;
     const OTYPE_NEISHEN = 2;
-    const OTYPE_ZHONGJIE = 3;
+    const OTYPE_JIGUAN = 3;
+
+
 
 
     public static function getOTypeMsg($type) {
