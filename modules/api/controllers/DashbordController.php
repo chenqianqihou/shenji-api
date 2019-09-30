@@ -287,29 +287,12 @@ class DashbordController extends BaseController {
                 'require' => false,
                 'checker' => 'noCheck',
             ),
-//            'country' => array (
-//                'require' => false,
-//                'checker' => 'noCheck',
-//            ),
         );
         if (false === $this->check()) {
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
-        $city = intval($this->getParam('city', 0));
-//        $country = intval($this->getParam('country', 0));
-
-        $address = "";
-        if($city){
-            $address = "$city";
-        }
-//        if($country){
-//            if($address){
-//                $address = "$address,$country";
-//            }else{
-//                $address = "$country";
-//            }
-//        }
+        $city = $this->getParam('city', 0);
 
 
         $useCode = $this->data['ID'];
@@ -319,25 +302,26 @@ class DashbordController extends BaseController {
         if(!$user){
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '登录用户未知！'));
         }
-        $originService = new OrganizationService();
-        $origins = $originService->getSubIds($user['organid']);
-        $origins[]= $user['organid'];
 
-        $originDatas = OrganizationDao::find()
-            ->where(["in", "id", $origins]);
-        if($address){
-            $originDatas = $originDatas->andWhere(["organization.regnum" => $address]);
+        if ($user['organid'] !== 1012) {
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '没有权限看其他市的！'));
         }
-        $originDatas = $originDatas->asArray()->all();
-        $origins = array_map(function($e){
-            return $e["id"];
-        }, $originDatas);
 
+        $organizes = OrganizationDao::find()
+            ->where(['regnum' => $city])
+            ->andWhere(['otype' => 3])
+            ->andWhere(['parentid' => 0])
+            ->asArray()
+            ->all();
+        $origins = array_map(function($e){
+            return $e['id'];
+        }, $organizes);
 
         $uses = UserDao::find()
             ->where(["in", "organid", $origins])
             ->asArray()
             ->all();
+
         $isJob = array_filter($uses,function($e){
             return $e['isjob'] == UserDao::IS_JOB;
         });
