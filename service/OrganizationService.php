@@ -122,7 +122,7 @@ class OrganizationService
         $organDao->highlevel = $params['highlevel'];
         $organDao->midlevel = $params['midlevel'];
         $organDao->retiree = isset($params['retiree']) ? $params['retiree'] : '-';
-        $organDao->parttimers = isset($params['parttimers']) ? $params['parttimers'] : 0;
+        $organDao->parttimers = isset($params['parttimers']) ? $params['parttimers'] : '-';
         $organDao->contactor = $params['contactor'];
         $organDao->contactphone = $params['contactphone'];
         $organDao->contactnumber = $params['contactnumber'];
