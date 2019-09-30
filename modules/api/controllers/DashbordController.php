@@ -31,7 +31,7 @@ class DashbordController extends BaseController {
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '登录用户未知！'));
         }
         $originService = new OrganizationService();
-        $origins = $originService->getSubordinateIds($user['organid']);
+        $origins = $originService->getSubIds($user['organid']);
         $origins[]= $user['organid'];
 
         $ret = [];
@@ -170,7 +170,7 @@ class DashbordController extends BaseController {
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '登录用户未知！'));
         }
         $originService = new OrganizationService();
-        $origins = $originService->getSubordinateIds($user['organid']);
+        $origins = $originService->getSubIds($user['organid']);
         $origins[]= $user['organid'];
 
         $uses = UserDao::find()
@@ -239,7 +239,7 @@ class DashbordController extends BaseController {
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '登录用户未知！'));
         }
         $originService = new OrganizationService();
-        $origins = $originService->getSubordinateIds($user['organid']);
+        $origins = $originService->getSubIds($user['organid']);
         $origins[]= $user['organid'];
 
         $originDatas = ProjectDao::find()
@@ -320,7 +320,7 @@ class DashbordController extends BaseController {
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '登录用户未知！'));
         }
         $originService = new OrganizationService();
-        $origins = $originService->getSubordinateIds($user['organid']);
+        $origins = $originService->getSubIds($user['organid']);
         $origins[]= $user['organid'];
 
         $originDatas = OrganizationDao::find()
