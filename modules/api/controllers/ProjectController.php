@@ -3289,12 +3289,12 @@ class ProjectController extends BaseController
                 break;
             case ProjectDao::$projLevelName['市州本级']:
                 $ret = array_values(array_filter($all, function($e){
-                    return count(explode($e['regnum'], ",")) == 2;
+                    return count(explode(",", $e['regnum'])) == 2;
                 }));
                 break;
             case ProjectDao::$projLevelName['省厅统一组织']:
                 $ret = array_values(array_filter($all, function($e) use ($location){
-                    $location = explode($location, ",");
+                    $location = explode(",", $location);
                     $location = [$location[0], $location[1] ?? ''];
                     $location = join(",", $location);
 
@@ -3303,7 +3303,7 @@ class ProjectController extends BaseController
                 break;
             case ProjectDao::$projLevelName['市州统一组织']:
                 $ret = array_values(array_filter($all, function($e) use ($location){
-                    $location = explode($location, ",");
+                    $location = explode(",", $location);
                     $location = [$location[0], $location[1] ?? ''];
                     $location = join(",", $location);
 
@@ -3312,8 +3312,7 @@ class ProjectController extends BaseController
                 break;
             case ProjectDao::$projLevelName['县级']:
                 $ret = array_values(array_filter($all, function($e){
-
-                    return count(explode($e['regnum'], ",")) == 3;
+                    return count(explode(",", $e['regnum'])) == 3;
                 }));
                 break;
         }
