@@ -323,6 +323,7 @@ class BaseController extends Controller {
             if (count($haveAuth) == 0) {
                 return false;
             }
+            return true;
         }
         return true;
     }

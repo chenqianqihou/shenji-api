@@ -273,7 +273,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'name',
-                'message' => 'name can not be null!'
+                'message' => '名称不能为空!'
             ];
 
             return $result;
@@ -283,7 +283,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'otype',
-                'message' => 'otype error!'
+                'message' => '机构类型错误!'
             ];
 
             return $result;
@@ -297,7 +297,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'deputy',
-                'message' => 'deputy can not be null!'
+                'message' => '法人代表不能为空!'
             ];
 
             return $result;
@@ -307,7 +307,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'regtime',
-                'message' => 'regtime error!'
+                'message' => '注册时间内容错误!'
             ];
 
             return $result;
@@ -317,7 +317,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'regnum',
-                'message' => 'regnum error!'
+                'message' => '注册地点编号错误!'
             ];
 
             return $result;
@@ -333,7 +333,7 @@ class OrganizationService
                 $result = [
                     'res' => false,
                     'key' => 'regnum',
-                    'message' => 'regnum must guizhou!'
+                    'message' => '注册地点编号必须为贵州!'
                 ];
 
                 return $result;
@@ -349,7 +349,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'category',
-                'message' => 'category can not be null!'
+                'message' => '资质类别不能为空!'
             ];
 
             return $result;
@@ -359,7 +359,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'level',
-                'message' => 'level can not be null!'
+                'message' => '资质等级不能为空!'
             ];
 
             return $result;
@@ -369,7 +369,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'capital',
-                'message' => 'capital error!'
+                'message' => '注册资本错误!'
             ];
 
             return $result;
@@ -379,7 +379,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'workbegin',
-                'message' => 'workbegin error'
+                'message' => '从业开始时间错误'
             ];
 
             return $result;
@@ -389,7 +389,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'costeng',
-                'message' => 'costeng error'
+                'message' => '造价工程师人数错误'
             ];
 
             return $result;
@@ -399,7 +399,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'coster',
-                'message' => 'coster error'
+                'message' => '造价师人数错误'
             ];
 
             return $result;
@@ -409,7 +409,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'accountant',
-                'message' => 'accountant error'
+                'message' => '会计师人数错误'
             ];
 
             return $result;
@@ -419,7 +419,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'highlevel',
-                'message' => 'highlevel error'
+                'message' => '高级职称人数错误'
             ];
 
             return $result;
@@ -429,7 +429,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'midlevel',
-                'message' => 'midlevel error'
+                'message' => '中级职称错误'
             ];
 
             return $result;
@@ -461,7 +461,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'contactor',
-                'message' => 'contactor can not be null'
+                'message' => '联系人错误'
             ];
 
             return $result;
@@ -493,7 +493,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'officenum',
-                'message' => 'officenum error'
+                'message' => '办公地点编号错误'
             ];
 
             return $result;
