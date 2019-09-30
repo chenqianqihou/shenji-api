@@ -3281,9 +3281,6 @@ class ProjectController extends BaseController
         $service = new OrganizationService();
         $all = $service->getShortOrgans(UserDao::$typeToName['审计机关'], false);
 
-        var_dump($all);
-        exit();
-
         switch ($projlevel){
             case ProjectDao::$projLevelName['省厅本级']:
                 $ret = array_values(array_filter($all, function($e){
