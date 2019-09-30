@@ -634,4 +634,20 @@ class OrganizationService
         return $res;
     }
 
+
+
+    //获取当前机构下所有下属机构
+    public function getSubIds($organid){
+        $ids = OrganizationDao::find()
+            ->where(['parentid' => $organid])
+            ->asArray()
+            ->all();
+        $ids = array_map(function($e){
+            return $e['id'];
+        }, $ids);
+
+        return $ids;
+
+    }
+
 }
