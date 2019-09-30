@@ -1141,7 +1141,7 @@ class ProjectController extends BaseController
             //if (date('Y', strtotime($projyear)) !== $projyear) {
             if ( !is_numeric( $projyear) ) {
                 return $this->outputJson('',
-                    ErrorDict::getError(ErrorDict::G_PARAM, "projyear 输入格式不对！应为年份格式!")
+                    ErrorDict::getError(ErrorDict::G_PARAM, "项目年份 输入格式不对！应为年份格式!")
                 );
             }
             $con = $con->andwhere(['projyear' => $projyear]);
@@ -1150,7 +1150,7 @@ class ProjectController extends BaseController
         if ($projlevel) {
             if (!in_array($projlevel, [1, 2, 3, 4])) {
                 return $this->outputJson('',
-                    ErrorDict::getError(ErrorDict::G_PARAM, "projlevel 输入格式不对！")
+                    ErrorDict::getError(ErrorDict::G_PARAM, "项目层级 输入格式不对！")
                 );
             }
             $con = $con->andwhere(['projlevel' => $projlevel]);
@@ -1159,7 +1159,7 @@ class ProjectController extends BaseController
         if ($medium) {
             if (!in_array($medium, [1, 2, 3, 4, 5])) {
                 return $this->outputJson('',
-                    ErrorDict::getError(ErrorDict::G_PARAM, "medium 输入格式不对！")
+                    ErrorDict::getError(ErrorDict::G_PARAM, "是否是中介机构 输入格式不对！")
                 );
             }
             if($medium == 1){
@@ -1284,7 +1284,7 @@ class ProjectController extends BaseController
         if ($internal) {
             if (!in_array($internal, [1, 2, 3, 4, 5])) {
                 return $this->outputJson('',
-                    ErrorDict::getError(ErrorDict::G_PARAM, "medium 输入格式不对！")
+                    ErrorDict::getError(ErrorDict::G_PARAM, "是否是中介机构 输入格式不对！")
                 );
             }
             if($internal == 1){

@@ -498,7 +498,7 @@ class AuditgroupController extends BaseController {
 
         if($jobstatus != 0 && !in_array($jobstatus, [UserDao::IS_JOB, UserDao::IS_NOT_JOB])){
             return $this->outputJson('',
-                ErrorDict::getError(ErrorDict::G_PARAM, 'jobstatus输入不合法！')
+                ErrorDict::getError(ErrorDict::G_PARAM, '是否在点输入不合法！')
             );
         }
 
