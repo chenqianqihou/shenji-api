@@ -1737,8 +1737,14 @@ class ProjectController extends BaseController
      * @return array
      */
     public function actionListselect() {
+        $years = ProjectDao::find()->groupBy("projyear")->asArray()->all();
+        $years = array_map(function($e){
+            return $e['projyear'];
+        }, $years);
+
+
         $data = [
-            'projyear' => ["2018","2019","2020"], //项目年度
+            'projyear' => $years, //项目年度
             'projlevel' => [
                 [ '1' => '省厅统一组织'],
                 [ '2' => '市州本级'],
