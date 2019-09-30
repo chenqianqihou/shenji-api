@@ -3311,8 +3311,12 @@ class ProjectController extends BaseController
                 }));
                 break;
             case ProjectDao::$projLevelName['县级']:
-                $ret = array_values(array_filter($all, function($e){
-                    return count(explode(",", $e['regnum'])) == 3;
+                $ret = array_values(array_filter($all, function($e) use ($location){
+                    $location = explode(",", $location);
+                    $location = [$location[0], $location[1] ?? ''];
+                    $location = join(",", $location);
+
+                    return !strpos($e['regnum'], $location);
                 }));
                 break;
         }
