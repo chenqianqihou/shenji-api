@@ -29,7 +29,7 @@ class Checker
         $format = 'Y-m-d H:i:s';
         $unixTime = strtotime($paramValue);
         if(!$unixTime) { //无法用strtotime转换，说明日期格式非法
-            self::$_err = ErrorDict::getError(ErrorDict::G_PARAM, 'invalid param '.$paramName, $paramName.'格式错误');
+            self::$_err = ErrorDict::getError(ErrorDict::G_PARAM, '日期参数有误！ ', '参数格式错误');
             self::$_ret = false;
             return;
         }
@@ -55,7 +55,7 @@ class Checker
             return;
         }
 
-        self::$_err = ErrorDict::getError(ErrorDict::G_PARAM, 'invalid param '.$paramName, $paramName.'应为整数!');
+        self::$_err = ErrorDict::getError(ErrorDict::G_PARAM, '数字参数有误！', '参数应为整数!');
         self::$_ret = false;
     }
 
@@ -69,7 +69,7 @@ class Checker
         $format = 'Y';
         $unixTime = strtotime($paramValue);
         if(!$unixTime) { //无法用strtotime转换，说明日期格式非法
-            self::$_err = ErrorDict::getError(ErrorDict::G_PARAM, 'invalid param '.$paramName, $paramName.'格式错误');
+            self::$_err = ErrorDict::getError(ErrorDict::G_PARAM, '年份日期有误！', '年份格式错误!');
             self::$_ret = false;
             return;
         }

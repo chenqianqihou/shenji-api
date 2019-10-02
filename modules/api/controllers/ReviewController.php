@@ -71,7 +71,7 @@ class ReviewController extends BaseController{
         if ($projyear) {
             if ( !is_numeric( $projyear) ) {
                 return $this->outputJson('',
-                    ErrorDict::getError(ErrorDict::G_PARAM, "projyear 输入格式不对！应为年份格式!")
+                    ErrorDict::getError(ErrorDict::G_PARAM, "项目年份输入格式不对！应为年份格式!")
                 );
             }
             $con = $con->andWhere(['project.projyear' => $projyear]);
@@ -80,7 +80,7 @@ class ReviewController extends BaseController{
         if ($projlevel) {
             if (!in_array($projlevel, [1, 2, 3, 4])) {
                 return $this->outputJson('',
-                    ErrorDict::getError(ErrorDict::G_PARAM, "projlevel 输入格式不对！")
+                    ErrorDict::getError(ErrorDict::G_PARAM, "项目层级输入格式不对！")
                 );
             }
             $con = $con->andWhere(['project.projlevel' => $projlevel]);
@@ -199,7 +199,7 @@ class ReviewController extends BaseController{
             ->andWhere(['status' => ReviewDao::STATUS_DEFAULT])
             ->one();
         if (!$rew){
-            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, 'id错误!'));
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '审核项不存在!'));
         }
         if ($rew->type != ReviewDao::PEOPLE_TYPE) {
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '审核类型不对！'));
@@ -702,7 +702,7 @@ class ReviewController extends BaseController{
 
         $result = AuditresultsDao::findOne($id);
         if(!$result){
-            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '审核列表id不对！'));
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '审核项目不对！'));
         }
         $result->status = $status;
         $result->save();
