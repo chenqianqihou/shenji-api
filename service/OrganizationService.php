@@ -128,6 +128,7 @@ class OrganizationService
         $organDao->contactnumber = $params['contactnumber'];
         $organDao->officenum = $params['officenum'];
         $organDao->officeaddress = isset($params['officeaddress']) ? $params['officeaddress'] : '-';
+        $organDao->qualiaudit = isset($params['qualiaudit']) ? $params['qualiaudit'] : '1';
         if( isset($params['parentid'] )){
             $organDao->parentid = $params['parentid'];
         }

@@ -703,7 +703,7 @@ class OrganizationController extends BaseController
             $qustr = $qu[1];
             $tmpdata['officenum'] = "$shenstr,$shistr,$qustr";
             $tmpdata['officeaddress'] = $data['Z'];
-            $tmpdata['qualiaudit'] = $data['AA'];
+            $tmpdata['qualiaudit'] = explode(':',$data['AA'])[0];
             $tmpdata['parentid'] = '0';
 
             $insertData[] = $tmpdata;	
