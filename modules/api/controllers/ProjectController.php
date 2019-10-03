@@ -3057,7 +3057,6 @@ class ProjectController extends BaseController
             $pepProGroups = PeopleProjectDao::find()
                 ->where(["projid" => $id])
                 ->groupBy('groupid')
-                ->asArray()
                 ->all();
             $groupIds = array_map(
                 function($e)
