@@ -3021,10 +3021,6 @@ class ProjectController extends BaseController
                 'require' => true,
                 'checker' => 'noCheck',
             ),
-            'operate' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
             'num' => array (
                 'require' => false,
                 'checker' => 'noCheck',
@@ -3036,13 +3032,9 @@ class ProjectController extends BaseController
         }
 
         $id = intval($this->getParam('id', 0));
-        $operate = intval($this->getParam('operate', 0));
-        if(!in_array($operate, array_keys(ProjectDao::$operatorStatus))) {
-            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '状态不正确！'));
-        }
         $num = intval($this->getParam('num', 0));
 
-        if($operate == 3 && $num == 0){
+        if($num == 0){
             return $this->outputJson('',
                 ErrorDict::getError(ErrorDict::G_PARAM, '预审理人数不对！')
             );
@@ -3054,145 +3046,79 @@ class ProjectController extends BaseController
 
         try{
             $pro = ProjectDao::findOne($id);
-            switch ($operate) {
-                case ProjectDao::OPERATOR_STATUS_SURE:
-                    $pro->status = ProjectDao::$statusToName['计划阶段'];
-                    $pro->save();
-                    $pepProGroups = PeopleProjectDao::find()
-                        ->where(["projid" => $id])
-                        ->groupBy('groupid')
-                        ->all();
-                    $groupIds = array_map(
-                        function($e)
-                        {
-                            return $e->groupid;
-                        },
-                        $pepProGroups
-                    );
+            if(!$pro){
+                return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
+            }
 
-                    $groups = AuditGroupDao::findAll($groupIds);
-                    foreach ($groups as $e){
-                        $e->status = AuditGroupDao::$statusToName['应进点'];
-                        $e->save();
-                    }
-                    $transaction->commit();
-                    break;
-                case ProjectDao::OPERATOR_STATUS_START:
-                    $pro->status = ProjectDao::$statusToName['实施阶段'];
-                    $pro->save();
+            $pro->status = ProjectDao::$statusToName['审理阶段'];
+            $pro->jugenum = $num;
+            $pro->save();
 
-//                    $pepProGroups = PeopleProjectDao::find()
-//                        ->where(["projid" => $id])
-//                        ->groupBy('groupid')
-//                        ->all();
-//                    $groupIds = array_map(
-//                        function($e)
-//                        {
-//                            return $e->groupid;
-//                        },
-//                        $pepProGroups
-//                    );
-//
-//                    $groups = AuditGroupDao::findAll($groupIds);
-//                    foreach ($groups as $e){
-//                        $e->status = AuditGroupDao::$statusToName['应进点'];
-//                        $e->save();
-//                    }
-                    $transaction->commit();
-                    break;
-                case ProjectDao::OPERATOR_STATUS_AUDIT:
-                    $pro->status = ProjectDao::$statusToName['审理阶段'];
-                    $pro->jugenum = $num;
-                    $pro->save();
+            $pepProGroups = PeopleProjectDao::find()
+                ->where(["projid" => $id])
+                ->groupBy('groupid')
+                ->asArray()
+                ->all();
+            $groupIds = array_map(
+                function($e)
+                {
+                    return $e->groupid;
+                },
+                $pepProGroups
+            );
 
-                    $pepProGroups = PeopleProjectDao::find()
-                        ->where(["projid" => $id])
-                        ->groupBy('groupid')
-                        ->all();
-                    $groupIds = array_map(
-                        function($e)
-                        {
-                            return $e->groupid;
-                        },
-                        $pepProGroups
-                    );
-
-                    $groups = AuditGroupDao::findAll($groupIds);
+            $groups = AuditGroupDao::findAll($groupIds);
 //                    foreach ($groups as $e){
 //                        $e->status = AuditGroupDao::$statusToName['审理中'];
 //                        $e->save();
 //                    }
 
-                    $orgIds = (new OrganizationService)->getSubordinateIds($pro->projorgan);
+            $orgIds = (new OrganizationService)->getSubIds($pro->projorgan);
+            $orgIds[] = $pro->projorgan;
 
-                    $idGroupMap = [];
-                    $users = UserDao::find()
-                        ->where(['isjob' => UserDao::IS_NOT_JOB])
-                        ->andWhere(['in', 'organid', $orgIds])
-                        ->asArray()
-                        ->all();
-                    foreach ($users as $e){
-                        $idGroupMap[] = [
-                            "id" => $e['id'],
-                            "group" => 0
-                        ];
-                    }
-                    $userGroups = PeopleProjectDao::find()
-                        ->where(["projid" => $id])
-                        ->groupBy('pid')
-                        ->asArray()
-                        ->all();
-                    foreach ($userGroups as $e){
-                        $idGroupMap[] = [
-                            "id" => $e['pid'],
-                            "group" => $e['groupid']
-                        ];
-                    }
+            $idGroupMap = [];
+            $users = UserDao::find()
+                ->where(['isjob' => UserDao::IS_NOT_JOB])
+                ->andWhere(['in', 'organid', $orgIds])
+                ->asArray()
+                ->all();
+            foreach ($users as $e){
+                $idGroupMap[] = [
+                    "id" => $e['id'],
+                    "group" => 0
+                ];
+            }
+            $userGroups = PeopleProjectDao::find()
+                ->where(["projid" => $id])
+                ->groupBy('pid')
+                ->asArray()
+                ->all();
+            foreach ($userGroups as $e){
+                $idGroupMap[] = [
+                    "id" => $e['pid'],
+                    "group" => $e['groupid']
+                ];
+            }
 
-                    $flag = count($idGroupMap);
+            $flag = count($idGroupMap);
 
-                    while ($flag > 0){
-                        foreach ($groups as $e){
-                            foreach ($idGroupMap as $key => $v){
-                                if($v['group'] !== $e['id']){
-                                    $judge = new JugeProjectDao();
-                                    $judge->projid = $id;
-                                    $judge->groupid = $e['id'];
-                                    $judge->pid = $v['id'];
-                                    $judge->save();
-                                    unset($idGroupMap[$key]);
-                                    break;
-                                }
-                            }
+            while ($flag > 0){
+                foreach ($groups as $e){
+                    foreach ($idGroupMap as $key => $v){
+                        if($v['group'] !== $e['id']){
+                            $judge = new JugeProjectDao();
+                            $judge->projid = $id;
+                            $judge->groupid = $e['id'];
+                            $judge->pid = $v['id'];
+                            $judge->save();
+                            unset($idGroupMap[$key]);
+                            break;
                         }
                     }
-
-                    $transaction->commit();
-                    break;
-                case ProjectDao::OPERATOR_STATUS_END:
-                    $pro->status = ProjectDao::$statusToName['项目结束'];
-                    $pro->save();
-
-                    $pepProGroups = PeopleProjectDao::find()
-                        ->where(["projid" => $id])
-                        ->groupBy('groupid')
-                        ->all();
-                    $groupIds = array_map(
-                        function($e)
-                        {
-                            return $e->groupid;
-                        },
-                        $pepProGroups
-                    );
-
-                    $groups = AuditGroupDao::findAll($groupIds);
-                    foreach ($groups as $e){
-                        $e->status = AuditGroupDao::$statusToName['报告中'];
-                        $e->save();
-                    }
-                    $transaction->commit();
-                    break;
+                }
             }
+
+            $transaction->commit();
         }catch(\Exception $e){
             $transaction->rollBack();
             Log::addLogNode('状态变更错误！', serialize($e->errorInfo));
