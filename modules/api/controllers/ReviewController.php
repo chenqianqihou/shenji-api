@@ -59,8 +59,8 @@ class ReviewController extends BaseController{
         $projyear = $this->getParam('projyear', '');
         $projlevel = intval($this->getParam('projlevel', 0));
         $query = $this->getParam('query', '');
-        $page_size = intval($this->getParam('page_size', 0));
-        $page = intval($this->getParam('page', 0));
+        $page_size = intval($this->getParam('page_size', 20));
+        $page = intval($this->getParam('page', 1));
 
         $con = (new \yii\db\Query())
             ->from('review')
@@ -563,7 +563,15 @@ class ReviewController extends BaseController{
             ->where(['auditresults.operatorid' => $user['id']]);
 
         if($query){
-            $con = $con->where(['or', ['like', 'project.projectnum', "%{$query}%"], ['like', 'project.name', "%{$query}%"]]);
+            $con = $con->where(['or', ['like', 'project.projectnum', $query], ['like', 'project.name', $query]]);
+        }
+
+        if(!$page){
+            $page = 1;
+        }
+
+        if(!$page_size){
+            $page_size = 20;
         }
 
         $countCon = clone $con;
