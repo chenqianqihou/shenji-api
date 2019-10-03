@@ -3034,12 +3034,19 @@ class ProjectController extends BaseController
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
+
         $id = intval($this->getParam('id', 0));
         $operate = intval($this->getParam('operate', 0));
         if(!in_array($operate, array_keys(ProjectDao::$operatorStatus))) {
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '状态不正确！'));
         }
         $num = intval($this->getParam('num', 0));
+
+        if($operate == 3 && $num == 0){
+            return $this->outputJson('',
+                ErrorDict::getError(ErrorDict::G_PARAM, '预审理人数不对！')
+            );
+        }
 
         //todo 注意！可能后续会加上权限相关的东西
 
@@ -3095,6 +3102,7 @@ class ProjectController extends BaseController
                     break;
                 case ProjectDao::OPERATOR_STATUS_AUDIT:
                     $pro->status = ProjectDao::$statusToName['审理阶段'];
+                    $pro->jugenum = $num;
                     $pro->save();
 
                     $pepProGroups = PeopleProjectDao::find()
@@ -3110,10 +3118,55 @@ class ProjectController extends BaseController
                     );
 
                     $groups = AuditGroupDao::findAll($groupIds);
-                    foreach ($groups as $e){
-                        $e->status = AuditGroupDao::$statusToName['审理中'];
-                        $e->save();
+//                    foreach ($groups as $e){
+//                        $e->status = AuditGroupDao::$statusToName['审理中'];
+//                        $e->save();
+//                    }
+
+                    $orgIds = (new OrganizationService)->getSubordinateIds($pro->projorgan);
+
+                    $idGroupMap = [];
+                    $users = UserDao::find()
+                        ->where(['isjob' => UserDao::IS_NOT_JOB])
+                        ->andWhere(['in', 'organid', $orgIds])
+                        ->asArray()
+                        ->all();
+                    foreach ($users as $e){
+                        $idGroupMap[] = [
+                            "id" => $e['id'],
+                            "group" => 0
+                        ];
                     }
+                    $userGroups = PeopleProjectDao::find()
+                        ->where(["projid" => $id])
+                        ->groupBy('pid')
+                        ->asArray()
+                        ->all();
+                    foreach ($userGroups as $e){
+                        $idGroupMap[] = [
+                            "id" => $e['pid'],
+                            "group" => $e['groupid']
+                        ];
+                    }
+
+                    $flag = count($idGroupMap);
+
+                    while ($flag > 0){
+                        foreach ($groups as $e){
+                            foreach ($idGroupMap as $key => $v){
+                                if($v['group'] !== $e['id']){
+                                    $judge = new JugeProjectDao();
+                                    $judge->projid = $id;
+                                    $judge->groupid = $e['id'];
+                                    $judge->pid = $v['id'];
+                                    $judge->save();
+                                    unset($idGroupMap[$key]);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
                     $transaction->commit();
                     break;
                 case ProjectDao::OPERATOR_STATUS_END:

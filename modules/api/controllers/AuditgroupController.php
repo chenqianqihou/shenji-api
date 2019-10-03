@@ -311,6 +311,12 @@ class AuditgroupController extends BaseController {
                 //进点
                 case 1:
                     $audit = AuditGroupDao::findOne($id);
+                    if(!$audit){
+                        $transaction->rollBack();
+                        return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+                    }
+
+
                     if (!in_array($audit->status, [AuditGroupDao::$statusToName['应进点'], AuditGroupDao::$statusToName['无']])){
                         return $this->outputJson('',
                             ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不为应进点!')
@@ -329,6 +335,11 @@ class AuditgroupController extends BaseController {
                 //实施结束
                 case 2:
                     $audit = AuditGroupDao::findOne($id);
+                    if(!$audit){
+                        $transaction->rollBack();
+                        return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+                    }
+
                     $audit->status = AuditGroupDao::$statusToName['实施结束'];
                     $audit->save();
 
@@ -346,6 +357,10 @@ class AuditgroupController extends BaseController {
 //                            ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不正确！')
 //                        );
 //                    }
+                    if(!$audit){
+                        $transaction->rollBack();
+                        return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+                    }
                     $audit->status = AuditGroupDao::$statusToName['审理中'];
                     $audit->save();
 
@@ -359,6 +374,11 @@ class AuditgroupController extends BaseController {
                 //审理结束
                 case 4:
                     $audit = AuditGroupDao::findOne($id);
+                    if(!$audit){
+                        $transaction->rollBack();
+                        return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+                    }
+
 //                    if ($audit->status = AuditGroupDao::$statusToName['审理中']){
 //                        return $this->outputJson('',
 //                            ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不正确！')
@@ -383,6 +403,10 @@ class AuditgroupController extends BaseController {
 //                            ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不正确！')
 //                        );
 //                    }
+                    if(!$audit){
+                        $transaction->rollBack();
+                        return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+                    }
                     $audit->status = AuditGroupDao::$statusToName['报告中'];
                     $audit->save();
 
@@ -396,6 +420,10 @@ class AuditgroupController extends BaseController {
                 //报告结束
                 case 6:
                     $audit = AuditGroupDao::findOne($id);
+                    if(!$audit){
+                        $transaction->rollBack();
+                        return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM));
+                    }
 //                    if ($audit->status = AuditGroupDao::$statusToName['报告中']){
 //                        return $this->outputJson('',
 //                            ErrorDict::getError(ErrorDict::G_PARAM, '审计组状态不正确！')
