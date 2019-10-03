@@ -3121,7 +3121,7 @@ class ProjectController extends BaseController
             $transaction->commit();
         }catch(\Exception $e){
             $transaction->rollBack();
-            Log::addLogNode('状态变更错误！', serialize($e->errorInfo));
+            Log::addLogNode('状态变更错误！', $e->getTraceAsString());
             $error = ErrorDict::getError(ErrorDict::G_SYS_ERR);
             $ret = $this->outputJson('', $error);
             return $ret;
