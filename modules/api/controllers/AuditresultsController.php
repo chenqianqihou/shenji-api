@@ -409,6 +409,9 @@ class AuditresultsController extends BaseController
             }
 
             $tmpdata['desc'] = $data['O'];
+            if( empty($tmpdata['desc'])){
+                $tmpdata['desc'] = '';
+            }
 
             $tmpdata['isfindout'] = explode(':',$data['P'])[0];
             if( empty($tmpdata['isfindout']) ||!is_numeric($tmpdata['isfindout']) || !in_array($tmpdata['isfindout'],[1,2]) ){
