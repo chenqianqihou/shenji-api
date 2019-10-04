@@ -420,8 +420,8 @@ class ReviewController extends BaseController{
                 $peoplePro = new PeopleProjectDao();
                 foreach ($pids as $e){
                     $peoplePro->pid = $e;
-                    $peoplePro->groupid = $id;
-                    $peoplePro->projid = $rew->groupid;
+                    $peoplePro->groupid = $rew->groupid;
+                    $peoplePro->projid = $rew->projid;
                     $peoplePro->roletype = PeopleProjectDao::ROLE_TYPE_GROUPER;
                     $peoplePro->islock = PeopleProjectDao::IS_LOCK;
 
@@ -508,8 +508,8 @@ class ReviewController extends BaseController{
                 $peoplePro = new PeopleProjectDao();
                 foreach ($pids as $e){
                     $peoplePro->pid = $e;
-                    $peoplePro->groupid = $id;
-                    $peoplePro->projid = $rew->groupid;
+                    $peoplePro->groupid = $rew->groupid;
+                    $peoplePro->projid = $rew->projid;
                     $peoplePro->roletype = PeopleProjectDao::ROLE_TYPE_GROUPER;
                     $peoplePro->islock = PeopleProjectDao::IS_LOCK;
 
