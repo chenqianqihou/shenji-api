@@ -433,7 +433,7 @@ class AuditgroupController extends BaseController {
                     $audit->save();
 
                     $pro = ProjectDao::findOne($audit['pid']);
-                    $pro->status = ProjectDao::$statusToName['报告阶段'];
+                    $pro->status = ProjectDao::$statusToName['项目结束'];
                     $pro->save();
 
                     $peoplePros = PeopleProjectDao::find()
