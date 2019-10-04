@@ -638,11 +638,12 @@ class AuditgroupController extends BaseController {
             $rew->type = ReviewDao::PEOPLE_TYPE;
             $rew->projid = $group->pid;
             $rew->ptype = $type;
+            $rew->groupid = $id;
             $rew->save();
 
             foreach ($pids as $e){
                 $prew = new PeopleReviewDao();
-                $peoplePro = new PeopleProjectDao();
+//                $peoplePro = new PeopleProjectDao();
                 $isExsit = $prew::find()->where(['pid' => $e])->andWhere(['rid' => $rew->id])->count();
                 if($isExsit){
                     $transaction->rollBack();
@@ -662,13 +663,13 @@ class AuditgroupController extends BaseController {
 
                 $prew->save();
 
-                $peoplePro->pid = $e;
-                $peoplePro->groupid = $id;
-                $peoplePro->projid = $group->pid;
-                $peoplePro->roletype = PeopleProjectDao::ROLE_TYPE_GROUPER;
-                $peoplePro->islock = PeopleProjectDao::IS_LOCK;
-
-                $peoplePro->save();
+//                $peoplePro->pid = $e;
+//                $peoplePro->groupid = $id;
+//                $peoplePro->projid = $group->pid;
+//                $peoplePro->roletype = PeopleProjectDao::ROLE_TYPE_GROUPER;
+//                $peoplePro->islock = PeopleProjectDao::IS_LOCK;
+//
+//                $peoplePro->save();
 
             }
             $transaction->commit();

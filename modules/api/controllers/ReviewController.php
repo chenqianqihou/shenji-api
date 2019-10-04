@@ -398,17 +398,17 @@ class ReviewController extends BaseController{
             $rew->status = $status;
             $rew->save();
 
-            if($status == ReviewDao::STATUS_FAILED){
-                $pids = PeopleReviewDao::find()
-                    ->where(['rid' => $id])
-                    ->groupBy('pid')
-                    ->select('pid')
-                    ->asArray()
-                    ->all();
-                $pids = array_map(function($e){
-                    return $e["pid"];
-                }, $pids);
+            $pids = PeopleReviewDao::find()
+                ->where(['rid' => $id])
+                ->groupBy('pid')
+                ->select('pid')
+                ->asArray()
+                ->all();
+            $pids = array_map(function($e){
+                return $e["pid"];
+            }, $pids);
 
+            if($status == ReviewDao::STATUS_FAILED){
                 if(count($pids) > 0){
                     $pros = PeopleProjectDao::find()
                         ->where(['projid' => $rew->projid])
@@ -417,6 +417,17 @@ class ReviewController extends BaseController{
                     foreach ($pros as $pro){
                         $pro->delete();
                     }
+                }
+            }else{
+                $peoplePro = new PeopleProjectDao();
+                foreach ($pids as $e){
+                    $peoplePro->pid = $e;
+                    $peoplePro->groupid = $id;
+                    $peoplePro->projid = $rew->groupid;
+                    $peoplePro->roletype = PeopleProjectDao::ROLE_TYPE_GROUPER;
+                    $peoplePro->islock = PeopleProjectDao::IS_LOCK;
+
+                    $peoplePro->save();
                 }
             }
 
@@ -475,18 +486,17 @@ class ReviewController extends BaseController{
         try {
             $rew->status = $status;
             $rew->save();
+            $pids = PeopleReviewDao::find()
+                ->where(['rid' => $id])
+                ->groupBy('pid')
+                ->select('pid')
+                ->asArray()
+                ->all();
+            $pids = array_map(function($e){
+                return $e["pid"];
+            }, $pids);
 
             if($status == ReviewDao::STATUS_FAILED){
-                $pids = PeopleReviewDao::find()
-                    ->where(['rid' => $id])
-                    ->groupBy('pid')
-                    ->select('pid')
-                    ->asArray()
-                    ->all();
-                $pids = array_map(function($e){
-                    return $e["pid"];
-                }, $pids);
-
                 if(count($pids) > 0){
                     $pros = PeopleProjectDao::find()
                         ->where(['projid' => $rew->projid])
@@ -495,6 +505,17 @@ class ReviewController extends BaseController{
                     foreach ($pros as $pro){
                         $pro->delete();
                     }
+                }
+            }else {
+                $peoplePro = new PeopleProjectDao();
+                foreach ($pids as $e){
+                    $peoplePro->pid = $e;
+                    $peoplePro->groupid = $id;
+                    $peoplePro->projid = $rew->groupid;
+                    $peoplePro->roletype = PeopleProjectDao::ROLE_TYPE_GROUPER;
+                    $peoplePro->islock = PeopleProjectDao::IS_LOCK;
+
+                    $peoplePro->save();
                 }
             }
 
