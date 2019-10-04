@@ -3100,8 +3100,7 @@ class ProjectController extends BaseController
             }
 
             $flag = count($idGroupMap);
-
-            while ($flag > 0){
+            while ($flag > 0 && $num > 0){
                 foreach ($groups as $e){
                     foreach ($idGroupMap as $key => $v){
                         if($v['group'] !== $e['id']){
@@ -3111,6 +3110,8 @@ class ProjectController extends BaseController
                             $judge->pid = $v['id'];
                             $judge->save();
                             unset($idGroupMap[$key]);
+                            $flag --;
+                            $num --;
                             break;
                         }
                     }
