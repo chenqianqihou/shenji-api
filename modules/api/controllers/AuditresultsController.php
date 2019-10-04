@@ -371,13 +371,11 @@ class AuditresultsController extends BaseController
                 return $ret;
             }
 
+            $tmpdata['problemid'] = 0;
             $problemid = ViolationDao::find()->where(['name'=>trim($data['H'])])->one();
-            if( is_null($problemid) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第H列类型格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
+            if($problemid){
+                $tmpdata['problemid'] = $problemid->id;
             }
-            $tmpdata['problemid'] = $problemid->id;
 
             $tmpdata['amountone'] = intval($data['I']);
             if( !is_numeric($tmpdata['amountone']) ){
@@ -481,7 +479,7 @@ class AuditresultsController extends BaseController
 
         $arservice = new AuditresultsService();
         foreach( $insertData as $idata ) {
-            $arservice->SubmitAuditResult( $idata );
+            $arservice->SaveAuditResult( $idata );
         }
 
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
