@@ -19,6 +19,7 @@ class BaseController extends Controller {
         'ID'      => '',
         'name'   => '',
     ];
+    protected $admins = ['sjguanliyuan'];
     protected $method;
     protected $defineMethod = 'GET';
     protected $params;
