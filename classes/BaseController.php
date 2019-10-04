@@ -5,6 +5,7 @@ namespace app\classes;
 use app\models\RoleDao;
 use app\models\UserDao;
 use app\service\AuthService;
+use app\service\OrganizationService;
 use Yii;
 use yii\web\Controller;
 use yii\base\Exception;
@@ -19,6 +20,7 @@ class BaseController extends Controller {
         'ID'      => '',
         'name'   => '',
     ];
+    protected $admins = ['sjguanliyuan'];
     protected $method;
     protected $defineMethod = 'GET';
     protected $params;
@@ -111,7 +113,9 @@ class BaseController extends Controller {
             ];
 
             $userDao = new UserDao();
+            $organService = new OrganizationService();
             $this->userInfo = $userDao->queryByID( $parse->getClaim('ID') );
+            $this->userInfo['organinfo'] = $organService->getOrganizationInfo( $this->userInfo['organid'] );
             //print_r( $this->userInfo );die;
         } catch (Exception $e) {
             Log::addLogNode('Invalid token', '');

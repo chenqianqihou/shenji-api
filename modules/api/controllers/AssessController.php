@@ -221,9 +221,17 @@ class AssessController extends BaseController
                 $kindid = $pvv['kindid'];
                 $list = $pvv['list'];
 
+                $uniqQuestion = [];
                 foreach( $list as $lv ) {
                     if( !isset( $lv['nameone']) ){
                         continue;    
+                    }
+                    if ($kindid == 2) {
+                        if (in_array($lv['nameone'], $uniqQuestion)) {
+                            continue;
+                        }else {
+                            $uniqQuestion[] = $lv['nameone'];
+                        }
                     }
                     if( !isset( $lv['id'] ) || $lv['id'] == 0){
                         $lv['typeid'] = $typeid;

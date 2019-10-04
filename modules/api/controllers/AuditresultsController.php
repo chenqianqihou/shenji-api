@@ -121,6 +121,7 @@ class AuditresultsController extends BaseController
 
         $params = $this->getParams();
         $params['peopleid'] = $userInfo['id'];
+        $params['problemid'] = $problemid;
 
         $arservice = new AuditresultsService();
         
@@ -198,6 +199,7 @@ class AuditresultsController extends BaseController
 
         $params = $this->getParams();
         $params['peopleid'] = $userInfo['id'];
+        $params['problemid'] = $problemid;
 
         $arservice = new AuditresultsService();
         
@@ -350,32 +352,24 @@ class AuditresultsController extends BaseController
 
             $tmpdata['havereport'] = explode(':',$data['E'])[0];
             if( empty($tmpdata['havereport']) ||!is_numeric($tmpdata['havereport']) || !in_array($tmpdata['havereport'],[1,2]) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第E列类型格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
+                $tmpdata['havereport'] = 0;
             }
 
             $tmpdata['havecoordinate'] = explode(':',$data['F'])[0];
             if( empty($tmpdata['havecoordinate']) ||!is_numeric($tmpdata['havecoordinate']) || !in_array($tmpdata['havecoordinate'],[1,2]) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第F列类型格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
+                $tmpdata['havecoordinate'] = 0;
             }
 
             $tmpdata['haveanalyse'] = explode(':',$data['G'])[0];
             if( empty($tmpdata['haveanalyse']) ||!is_numeric($tmpdata['haveanalyse']) || !in_array($tmpdata['haveanalyse'],[1,2]) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第G列类型格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
+                $tmpdata['haveanalyse'] = 0;
             }
 
+            $tmpdata['problemid'] = 0;
             $problemid = ViolationDao::find()->where(['name'=>trim($data['H'])])->one();
-            if( is_null($problemid) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第H列类型格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
+            if($problemid){
+                $tmpdata['problemid'] = $problemid->id;
             }
-            $tmpdata['problemid'] = $problemid->id;
 
             $tmpdata['amountone'] = intval($data['I']);
             if( !is_numeric($tmpdata['amountone']) ){
@@ -415,6 +409,9 @@ class AuditresultsController extends BaseController
             }
 
             $tmpdata['desc'] = $data['O'];
+            if( empty($tmpdata['desc'])){
+                $tmpdata['desc'] = '';
+            }
 
             $tmpdata['isfindout'] = explode(':',$data['P'])[0];
             if( empty($tmpdata['isfindout']) ||!is_numeric($tmpdata['isfindout']) || !in_array($tmpdata['isfindout'],[1,2]) ){
@@ -479,7 +476,7 @@ class AuditresultsController extends BaseController
 
         $arservice = new AuditresultsService();
         foreach( $insertData as $idata ) {
-            $arservice->SubmitAuditResult( $idata );
+            $arservice->SaveAuditResult( $idata );
         }
 
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
