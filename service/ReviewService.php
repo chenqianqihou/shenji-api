@@ -19,21 +19,11 @@ class ReviewService {
      *
      */
     public function getMediumStatus($id){
-        $zhongjie = (new \yii\db\Query())
-            ->from('peopleproject')
-            ->innerJoin('people', 'peopleproject.pid = people.id')
-            ->andWhere(['peopleproject.projid' => $id])
-            ->andWhere(['people.type' => UserDao::$typeToName['中介机构']])
-            ->all();
-        if(count($zhongjie) > 0){
-            $rew = ReviewDao::find()
-                ->where(['projid' => $id])
-                ->andWhere(['ptype' => ReviewDao::ZHONGJIE_TYPE])
-                ->one();
-            if(!$rew){
-                return PeopleReviewDao::REVIEW_NOT_SURE_TYPE;
-            }
-
+        $rew = ReviewDao::find()
+            ->where(['projid' => $id])
+            ->andWhere(['ptype' => ReviewDao::ZHONGJIE_TYPE])
+            ->one();
+        if($rew){
             switch ($rew->status){
                 case ReviewDao::STATUS_DEFAULT:
                     return PeopleReviewDao::REVIEW_WAIT_TYPE;
@@ -42,9 +32,13 @@ class ReviewService {
                 case ReviewDao::STATUS_FAILED:
                     return PeopleReviewDao::REVIEW_FAILED_TYPE;
             }
+
         }
 
+
         return PeopleReviewDao::REVIEW_NO_NEED_TYPE;
+
+
     }
 
     /**
@@ -52,21 +46,11 @@ class ReviewService {
      *
      */
     public function getInternalStatus($id){
-        $neishen = (new \yii\db\Query())
-            ->from('peopleproject')
-            ->innerJoin('people', 'peopleproject.pid = people.id')
-            ->andWhere(['peopleproject.projid' => $id])
-            ->andWhere(['people.type' => UserDao::$typeToName['内审机构']])
-            ->all();
-        if(count($neishen) > 0){
-            $rew = ReviewDao::find()
-                ->where(['projid' => $id])
-                ->andWhere(['ptype' => ReviewDao::NEISHEN_TYPE])
-                ->one();
-            if(!$rew){
-                return PeopleReviewDao::REVIEW_NOT_SURE_TYPE;
-            }
-
+        $rew = ReviewDao::find()
+            ->where(['projid' => $id])
+            ->andWhere(['ptype' => ReviewDao::NEISHEN_TYPE])
+            ->one();
+        if($rew){
             switch ($rew->status){
                 case ReviewDao::STATUS_DEFAULT:
                     return PeopleReviewDao::REVIEW_WAIT_TYPE;
@@ -76,6 +60,8 @@ class ReviewService {
                     return PeopleReviewDao::REVIEW_FAILED_TYPE;
             }
         }
+
+
 
         return PeopleReviewDao::REVIEW_NO_NEED_TYPE;
     }
