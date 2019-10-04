@@ -532,7 +532,7 @@ class AuditgroupController extends BaseController {
 
 
         if($jobstatus){
-            $con = $con->Where(['people.isjob' => $jobstatus]);
+            $con = $con->andWhere(['people.isjob' => $jobstatus]);
         }
 
         if($query){
