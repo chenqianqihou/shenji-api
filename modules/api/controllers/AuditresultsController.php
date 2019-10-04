@@ -62,10 +62,6 @@ class AuditresultsController extends BaseController
                 'require' => true,
                 'checker' => 'noCheck',
             ),
-            'problemid' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
         );
         if (false === $this->check()) {
             $ret = $this->outputJson(array(), $this->err);
@@ -74,7 +70,7 @@ class AuditresultsController extends BaseController
 
         $projectid = $this->getParam('projectid');
         $peopleid = $this->data['ID'];
-        $problemid = $this->getParam('problemid');
+        $problemid = $this->getParam('problemid', 0);
 
         //判断项目是否存在
         $projectDao = new ProjectDao();
@@ -95,30 +91,32 @@ class AuditresultsController extends BaseController
         }
         
         //判断problemid是否合法
-        $assessService = new AssessService();
-        $violations = $assessService->Violations();
-        $isvalid = false;
-        $projectType = json_decode($projectInfo['projtype']);
-        foreach( $violations as $p){
-            if( $p['name'] == $projectType[0] ){
-                foreach( $p['list'] as $pd ){
-                    if( $pd['name'] == $projectType[1] ){
-                        foreach( $pd['list'] as $pda ){
-                            if ($pda['id'] == $problemid) {
-                                $isvalid = true;
-                                break;
+        if ($problemid) {
+            $assessService = new AssessService();
+            $violations = $assessService->Violations();
+            $isvalid = false;
+            $projectType = json_decode($projectInfo['projtype']);
+            foreach( $violations as $p){
+                if( $p['name'] == $projectType[0] ){
+                    foreach( $p['list'] as $pd ){
+                        if( $pd['name'] == $projectType[1] ){
+                            foreach( $pd['list'] as $pda ){
+                                if ($pda['id'] == $problemid) {
+                                    $isvalid = true;
+                                    break;
+                                }
                             }
+                            break;
                         }
-                        break;
                     }
+                    break;
                 }
-                break;
             }
-        }
-        if( $isvalid == false ){
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '问题性质不合法');
-            $ret = $this->outputJson('', $error);
-            return $ret;    
+            if( $isvalid == false ){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '问题性质不合法');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
         }
 
         $params = $this->getParams();
@@ -141,10 +139,6 @@ class AuditresultsController extends BaseController
                 'require' => true,
                 'checker' => 'noCheck',
             ),
-            'problemid' => array (
-                'require' => true,
-                'checker' => 'noCheck',
-            ),
         );
         if (false === $this->check()) {
             $ret = $this->outputJson(array(), $this->err);
@@ -153,7 +147,7 @@ class AuditresultsController extends BaseController
 
         $projectid = $this->getParam('projectid');
         $peopleid = $this->data['ID'];
-        $problemid = $this->getParam('problemid');
+        $problemid = $this->getParam('problemid', 0);
 
         //判断项目是否存在
         $projectDao = new ProjectDao();
@@ -174,30 +168,32 @@ class AuditresultsController extends BaseController
         }
         
         //判断problemid是否合法
-        $assessService = new AssessService();
-        $violations = $assessService->Violations();
-        $isvalid = false;
-        $projectType = json_decode($projectInfo['projtype']);
-        foreach( $violations as $p){
-            if( $p['name'] == $projectType[0] ){
-                foreach( $p['list'] as $pd ){
-                    if( $pd['name'] == $projectType[1] ){
-                        foreach( $pd['list'] as $pda ){
-                            if ($pda['id'] == $problemid) {
-                                $isvalid = true;
-                                break;
+        if ($problemid) {
+            $assessService = new AssessService();
+            $violations = $assessService->Violations();
+            $isvalid = false;
+            $projectType = json_decode($projectInfo['projtype']);
+            foreach( $violations as $p){
+                if( $p['name'] == $projectType[0] ){
+                    foreach( $p['list'] as $pd ){
+                        if( $pd['name'] == $projectType[1] ){
+                            foreach( $pd['list'] as $pda ){
+                                if ($pda['id'] == $problemid) {
+                                    $isvalid = true;
+                                    break;
+                                }
                             }
+                            break;
                         }
-                        break;
-                    }  
-                }    
-                break;
-            }    
-        }
-        if( $isvalid == false ){
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '问题性质不合法');
-            $ret = $this->outputJson('', $error);
-            return $ret;    
+                    }
+                    break;
+                }
+            }
+            if( $isvalid == false ){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '问题性质不合法');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
         }
 
         $params = $this->getParams();
