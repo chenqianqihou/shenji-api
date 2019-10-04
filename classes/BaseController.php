@@ -3,6 +3,7 @@
 namespace app\classes;
 
 use app\models\RoleDao;
+use app\models\UserDao;
 use app\service\AuthService;
 use Yii;
 use yii\web\Controller;
@@ -21,6 +22,7 @@ class BaseController extends Controller {
     protected $method;
     protected $defineMethod = 'GET';
     protected $params;
+    protected $userInfo;
     protected $defineParams;
     protected $beginTime;
     protected $err;
@@ -107,6 +109,10 @@ class BaseController extends Controller {
                 'ID' => $parse->getClaim('ID'),
                 'name' => $parse->getClaim('name')
             ];
+
+            $userDao = new UserDao();
+            $this->userInfo = $userDao->queryByID( $parse->getClaim('ID') );
+            //print_r( $this->userInfo );die;
         } catch (Exception $e) {
             Log::addLogNode('Invalid token', '');
             $this->noLogin();
