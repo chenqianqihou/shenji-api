@@ -352,23 +352,17 @@ class AuditresultsController extends BaseController
 
             $tmpdata['havereport'] = explode(':',$data['E'])[0];
             if( empty($tmpdata['havereport']) ||!is_numeric($tmpdata['havereport']) || !in_array($tmpdata['havereport'],[1,2]) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第E列类型格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
+                $tmpdata['havereport'] = 0;
             }
 
             $tmpdata['havecoordinate'] = explode(':',$data['F'])[0];
             if( empty($tmpdata['havecoordinate']) ||!is_numeric($tmpdata['havecoordinate']) || !in_array($tmpdata['havecoordinate'],[1,2]) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第F列类型格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
+                $tmpdata['havecoordinate'] = 0;
             }
 
             $tmpdata['haveanalyse'] = explode(':',$data['G'])[0];
             if( empty($tmpdata['haveanalyse']) ||!is_numeric($tmpdata['haveanalyse']) || !in_array($tmpdata['haveanalyse'],[1,2]) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第G列类型格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
+                $tmpdata['haveanalyse'] = 0;
             }
 
             $tmpdata['problemid'] = 0;
