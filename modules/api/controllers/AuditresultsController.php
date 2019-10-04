@@ -121,6 +121,7 @@ class AuditresultsController extends BaseController
 
         $params = $this->getParams();
         $params['peopleid'] = $userInfo['id'];
+        $params['problemid'] = $problemid;
 
         $arservice = new AuditresultsService();
         
@@ -198,6 +199,7 @@ class AuditresultsController extends BaseController
 
         $params = $this->getParams();
         $params['peopleid'] = $userInfo['id'];
+        $params['problemid'] = $problemid;
 
         $arservice = new AuditresultsService();
         
