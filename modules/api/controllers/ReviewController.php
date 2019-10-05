@@ -578,8 +578,8 @@ class ReviewController extends BaseController{
             ->from('auditresults')
             ->innerJoin('project', 'project.id = auditresults.projectid')
             ->innerJoin('people', 'people.id = auditresults.peopleid')
-            ->select('auditresults.id, project.projectnum, project.name, project.projyear, project.projlevel, people.pid as pid, people.name as pname, auditresults.status, auditresults.projectid')
-            ->where(['auditresults.operatorid' => $user['id']]);
+            ->select('auditresults.id, project.projectnum, project.name, project.projyear, project.projlevel, people.pid as pid, people.name as pname, auditresults.status, auditresults.projectid');
+//            ->where(['auditresults.operatorid' => $user['id']]);
 
         if($query){
             $con = $con->where(['or', ['like', 'project.projectnum', $query], ['like', 'project.name', $query]]);
