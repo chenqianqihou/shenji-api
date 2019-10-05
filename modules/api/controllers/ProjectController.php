@@ -2173,7 +2173,6 @@ class ProjectController extends BaseController
             $tmpdata['projdesc'] = intval( $data['D'] );
             $tmpdata['projlevel'] = $data['E'];
             $tmpdata['location'] = $data['F'];
-            $tmpdata['leadorgan'] = $data['G'];
             $tmpdata['projtype'] = json_encode([$data['H'], $data['I']], JSON_UNESCAPED_UNICODE);
             $tmpdata['leadernum'] = $data['J'];
             $tmpdata['leader_projtype'] = json_encode([$data['K'], $data['L']], JSON_UNESCAPED_UNICODE);
@@ -2182,6 +2181,20 @@ class ProjectController extends BaseController
             $tmpdata['master_projtype'] = json_encode([$data['O'], $data['P']], JSON_UNESCAPED_UNICODE);
             $tmpdata['master_filternum'] = $data['Q'];
             $tmpdata['auditornum'] = $data['R'];
+
+
+            $projganNums = explode(":", $data['G']);
+
+            $org = OrganizationDao::findOne($projganNums[0]);
+            if(!$org){
+                return $this->outputJson(
+                    '',
+                    ErrorDict::getError(ErrorDict::G_PARAM, "不存在的项目单位！")
+                );
+            }
+
+            $tmpdata['leadorgan'] = $projganNums[0];
+            $tmpdata['projorgan'] = $org->parentid;
 
             $insertData[] = $tmpdata;
         }
