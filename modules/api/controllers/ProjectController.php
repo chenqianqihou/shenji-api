@@ -126,6 +126,13 @@ class ProjectController extends BaseController
         $auditornum = intval($this->getParam('auditornum', 0));
         $location = $this->getParam('location', '');
 
+        $leaderProjType = array_values(array_filter($leaderProjType, function($e){
+            return !empty($e);
+        }));
+        $masterProjType = array_values(array_filter($masterProjType, function($e){
+            return !empty($e);
+        }));
+
 
 
         //如果单位组织不存在，则返回异常
@@ -2217,6 +2224,13 @@ class ProjectController extends BaseController
             $masterFilternum = $e['master_filternum'];
             $auditornum = $e['auditornum'];
             $location = $e['location'];
+
+            $leaderProjType = array_values(array_filter($leaderProjType, function($e){
+                return !empty($e);
+            }));
+            $masterProjType = array_values(array_filter($masterProjType, function($e){
+                return !empty($e);
+            }));
 
 
             //如果单位组织不存在，则返回异常
