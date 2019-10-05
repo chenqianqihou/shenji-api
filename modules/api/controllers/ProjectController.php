@@ -2171,7 +2171,7 @@ class ProjectController extends BaseController
             $tmpdata['plantime'] = intval( $data['B'] );
             $tmpdata['projyear'] = intval( $data['C'] );
             $tmpdata['projdesc'] = intval( $data['D'] );
-            $tmpdata['projlevel'] = $data['E'];
+            $tmpdata['projlevel'] = explode(':', $data['E']);
             $tmpdata['location'] = $data['F'];
             $tmpdata['projtype'] = json_encode([$data['H'], $data['I']], JSON_UNESCAPED_UNICODE);
             $tmpdata['leadernum'] = $data['J'];
