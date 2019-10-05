@@ -2182,10 +2182,10 @@ class ProjectController extends BaseController
             $tmpdata['location'] = $data['F'];
             $tmpdata['projtype'] = json_encode([$data['H'], $data['I']], JSON_UNESCAPED_UNICODE);
             $tmpdata['leadernum'] = $data['J'];
-            $tmpdata['leader_projtype'] = json_encode([$data['K'], $data['L']], JSON_UNESCAPED_UNICODE);
+            $tmpdata['leader_projtype'] = [$data['K'], $data['L']];
             $tmpdata['leader_filternum'] = $data['M'];
             $tmpdata['masternum'] = $data['N'];
-            $tmpdata['master_projtype'] = json_encode([$data['O'], $data['P']], JSON_UNESCAPED_UNICODE);
+            $tmpdata['master_projtype'] = [$data['O'], $data['P']];
             $tmpdata['master_filternum'] = $data['Q'];
             $tmpdata['auditornum'] = $data['R'];
 
