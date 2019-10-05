@@ -323,6 +323,10 @@ class BaseController extends Controller {
 
     //url级别权限
     function authControl($pid, $url) {
+        if( in_array( $pid, Yii::$app->params['adminlist']) ) {
+            return true;
+        }
+
         $authService = new AuthService();
         //判断此url是否需要权限校验
         $needJudge = $authService->judgeUrlNeedAuth($url);

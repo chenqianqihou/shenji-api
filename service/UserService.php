@@ -19,6 +19,10 @@ use app\classes\Pinyin;
 
 class UserService
 {
+    protected $_user_organ_regnum = '';
+    public function __construct( $regnum = '') {
+        $this->_user_organ_regnum = $regnum;    
+    }
     //工作状态
     public static $jobStatus = [
         1 => "在点",
