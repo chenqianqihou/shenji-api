@@ -578,7 +578,7 @@ class ReviewController extends BaseController{
             ->from('auditresults')
             ->innerJoin('project', 'project.id = auditresults.projectid')
             ->innerJoin('people', 'people.id = auditresults.peopleid')
-            ->select('auditresults.id, project.projectnum, project.name, project.projyear, project.projlevel, people.pid as pid, people.name as pname, auditresults.status, auditresults.projectid')
+            ->select('auditresults.id, project.projectnum, project.name, project.projyear, project.projlevel, people.pid as pid, people.name as pname, auditresults.status, auditresults.projectid,people.id as peopleId')
             ->andWhere(['auditresults.operatorid' => $user['id']]);
 
         if($query){
@@ -599,7 +599,7 @@ class ReviewController extends BaseController{
         $list = array_map(function($e){
             $people = PeopleProjectDao::find()
                 ->where(['projid' => $e['projectid']])
-                ->andWhere(['pid' => $e['pid']])
+                ->andWhere(['pid' => $e['peopleId']])
                 ->asArray()
                 ->one();
             $e['projrole'] = $people['roletype'];
