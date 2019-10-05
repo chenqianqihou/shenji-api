@@ -9,6 +9,10 @@ use Yii;
 
 class OrganizationService
 {
+    protected $_user_organ_regnum = '';
+    public function __construct( $regnum = '') {
+        $this->_user_organ_regnum = $regnum;    
+    }
 
     // 查询机构数量
     public function getOrganizationCount($oid) {
@@ -59,6 +63,10 @@ class OrganizationService
 
         if( trim($keyword) != '' ){
             $res = $res->andWhere(['like', 'name', $keyword]);    
+        }
+
+        if( $this->_user_organ_regnum != '' ) {
+            $res = $res->andWhere(['like', 'regnum', $this->_user_organ_regnum]);    
         }
         $total = $res->count();
         $list = $res->orderBy('id desc')->offset( $start )->limit($length)->asArray()->all();
