@@ -731,7 +731,13 @@ class ReviewController extends BaseController{
         if(!$result){
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '审核项目不对！'));
         }
-        $result->status = $status;
+
+        if ($status == 1){
+            $result->status = 3;
+        }else {
+            $result->status = 4;
+        }
+
         $result->save();
 
         return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS));
