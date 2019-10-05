@@ -3298,29 +3298,26 @@ class ProjectController extends BaseController
                 break;
             case ProjectDao::$projLevelName['省厅统一组织']:
                 $ret = array_values(array_filter($all, function($e) use ($location){
-                    $location = explode(",", $location);
-                    $location = [$location[0], $location[1] ?? ''];
-                    $location = join(",", $location);
+                    $city = explode(",", $location);
+                    $city = [$city[0], $city[1] ?? ''];
+                    $city = join(",", $city);
 
-                    return !strpos($e['regnum'], $location);
+
+                    return strpos($e['regnum'], $city) === false;
                 }));
                 break;
             case ProjectDao::$projLevelName['市州统一组织']:
                 $ret = array_values(array_filter($all, function($e) use ($location){
-                    $location = explode(",", $location);
-                    $location = [$location[0], $location[1] ?? ''];
-                    $location = join(",", $location);
+                    $city = explode(",", $location);
+                    $city = [$city[0], $city[1] ?? ''];
+                    $city = join(",", $city);
 
-                    return !strpos($e['regnum'], $location);
+                    return strpos($e['regnum'], $city) === false;
                 }));
                 break;
             case ProjectDao::$projLevelName['县级']:
-                $ret = array_values(array_filter($all, function($e) use ($location){
-                    $location = explode(",", $location);
-                    $location = [$location[0], $location[1] ?? ''];
-                    $location = join(",", $location);
-
-                    return !strpos($e['regnum'], $location);
+                $ret = array_values(array_filter($all, function($e){
+                    return count(explode(",", $e['regnum'])) == 2;
                 }));
                 break;
         }
