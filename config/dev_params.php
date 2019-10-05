@@ -2,6 +2,7 @@
 
 return [
     'secret' => 'shenji@^!&*',
+    'adminlist' => ['sjguanliyuan'],
     'districts' => '{
         "100000": {
             "110000": "北京市",

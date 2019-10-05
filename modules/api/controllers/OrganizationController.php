@@ -193,7 +193,7 @@ class OrganizationController extends BaseController
         $otype = intval($this->getParam('type',-1));
         $start = $this->getParam('start',0);
         $length = $this->getParam('length',10);
-        $organService = new OrganizationService( $this->userInfo['organinfo']['regnum']);
+        $organService = new OrganizationService( !in_array( $this->userInfo['pid'], Yii::$app->params['adminlist']) ?  $this->userInfo['organinfo']['regnum'] : '' );
         $organList = $organService->getOrganizationList( $keyword,$otype,$start,$length );
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($organList, $error);

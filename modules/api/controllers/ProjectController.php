@@ -2199,8 +2199,6 @@ class ProjectController extends BaseController
             $insertData[] = $tmpdata;
         }
 
-
-
         foreach ($insertData as $e){
 
             $name = $e['name'];
