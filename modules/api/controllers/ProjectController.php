@@ -935,21 +935,24 @@ class ProjectController extends BaseController
                             $tmp = array_pop($members);
                         }else{
                             $menMembers = array_filter($members, function($e){
-                                return $e['user']['sex'] === UserDao::$sexName['男'];
+                                return $e['sex'] === UserDao::$sexName['男'];
                             });
                             $tmp = array_pop($menMembers);
                         }
 
-                        $group[$key][] = [
-                            'user' => $tmp,
-                            'role' => PeopleProjectDao::ROLE_TYPE_GROUPER
-                        ];
-                        $members = array_values(array_filter($members ,function($e) use ($tmp){
-                            if(!isset($tmp['id']) || !isset($e['id'])){
-                                return false;
-                            }
-                            return $e['id'] !== $tmp['id'];
-                        }));
+                        if(!empty($tmp)){
+                            $group[$key][] = [
+                                'user' => $tmp,
+                                'role' => PeopleProjectDao::ROLE_TYPE_GROUPER
+                            ];
+                            $members = array_values(array_filter($members ,function($e) use ($tmp){
+                                if(!isset($tmp['id']) || !isset($e['id'])){
+                                    return false;
+                                }
+                                return $e['id'] !== $tmp['id'];
+                            }));
+                        }
+
                         $membersNum--;
                     }
                 } else {
