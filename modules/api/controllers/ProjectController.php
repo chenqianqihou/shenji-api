@@ -1158,7 +1158,7 @@ class ProjectController extends BaseController
         }
 
         if ($projlevel) {
-            if (!in_array($projlevel, [1, 2, 3, 4])) {
+            if (!in_array($projlevel, [1, 2, 3, 4, 5])) {
                 return $this->outputJson('',
                     ErrorDict::getError(ErrorDict::G_PARAM, "项目层级 输入格式不对！")
                 );
