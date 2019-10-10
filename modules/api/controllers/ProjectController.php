@@ -1259,13 +1259,13 @@ class ProjectController extends BaseController
                 );
             }
             if($internal == 1){
-                $projs = (new \yii\db\Query())
-                    ->from('peopleproject')
-                    ->innerJoin('people', 'peopleproject.pid = people.id')
-                    ->andWhere(['people.type' => UserDao::$typeToName['内审机构']])
-                    ->select('peopleproject.projid')
-                    ->groupBy('peopleproject.projid')
+                $projs = ReviewDao::find()
+                    ->where(['ptype' => 2])
+                    ->andWhere(['type' => 1])
+                    ->groupBy(['projid'])
+                    ->asArray()
                     ->all();
+
                 $projs = array_map(function($e){
                     return $e['projid'];
                 }, $projs);
@@ -1274,97 +1274,61 @@ class ProjectController extends BaseController
                     $con = $con->andWhere(['not in', 'id', $projs]);
                 }
             }else if($internal == 2){
-                $projs = (new \yii\db\Query())
-                    ->from('peopleproject')
-                    ->innerJoin('people', 'peopleproject.pid = people.id')
-                    ->andWhere(['people.type' => UserDao::$typeToName['内审机构']])
-                    ->select('peopleproject.projid')
-                    ->groupBy('peopleproject.projid')
-                    ->all();
-                $projs = array_map(function($e){
-                    return $e['projid'];
-                }, $projs);
-                $rews = ReviewDao::find()
-                    ->andWhere(['ptype' => 1])
-                    ->groupBy('projid')
-                    ->select('projid')
-                    ->all();
-                $rews = array_map(function($e){
-                    return $e['projid'];
-                }, $rews);
-
-                $projs = array_diff($projs, $rews);
+                //已经没有待提审了
+                $projs = [0];
 
                 $con = $con->andWhere(['in', 'id', $projs]);
             }else if($internal == 3){
-                $projs = (new \yii\db\Query())
-                    ->from('peopleproject')
-                    ->innerJoin('people', 'peopleproject.pid = people.id')
-                    ->andWhere(['people.type' => UserDao::$typeToName['内审机构']])
-                    ->select('peopleproject.projid')
-                    ->groupBy('peopleproject.projid')
-                    ->all();
-                $projs = array_map(function($e){
-                    return $e['projid'];
-                }, $projs);
-                $rews = ReviewDao::find()
-                    ->andWhere(['ptype' => 1])
-                    ->andWhere(['in', 'projid', $projs])
+                $projs = ReviewDao::find()
+                    ->where(['ptype' => 2])
+                    ->andWhere(['type' => 1])
                     ->andWhere(['status' => 0])
-                    ->groupBy('projid')
-                    ->select('projid')
+                    ->groupBy(['projid'])
+                    ->asArray()
                     ->all();
-                $rews = array_map(function($e){
+                $projs = array_map(function($e){
                     return $e['projid'];
-                }, $rews);
+                }, $projs);
 
-                $con = $con->andWhere(['in', 'id', $rews]);
+                if(count($projs) == 0) {
+                    $projs[] = 0;
+                }
+
+                $con = $con->andWhere(['in', 'id', $projs]);
             }else if($internal == 4){
-                $projs = (new \yii\db\Query())
-                    ->from('peopleproject')
-                    ->innerJoin('people', 'peopleproject.pid = people.id')
-                    ->andWhere(['people.type' => UserDao::$typeToName['内审机构']])
-                    ->select('peopleproject.projid')
-                    ->groupBy('peopleproject.projid')
-                    ->all();
-                $projs = array_map(function($e){
-                    return $e['projid'];
-                }, $projs);
-                $rews = ReviewDao::find()
-                    ->andWhere(['ptype' => 1])
-                    ->andWhere(['in', 'projid', $projs])
+                $projs = ReviewDao::find()
+                    ->where(['ptype' => 2])
+                    ->andWhere(['type' => 1])
                     ->andWhere(['status' => 1])
-                    ->groupBy('projid')
-                    ->select('projid')
-                    ->all();
-                $rews = array_map(function($e){
-                    return $e['projid'];
-                }, $rews);
-
-                $con = $con->andWhere(['in', 'id', $rews]);
-            }else if($internal == 5){
-                $projs = (new \yii\db\Query())
-                    ->from('peopleproject')
-                    ->innerJoin('people', 'peopleproject.pid = people.id')
-                    ->andWhere(['people.type' => UserDao::$typeToName['内审机构']])
-                    ->select('peopleproject.projid')
-                    ->groupBy('peopleproject.projid')
+                    ->groupBy(['projid'])
+                    ->asArray()
                     ->all();
                 $projs = array_map(function($e){
                     return $e['projid'];
                 }, $projs);
 
-                $rews = ReviewDao::find()
-                    ->andWhere(['ptype' => 1])
-                    ->andWhere(['in', 'projid', $projs])
+                if(count($projs) == 0) {
+                    $projs[] = 0;
+                }
+
+                $con = $con->andWhere(['in', 'id', $projs]);
+            }else if($internal == 5){
+                $projs = ReviewDao::find()
+                    ->where(['ptype' => 2])
+                    ->andWhere(['type' => 1])
                     ->andWhere(['status' => 2])
-                    ->groupBy('projid')
-                    ->select('projid')
+                    ->groupBy(['projid'])
+                    ->asArray()
                     ->all();
-                $rews = array_map(function($e){
+                $projs = array_map(function($e){
                     return $e['projid'];
-                }, $rews);
-                $con = $con->andWhere(['in', 'id', $rews]);
+                }, $projs);
+
+                if(count($projs) == 0) {
+                    $projs[] = 0;
+                }
+
+                $con = $con->andWhere(['in', 'id', $projs]);
             }
 
         }
