@@ -1339,7 +1339,14 @@ class ProjectController extends BaseController
                     ErrorDict::getError(ErrorDict::G_PARAM, "projstage 输入格式不对！")
                 );
             }
-            $con = $con->andwhere(['status' => $projstage]);
+
+            if($projstage == 1){
+                $stage = [0, 1];
+            }else {
+                $stage = [$projstage];
+            }
+
+            $con = $con->andwhere(['in', 'status', $stage]);
         }
 
 
