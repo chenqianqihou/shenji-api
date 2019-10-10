@@ -307,12 +307,21 @@ class DashbordController extends BaseController {
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '没有权限看其他市的！'));
         }
 
-        $organizes = OrganizationDao::find()
-            ->where(['regnum' => $city])
-            ->andWhere(['otype' => 3])
-            ->andWhere(['parentid' => 0])
-            ->asArray()
-            ->all();
+        if($city == 0){
+            $organizes = OrganizationDao::find()
+                ->andWhere(['otype' => 3])
+                ->andWhere(['parentid' => 0])
+                ->asArray()
+                ->all();
+        }else{
+            $organizes = OrganizationDao::find()
+                ->where(['regnum' => $city])
+                ->andWhere(['otype' => 3])
+                ->andWhere(['parentid' => 0])
+                ->asArray()
+                ->all();
+        }
+
         $origins = array_map(function($e){
             return $e['id'];
         }, $organizes);
