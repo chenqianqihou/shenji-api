@@ -29,6 +29,7 @@ class OrganizationController extends BaseController
         $checkres = $organService->checkParams( $params );
         if( !$checkres['res']){
             $error = ErrorDict::getError(ErrorDict::G_PARAM);
+            $error['returnMessage'] .= ','.$checkres['message'];
             $ret = $this->outputJson($checkres, $error);
             return $ret;
         }

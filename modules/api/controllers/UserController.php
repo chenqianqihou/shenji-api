@@ -1159,7 +1159,6 @@ class UserController extends BaseController
             $validation->setShowInputMessage(true);
             $validation->setPromptTitle('角色配置 录入');
             $validation->setPrompt('角色配置 输入格式和可选内容为："'.$rolestr.'"');
-
     
             $validation = $spreadsheet->getActiveSheet()->getCell('F'.$ss)->getDataValidation();
             $validation->setType(DataValidation::TYPE_LIST);

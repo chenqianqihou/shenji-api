@@ -316,7 +316,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'regtime',
-                'message' => '注册时间内容错误!'
+                'message' => '注册时间内容错误,不能大于当前时间!'
             ];
 
             return $result;
@@ -388,7 +388,7 @@ class OrganizationService
             $result = [
                 'res' => false,
                 'key' => 'workbegin',
-                'message' => '从业开始时间错误'
+                'message' => '从业开始时间错误,不能大于当前时间'
             ];
 
             return $result;
