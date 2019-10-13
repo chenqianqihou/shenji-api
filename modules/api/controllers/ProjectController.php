@@ -149,7 +149,7 @@ class ProjectController extends BaseController
                 ErrorDict::getError(ErrorDict::G_PARAM, "项目类型错误!")
             );
         }
-        if(!in_array($projlevel, [1, 2, 3, 4])){
+        if(!in_array($projlevel, [1, 2, 3, 4, 5])){
             return $this->outputJson(
                 '',
                 ErrorDict::getError(ErrorDict::G_PARAM, "项目层级输入有误！")
