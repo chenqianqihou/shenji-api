@@ -36,7 +36,7 @@ class AuditresultsController extends BaseController
         $arservice = new AuditresultsService();
 
         if( $arservice->AuditResultCount($resultid) <= 0 ) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '审计成果不存在');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM,'审计成果不存在');
             $ret = $this->outputJson('', $error);
             return $ret;    
         }
@@ -242,12 +242,13 @@ class AuditresultsController extends BaseController
             $ret = $this->outputJson(array(), $this->err);
             return $ret;
         }
+        $peopleid = $this->userInfo['id'];
         $projectid = $this->getParam('projectid','');
         $status = intval($this->getParam('status',-1));
         $start = $this->getParam('start',0);
         $length = $this->getParam('length',10);
         $arService = new AuditresultsService();
-        $arList = $arService->getAuditResultsList( $projectid,$status,$start,$length );
+        $arList = $arService->getAuditResultsList($peopleid, $projectid,$status,$start,$length );
         $projectDao = new ProjectDao();
         $userDao = new UserDao();
         $peopleProjectRoleType = [];

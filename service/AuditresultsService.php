@@ -40,12 +40,13 @@ class AuditresultsService
             return AuditresultsDao::deleteAll(['id'=>$ids]);    
     }
 
-    public function getAuditResultsList($projectid, $status, $start, $length) {
+    public function getAuditResultsList($peopleid, $projectid, $status, $start, $length) {
         $res = (new \yii\db\Query())
             ->from('auditresults')
             ->innerJoin('project', 'auditresults.projectid = project.id')
             ->select('project.name, project.projectnum, auditresults.*')
             ->where(1);
+        $res = $res->andWhere(['auditresults.peopleid'=>$peopleid]);
         if( $status > 0 ){
             $res = $res->andWhere(['auditresults.status'=>$status]);
         }
