@@ -2865,7 +2865,7 @@ class ProjectController extends BaseController
 
                 $transaction->commit();
             } catch(\Exception $e){
-                Log::fatal(printf("创建错误！%s, %s", $e->getMessage(), $e->getTraceAsString()));
+//                Log::fatal(printf("创建错误！%s, %s", $e->getMessage(), $e->getTraceAsString()));
                 $transaction->rollBack();
                 $error = ErrorDict::getError(ErrorDict::ERR_INTERNAL);
                 return $this->outputJson('', $error);
