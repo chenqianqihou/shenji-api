@@ -370,7 +370,7 @@ class UserService
         $political = intval($params['political']);
         $location = $params['location'];
         $level = intval($params['level']);
-        $comment = $params['comment'];
+        $comment = isset($params['comment']) ? $params['comment'] : '';
         $role = $params['role'];
         $position = intval($params['position']);
         $organization = intval($params['organization']);
