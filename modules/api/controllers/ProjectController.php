@@ -827,7 +827,7 @@ class ProjectController extends BaseController
 
             $transaction->commit();
         } catch(\Exception $e){
-            Log::fatal(printf("创建错误！%s, %s", $e->getMessage(), $e->getTraceAsString()));
+//            Log::fatal(printf("创建错误！%s, %s", $e->getMessage(), $e->getTraceAsString()));
             $transaction->rollBack();
             return $this->outputJson('',
                 ErrorDict::getError(ErrorDict::ERR_INTERNAL, "创建项目内部错误！")
@@ -1696,7 +1696,7 @@ class ProjectController extends BaseController
             ],
             'medium' => [
                 [ '1' => '无需审核'],
-                [ '2' => '待提审'],
+//                [ '2' => '待提审'],
                 [ '3' => '待审核'],
                 [ '4' => '审核通过'],
                 [ '5' => '审核未通过'],
@@ -1958,7 +1958,7 @@ class ProjectController extends BaseController
 
 
         $lnowdk = 0;
-        $larr = ["_1.财政类","_2.社会保险基金类","_3.企业金融类","_4.经济责任类","_5.政策跟踪"];
+        $larr = ["1.财政类","2.社会保险基金类","3.企业金融类","4.经济责任类","5.政策跟踪"];
         foreach($larr as $lk=>$lv) {
             $lnowdk = $lk+1;
             $spreadsheet->getActiveSheet()->getCell('AC'.$lnowdk)->setValue( $lv );    
@@ -2114,8 +2114,13 @@ class ProjectController extends BaseController
             $tmpdata['projyear'] = intval( $data['C'] );
             $tmpdata['projdesc'] = intval( $data['D'] );
             $tmpdata['projlevel'] = explode(':', $data['E'])[0];
-            $tmpdata['location'] = $data['F'];
-            $tmpdata['projtype'] = json_encode([$data['H'], $data['I']], JSON_UNESCAPED_UNICODE);
+            $tmpdata['location'] = explode(':', $data['F'])[0];
+            $projtypeArray = [
+                str_replace('_','',$data['H']),
+                $data['I']
+            ];
+
+            $tmpdata['projtype'] = $projtypeArray;
             $tmpdata['leadernum'] = $data['J'];
             $tmpdata['leader_projtype'] = [$data['K'], $data['L']];
             $tmpdata['leader_filternum'] = $data['M'];
@@ -2182,7 +2187,7 @@ class ProjectController extends BaseController
                     ErrorDict::getError(ErrorDict::G_PARAM, "项目类型错误!")
                 );
             }
-            if(!in_array($projlevel, [1, 2, 3, 4])){
+            if(!in_array($projlevel, [1, 2, 3, 4, 5])){
                 return $this->outputJson(
                     '',
                     ErrorDict::getError(ErrorDict::G_PARAM, "项目层级输入有误！")
@@ -2202,7 +2207,7 @@ class ProjectController extends BaseController
                 $service = new ProjectService();
                 $projectId = $service->createProject(
                     ProjectDao::$statusToName['未开始'],
-                    strtotime('now'),
+                    $service->createProjNum(),
                     $name,
                     $projyear,
                     $plantime,
@@ -2860,11 +2865,10 @@ class ProjectController extends BaseController
 
                 $transaction->commit();
             } catch(\Exception $e){
-                Log::fatal(printf("创建错误！%s, %s", $e->getMessage(), $e->getTraceAsString()));
+//                Log::fatal(printf("创建错误！%s, %s", $e->getMessage(), $e->getTraceAsString()));
                 $transaction->rollBack();
-                return $this->outputJson('',
-                    ErrorDict::getError(ErrorDict::ERR_INTERNAL, "创建项目内部错误！")
-                );
+                $error = ErrorDict::getError(ErrorDict::ERR_INTERNAL);
+                return $this->outputJson('', $error);
             }
         }
 
