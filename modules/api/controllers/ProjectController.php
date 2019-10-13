@@ -1958,7 +1958,7 @@ class ProjectController extends BaseController
 
 
         $lnowdk = 0;
-        $larr = ["_1.财政类","_2.社会保险基金类","_3.企业金融类","_4.经济责任类","_5.政策跟踪"];
+        $larr = ["1.财政类","2.社会保险基金类","3.企业金融类","4.经济责任类","5.政策跟踪"];
         foreach($larr as $lk=>$lv) {
             $lnowdk = $lk+1;
             $spreadsheet->getActiveSheet()->getCell('AC'.$lnowdk)->setValue( $lv );    
@@ -2115,7 +2115,12 @@ class ProjectController extends BaseController
             $tmpdata['projdesc'] = intval( $data['D'] );
             $tmpdata['projlevel'] = explode(':', $data['E'])[0];
             $tmpdata['location'] = explode(':', $data['F'])[0];
-            $tmpdata['projtype'] = stripslashes(json_encode([$data['H'], $data['I']], JSON_UNESCAPED_UNICODE));
+            $projtypeArray = [
+                str_replace('_','',$data['H']),
+                $data['I']
+            ];
+
+            $tmpdata['projtype'] = $projtypeArray;
             $tmpdata['leadernum'] = $data['J'];
             $tmpdata['leader_projtype'] = [$data['K'], $data['L']];
             $tmpdata['leader_filternum'] = $data['M'];
