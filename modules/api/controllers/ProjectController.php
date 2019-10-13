@@ -2867,9 +2867,8 @@ class ProjectController extends BaseController
             } catch(\Exception $e){
                 Log::fatal(printf("创建错误！%s, %s", $e->getMessage(), $e->getTraceAsString()));
                 $transaction->rollBack();
-                return $this->outputJson('',
-                    ErrorDict::getError(ErrorDict::ERR_INTERNAL, "创建项目内部错误！")
-                );
+                $error = ErrorDict::getError(ErrorDict::ERR_INTERNAL);
+                return $this->outputJson('', $error);
             }
         }
 
