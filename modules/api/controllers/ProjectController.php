@@ -827,7 +827,7 @@ class ProjectController extends BaseController
 
             $transaction->commit();
         } catch(\Exception $e){
-            Log::fatal(printf("创建错误！%s, %s", $e->getMessage(), $e->getTraceAsString()));
+//            Log::fatal(printf("创建错误！%s, %s", $e->getMessage(), $e->getTraceAsString()));
             $transaction->rollBack();
             return $this->outputJson('',
                 ErrorDict::getError(ErrorDict::ERR_INTERNAL, "创建项目内部错误！")
@@ -1696,7 +1696,7 @@ class ProjectController extends BaseController
             ],
             'medium' => [
                 [ '1' => '无需审核'],
-                [ '2' => '待提审'],
+//                [ '2' => '待提审'],
                 [ '3' => '待审核'],
                 [ '4' => '审核通过'],
                 [ '5' => '审核未通过'],
@@ -2207,7 +2207,7 @@ class ProjectController extends BaseController
                 $service = new ProjectService();
                 $projectId = $service->createProject(
                     ProjectDao::$statusToName['未开始'],
-                    strtotime('now'),
+                    $service->createProjNum(),
                     $name,
                     $projyear,
                     $plantime,
