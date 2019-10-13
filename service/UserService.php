@@ -138,7 +138,7 @@ class UserService
     }
 
     // 用户列表
-    public function getUserList($type, $regNum, $organid, $query, $status, $sex, $education,
+    public function getUserList($userRegNum, $type, $regNum, $organid, $query, $status, $sex, $education,
                                 $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $length, $page) {
         $data = [
             'list' => [],
@@ -152,8 +152,19 @@ class UserService
         if (!isset(UserDao::$type[$type])) {
             return $data;
         }
+        $userOrganizedIds = [];
         if ($type != UserDao::$typeToName['审计机关']) {
             $position = ''; $techtitle = ''; $expertise = ''; $auditBeginLeft = ''; $auditBeginRight = '';
+        }else {
+            //查询用户所在行政区编码下面的机构ID
+            $organizationService = new OrganizationService();
+            $userOrganInfos = $organizationService->getOrganIdByRegnumAndType($type, $userRegNum);
+            foreach ($userOrganInfos as $one) {
+                $userOrganizedIds[] = $one['id'];
+            }
+            if (count($userOrganizedIds) == 0) {
+                return $data;
+            }
         }
         //判断按行政区查询还是审计机构查询
         $organids = [];
@@ -191,7 +202,7 @@ class UserService
         $start = $length * ($page - 1);
         $organids = implode(',', $organids);
         $userList = $userDao->queryPeopleListNew($type, $organids, $departid, $query, $status, $sex, $education,
-            $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $start, $length);
+            $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $userOrganizedIds, $start, $length);
         $organizationService = new OrganizationService();
         $organizationInfo = [];
         $allOrganization = $organizationService->getAllOrganization();
@@ -232,7 +243,7 @@ class UserService
         }
         $userDao = new UserDao();
         $count = $userDao->countPeopleListNew($type, $organids, $departid, $query, $status, $sex, $education,
-            $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight);
+            $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $userOrganizedIds);
         $data['list'] = $list;
         $data['total'] = $count;
         return $data;

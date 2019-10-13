@@ -886,7 +886,8 @@ class UserController extends BaseController
             $auditBeginRight = date('Y-m-d', intval($auditBeginRight));
         }
         $userService = new UserService(!in_array( $this->userInfo['pid'], Yii::$app->params['adminlist']) ?  $this->userInfo['organinfo']['regnum'] : '' );
-        $data = $userService->getUserList($type, $regNum, $organid, $query, $status, $sex, $education,
+        $userRegNum = $this->userInfo['organinfo']['regnum'];
+        $data = $userService->getUserList($userRegNum, $type, $regNum, $organid, $query, $status, $sex, $education,
             $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $length, $page);
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($data, $error);

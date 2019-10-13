@@ -360,12 +360,16 @@ class UserDao extends ActiveRecord{
 
     //人员列表(新)
     public function queryPeopleListNew($type, $organids, $departid, $query, $status, $sex, $education, $position,
-                                       $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $start, $length) {
+                                       $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $userOrganizedIds, $start, $length) {
         $condition = " type = :type ";
         if ($departid != 0) {
             $condition = $condition . " and department = :department";
         }elseif ($organids != ''){
             $condition = $condition . " and organid in (" . $organids . ")";
+        }
+        if (count($userOrganizedIds) > 0) {
+            $userOrganizedIds = implode(',', $userOrganizedIds);
+            $condition = $condition . " and organid in (" . $userOrganizedIds . ")";
         }
         if ($sex) {
             $condition = $condition . " and sex = :sex";
@@ -433,12 +437,16 @@ class UserDao extends ActiveRecord{
 
     //人员列表总数(新)
     public function countPeopleListNew($type, $organids, $departid, $query, $status, $sex, $education, $position,
-                                       $techtitle, $expertise, $auditBeginLeft, $auditBeginRight) {
+                                       $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $userOrganizedIds) {
         $condition = " type = :type ";
         if ($departid != 0) {
             $condition = $condition . " and department = :department";
         }elseif ($organids != '') {
             $condition = $condition . " and organid in (" . $organids . ")";
+        }
+        if (count($userOrganizedIds) > 0) {
+            $userOrganizedIds = implode(',', $userOrganizedIds);
+            $condition = $condition . " and organid in (" . $userOrganizedIds . ")";
         }
         if ($sex) {
             $condition = $condition . " and sex = :sex";
