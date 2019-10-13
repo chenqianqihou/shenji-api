@@ -1122,7 +1122,7 @@ class UserController extends BaseController
         $i = 0;
         foreach( $organDict as $odk=>$odv){
             if($odv['parentid'] == 0){
-                $spreadsheet->setActiveSheetIndex(0)->setCellValue('ZZ'.(++$i), $odk.':'.$odv['name']);
+                //$spreadsheet->setActiveSheetIndex(0)->setCellValue('ZZ'.(++$i), $odk.':'.$odv['name']);
             } else {
                 if( !isset($organDict[$odv['parentid']]) ){
                     continue;    
