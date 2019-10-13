@@ -330,7 +330,7 @@ class AuditresultsController extends BaseController
 
             $userObj = UserDao::find()->where(['pid'=>$data['A']])->one();
             if( is_null($userObj) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第A列错误,用户不存在！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '第'.$sk.'行第A列错误,用户不存在！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
@@ -338,7 +338,7 @@ class AuditresultsController extends BaseController
 
             $projObj = ProjectDao::find()->where(['projectnum'=>$data['B']])->one();
             if( is_null($projObj) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第B列错误,项目编号不存在！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '第'.$sk.'行第B列错误,项目编号不存在！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
@@ -346,7 +346,7 @@ class AuditresultsController extends BaseController
 
             //判断用户和项目是否有关联
             if( PeopleProjectDao::find()->where(['pid'=>$tmpdata['peopleid'],'projid'=>$tmpdata['projectid']])->count() <= 0) {
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行，找不到人员和项目编号的对应关系！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '第'.$sk.'行，找不到人员和项目编号的对应关系！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
@@ -374,37 +374,37 @@ class AuditresultsController extends BaseController
 
             $tmpdata['amountone'] = intval($data['I']);
             if( !is_numeric($tmpdata['amountone']) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第I列类型格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM,'第'.$sk.'行第I列类型格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
             $tmpdata['amounttwo'] = intval($data['J']);
             if( !is_numeric($tmpdata['amounttwo']) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第J列类型格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '第'.$sk.'行第J列类型格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
             $tmpdata['amountthree'] = intval($data['K']);
             if( !is_numeric($tmpdata['amountthree']) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第K列类型格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM,  '第'.$sk.'行第K列类型格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
             $tmpdata['amountfour'] = intval($data['L']);
             if( !is_numeric($tmpdata['amountfour']) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第L列类型格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '第'.$sk.'行第L列类型格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
             $tmpdata['amountfive'] = intval($data['M']);
             if( !is_numeric($tmpdata['amountfive']) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第M列类型格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '第'.$sk.'行第M列类型格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
             $tmpdata['amountsix'] = intval($data['N']);
             if( !is_numeric($tmpdata['amountsix']) ){
-                $error = ErrorDict::getError(ErrorDict::G_PARAM, '', '第'.$sk.'行第N列类型格式错误！');
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, '第'.$sk.'行第N列类型格式错误！');
                 $ret = $this->outputJson('', $error);
                 return $ret;
             }
