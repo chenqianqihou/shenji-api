@@ -1703,7 +1703,7 @@ class ProjectController extends BaseController
             ],
             'internal' => [
                 [ '1' => "无需审核"],
-                [ '2' => '待提审'],
+//                [ '2' => '待提审'],
                 [ '3' => '待审核'],
                 [ '4' => '审核通过'],
                 [ '5' => '审核未通过'],
