@@ -2112,7 +2112,7 @@ class ProjectController extends BaseController
             $tmpdata['name'] = $data['A'];
             $tmpdata['plantime'] = intval( $data['B'] );
             $tmpdata['projyear'] = intval( $data['C'] );
-            $tmpdata['projdesc'] = intval( $data['D'] );
+            $tmpdata['projdesc'] = $data['D'];
             $tmpdata['projlevel'] = explode(':', $data['E'])[0];
             $tmpdata['location'] = explode(':', $data['F'])[0];
             $projtypeArray = [
