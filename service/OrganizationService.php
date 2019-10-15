@@ -65,7 +65,7 @@ class OrganizationService
             $res = $res->andWhere(['like', 'name', $keyword]);    
         }
 
-        if( $this->_user_organ_regnum != '' ) {
+        if( ($otype !=1 ) && $this->_user_organ_regnum != '' ) {
             $res = $res->andWhere(['like', 'regnum', $this->_user_organ_regnum]);    
         }
         $total = $res->count();
