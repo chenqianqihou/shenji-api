@@ -304,7 +304,7 @@ class DashbordController extends BaseController {
         }
 
         if ($user['organid'] !== 1012) {
-            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '没有权限看其他市的！'));
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS, '没有权限看其他市的！'));
         }
 
         if($city == 0){
