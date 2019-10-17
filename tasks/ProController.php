@@ -1,15 +1,18 @@
-﻿<?php
-
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ryugou
+ * Date: 2019/10/17
+ * Time: 11:51 PM
+ */
 namespace app\tasks;
 
 use app\models\AuditGroupDao;
-use app\models\PeopleProjectDao;
-use app\models\ProjectDao;
-use app\models\UserDao;
-use linslin\yii2\curl\Curl;
 use yii\console\Controller;
 
-class ProjectController extends Controller{
+
+class ProController extends Controller {
+
 
     /**
      * 扫描修改审计组的审计状态
@@ -18,15 +21,16 @@ class ProjectController extends Controller{
      * 2、最后一个进点的审计组的进点后，项目时长内，没有结束项目实施，状态为“该结束未结束”。
      *
      */
-    public function actionScanStatus()
+    public function actionScanstatus()
     {
         //1、三天内，审计组没进点，状态变更为“ 该进点而未进点”；
         $timeLimit = strtotime('-3 day');
         $auditGroups = AuditGroupDao::find()
-            ->where(['status' => AuditGroupDao::$statusToName['应进点']])
+            ->where(['in', 'status', [AuditGroupDao::$statusToName['无'], AuditGroupDao::$statusToName['应进点']]])
             ->all();
+
         foreach ($auditGroups as $e) {
-            if(strtotime($e->utime) >= $timeLimit){
+            if($timeLimit >= strtotime($e->utime)){
                 $e->status = AuditGroupDao::$statusToName['该进点而未进点'];
                 $e->save();
             }
@@ -42,6 +46,7 @@ class ProjectController extends Controller{
             ->where(['auditgroup.status' => AuditGroupDao::$statusToName['已进点']])
             ->groupBy('peopleproject.projid')
             ->all();
+
         $projectMap = [];
         foreach ($elems as $e){
             $projectMap[$e['pid']][] = $e;
