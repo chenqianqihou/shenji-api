@@ -1350,6 +1350,23 @@ class ProjectController extends BaseController
         }
 
 
+        $useCode = $this->data['ID'];
+        $user = UserDao::find()
+            ->where(['pid' => $useCode])
+            ->one();
+        if(!$user){
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '登录用户未知！'));
+        }
+
+        if ($user['organid'] !== 1012) {
+            $org = new OrganizationService();
+            $orgIds = $org->getSubIds($user['organid'] ?? '');
+            $orgIds[] = $user['organid'];
+
+            $con = $con->andWhere(["in", "projorgan", $orgIds]);
+        }
+
+
         if ($query) {
             $con = $con->andwhere(['or', ['like', 'projectnum', $query], ['like', 'name', $query]]);
         }
