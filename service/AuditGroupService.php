@@ -23,7 +23,7 @@ class AuditGroupService
             $peoples = (new \yii\db\Query())
                 ->from('peopleproject')
                 ->innerJoin('people', 'peopleproject.pid = people.id')
-                ->select('people.id, people.pid, people.name, people.sex, peopleproject.roletype, people.address as location, people.type as role, people.level, peopleproject.islock, peopleproject.objectscore, peopleproject.subjectscore')
+                ->select('people.id, people.pid, people.name, people.sex, peopleproject.roletype, people.location as location, people.type as role, people.level, peopleproject.islock, peopleproject.objectscore, peopleproject.subjectscore')
                 ->where(['peopleproject.groupid' => $e['id']])
                 ->andWhere(['peopleproject.projid' => $id])
                 ->all();
