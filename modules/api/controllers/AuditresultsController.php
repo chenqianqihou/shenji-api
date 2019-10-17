@@ -472,7 +472,6 @@ class AuditresultsController extends BaseController
             }
             
             $insertData[] = $tmpdata;
-            break;
         }
 
         $arservice = new AuditresultsService();
