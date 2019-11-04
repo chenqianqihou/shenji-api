@@ -1975,7 +1975,7 @@ class ProjectController extends BaseController
 
 
         $lnowdk = 0;
-        $larr = ["1.财政类","2.社会保险基金类","3.企业金融类","4.经济责任类","5.政策跟踪"];
+        $larr = ["_1.财政类","_2.社会保险基金类","_3.企业金融类","_4.经济责任类","_5.政策跟踪"];
         foreach($larr as $lk=>$lv) {
             $lnowdk = $lk+1;
             $spreadsheet->getActiveSheet()->getCell('AC'.$lnowdk)->setValue( $lv );    
@@ -2126,6 +2126,9 @@ class ProjectController extends BaseController
             if( empty($data['A']) ){
                 continue;    
             }
+            $data['K'] = str_replace('_','',$data['K']);
+            $data['O'] = str_replace('_','',$data['O']);
+
             $tmpdata['name'] = $data['A'];
             $tmpdata['plantime'] = intval( $data['B'] );
             $tmpdata['projyear'] = intval( $data['C'] );
