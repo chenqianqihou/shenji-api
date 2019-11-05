@@ -405,6 +405,13 @@ class UserService
             $info['msg'] = '政治面貌错误';
             return $info;
         }
+
+        if( UserDao::find()->where(['phone'=>$phone])->count() > 0 ) {
+            Log::addLogNode('addNewUser', 'phone is error');
+            $info['msg'] = $phone.'手机号已经在案，录入错误';
+            return $info;
+        }
+
         $namePinyin = Pinyin::utf8_to($name);
         if ($namePinyin == "") {
             $namePinyin = rand(10000, 20000);
@@ -540,7 +547,7 @@ class UserService
         }catch (Exception $e) {
             $tr->rollBack();
             Log::addLogNode('addException', serialize($e->errorInfo));
-            $info['msg'] = '异常错误';
+            $info['msg'] = '异常错误,'.json_encode( $e->errorInfo );
             return $info;
         }
         $info['msg'] = '录入完成';
