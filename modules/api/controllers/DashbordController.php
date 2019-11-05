@@ -178,7 +178,7 @@ class DashbordController extends BaseController {
             ->asArray()
             ->all();
         $uses = array_map(function($e){
-            $e['age'] = substr($e['cardid'], 7, 4);
+            $e['age'] = date('Y') - substr($e['cardid'], 6, 4);
             return $e;
         }, $uses);
 
@@ -259,6 +259,9 @@ class DashbordController extends BaseController {
         $country = array_filter($originDatas, function($e){
             return $e['projlevel'] == OrganizationDao::PROJ_LEVEL_COUNTRY;
         });
+        $provLocal = array_filter($originDatas, function($e){
+            return $e['projlevel'] == OrganizationDao::PROJ_LEVEL_PROVINCE_LOCAL;
+        });
 
 
         $ret = [
@@ -267,7 +270,8 @@ class DashbordController extends BaseController {
                 "province" => count($province),
                 "city_local" => count($cityLocal), #市州本级
                 "city_unified" => count($cityUnified), #市州统一组织
-                "country" => count($country)
+                "country" => count($country),
+                "province_local" => count( $provLocal),
             ],
 
         ];
