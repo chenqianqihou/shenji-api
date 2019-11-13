@@ -2161,7 +2161,7 @@ class ProjectController extends BaseController
             }
 
             $tmpdata['leadorgan'] = $projganNums[0];
-            $tmpdata['projorgan'] = $org->parentid;
+            $tmpdata['projorgan'] = $org->parentid == 0 ? $org->id : $org->parentid;
 
             $insertData[] = $tmpdata;
         }
