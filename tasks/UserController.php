@@ -226,7 +226,7 @@ class UserController extends Controller{
                     }
                 }
             }
-            $transferPeople = json_decode($one['transferpeople'])
+            $transferPeople = json_decode($one['transferpeople'], true);
             //移送处理情况:移送处理人员情况及人数:地厅级以上
             if (isset($obejectiveScoreInfo['range09Score'])) {
                 $range09Score = $obejectiveScoreInfo['range09Score'];
