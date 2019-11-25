@@ -226,11 +226,12 @@ class UserController extends Controller{
                     }
                 }
             }
+            $transferPeople = json_decode($one['transferpeople'])
             //移送处理情况:移送处理人员情况及人数:地厅级以上
             if (isset($obejectiveScoreInfo['range09Score'])) {
                 $range09Score = $obejectiveScoreInfo['range09Score'];
                 foreach ($range09Score as $rang) {
-                    if ($one['transferpeoplenum'] >= $rang['value'][0] && $one['transferpeoplenum'] <= $rang['value'][1]) {
+                    if (isset($transferPeople['地厅级以上']) && $transferPeople['地厅级以上'] >= $rang['value'][0] && $transferPeople['地厅级以上'] <= $rang['value'][1]) {
                         $score = $score + $rang['score'];
                         break;
                     }
@@ -240,7 +241,7 @@ class UserController extends Controller{
             if (isset($obejectiveScoreInfo['range10Score'])) {
                 $range10Score = $obejectiveScoreInfo['range10Score'];
                 foreach ($range10Score as $rang) {
-                    if ($one['transferpeoplenum'] >= $rang['value'][0] && $one['transferpeoplenum'] <= $rang['value'][1]) {
+                    if (isset($transferPeople['县处级']) && $transferPeople['县处级'] >= $rang['value'][0] && $transferPeople['县处级'] <= $rang['value'][1]) {
                         $score = $score + $rang['score'];
                         break;
                     }
@@ -250,7 +251,7 @@ class UserController extends Controller{
             if (isset($obejectiveScoreInfo['range11Score'])) {
                 $range11Score = $obejectiveScoreInfo['range11Score'];
                 foreach ($range11Score as $rang) {
-                    if ($one['transferpeoplenum'] >= $rang['value'][0] && $one['transferpeoplenum'] <= $rang['value'][1]) {
+                    if (isset($transferPeople['乡科级']) && $transferPeople['乡科级'] >= $rang['value'][0] && $transferPeople['乡科级'] <= $rang['value'][1]) {
                         $score = $score + $rang['score'];
                         break;
                     }
@@ -260,7 +261,7 @@ class UserController extends Controller{
             if (isset($obejectiveScoreInfo['range12Score'])) {
                 $range12Score = $obejectiveScoreInfo['range12Score'];
                 foreach ($range12Score as $rang) {
-                    if ($one['transferpeoplenum'] >= $rang['value'][0] && $one['transferpeoplenum'] <= $rang['value'][1]) {
+                    if (isset($transferPeople['其他']) && $transferPeople['其他'] >= $rang['value'][0] && $transferPeople['其他'] <= $rang['value'][1]) {
                         $score = $score + $rang['score'];
                         break;
                     }
