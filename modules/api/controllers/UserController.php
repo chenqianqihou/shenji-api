@@ -1376,6 +1376,11 @@ class UserController extends BaseController
             $qustr = $qu[1];
             $tmpdata['location'] = "$shenstr,$shistr,$qustr";
             $organid = explode(':',$data['N'])[0];
+            if( $organid == '' || !isset($organDict[$organid])){
+                $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['A'].' '.$data['N'].' 所属机构-所属部门 错误！');
+                $ret = $this->outputJson('', $error);
+                return $ret;
+            }
             if( $organDict[$organid]['parentid'] == 0 ){
                 $tmpdata['organization'] = $organid;
             } else {
