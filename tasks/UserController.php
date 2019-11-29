@@ -11,6 +11,15 @@ use yii\console\Controller;
 
 class UserController extends Controller{
 
+    //将人员表中的信息导出
+    public function actionUserexport() {
+        $people = UserDao::find()->asArray()->all();
+        echo "id,登录名,用户名,手机号,身份证号\n";
+        foreach( $people as $p) {
+            echo $p['id'].','.$p['pid'].','.$p['name'].','.$p['phone'].',\''.$p['cardid']."\n";    
+        }
+    }
+
     /**
      * 计算审计人员=》客观分+主观分
      * 1、项目结束时计算
