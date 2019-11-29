@@ -8,10 +8,20 @@
 namespace app\tasks;
 
 use app\models\AuditGroupDao;
+use app\models\ProjectDao;
 use yii\console\Controller;
 
 
 class ProController extends Controller {
+
+    //将项目表中的信息导出
+    public function actionProjectexport() {
+        $proj = ProjectDao::find()->asArray()->all();
+        echo "id,项目编号,项目名\n";
+        foreach( $proj as $p) {
+            echo $p['id'].',\''.$p['projectnum'].','.$p['name']."\n";    
+        }
+    }
 
 
     /**
