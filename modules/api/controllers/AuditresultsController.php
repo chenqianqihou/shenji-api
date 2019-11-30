@@ -3,6 +3,7 @@
 namespace app\modules\api\controllers;
 
 use app\classes\BaseController;
+use app\models\RoleDao;
 use app\service\AuditresultsService;
 use app\service\AssessService;
 use app\models\ProjectDao;
@@ -247,8 +248,22 @@ class AuditresultsController extends BaseController
         $status = intval($this->getParam('status',-1));
         $start = $this->getParam('start',0);
         $length = $this->getParam('length',10);
+        //查询用户角色
+        $roleList = [];
+        $roleDao = new RoleDao();
+        $roleInfo = $roleDao->queryByPid($this->userInfo['pid']);
+        if ($roleInfo) {
+            foreach ($roleInfo as $role) {
+                $roleList[] = $role['name'];
+            }
+        }
         $arService = new AuditresultsService();
-        $arList = $arService->getAuditResultsList($peopleid, $projectid,$status,$start,$length );
+        if (in_array('厅/局领导', $roleList) || in_array('项目计划管理人员', $roleList)
+            || in_array('法规部门', $roleList) || in_array('审理部门', $roleList)) {
+            $arList = $arService->getAuditResultsByOrgan($this->userInfo['organid'],$projectid,$status,$start,$length);
+        }else {
+            $arList = $arService->getAuditResultsList($peopleid, $projectid,$status,$start,$length );
+        }
         $projectDao = new ProjectDao();
         $userDao = new UserDao();
         $peopleProjectRoleType = [];
