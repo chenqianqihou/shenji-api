@@ -76,6 +76,23 @@ class AuditresultsService
         return ['total'=>$total,'list'=>$list];
     }
 
+    public function getAuditResultsAllList($projectid, $status, $start, $length) {
+        $res = (new \yii\db\Query())
+            ->from('auditresults')
+            ->innerJoin('project', 'auditresults.projectid = project.id')
+            ->select('project.name, project.projectnum, auditresults.*')
+            ->where(1);
+        if( $status > 0 ){
+            $res = $res->andWhere(['auditresults.status'=>$status]);
+        }
+        if ($projectid) {
+            $res = $res->andwhere(['or', ['like', 'projectnum', $projectid], ['like', 'name', $projectid]]);
+        }
+        $total = $res->count();
+        $list = $res->orderBy('id desc')->offset( $start )->limit($length)->all();
+        return ['total'=>$total,'list'=>$list];
+    }
+
     public function SaveAuditResult( $params = [] ) {
         if( isset($params['id']) && is_numeric($params['id']) && AuditresultsDao::find()->where(['id' => $params['id']])->count() > 0 ){
             $auditdao = AuditresultsDao::find()->where(['id' => $params['id']])->one();    
