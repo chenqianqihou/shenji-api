@@ -10,6 +10,9 @@ namespace app\tasks;
 use app\models\AuditGroupDao;
 use app\models\ProjectDao;
 use yii\console\Controller;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 
 
 class ProController extends Controller {
@@ -23,6 +26,20 @@ class ProController extends Controller {
         }
     }
 
+    //历史项目导入
+    public function actionHistoryimport( $pf ) {
+        $nowdir = getcwd().'/';
+        $pfile = $nowdir.$pf;
+        if(! file_exists( $pfile ) ) {
+            echo "文件不存在！";    
+            return;
+        }
+        
+        echo "当前处理文件为：".$pfile."\n";
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load( $pfile );
+        $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+        print_r( $sheetData[1]);
+    }
 
     /**
      * 扫描修改审计组的审计状态
