@@ -8,11 +8,15 @@
 namespace app\tasks;
 
 use app\models\AuditGroupDao;
+use app\models\OrganizationDao;
+use app\models\PeopleProjectDao;
 use app\models\ProjectDao;
+use app\models\UserDao;
 use yii\console\Controller;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
+use app\service\ProjectService;
 
 
 class ProController extends Controller {
@@ -39,6 +43,180 @@ class ProController extends Controller {
         $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load( $pfile );
         $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
         print_r( $sheetData[1]);
+        print_r($sheetData[2]);
+
+
+        $elems = [];
+
+        foreach ($sheetData as $key => $value){
+            if($key >= 2 ) {
+                $organs = explode($value['G'], "-");
+                $org = OrganizationDao::find()
+                    ->where(['name' => $organs[0]])
+                    ->asArray()
+                    ->one();
+                if(!$org) {
+                   echo "未找到相关的项目单位！";
+                   return;
+                }
+
+                $leaderOrg = OrganizationDao::find()
+                    ->where(['parentid' => $org['id']])
+                    ->andWhere(['name' => $organs[1]])
+                    ->asArray()
+                    ->one();
+
+                if(!$leaderOrg){
+                    echo "未找到{$organs[0]}的牵头业务部门{$organs[1]}!";
+                    return;
+                }
+
+                $level = explode($value['E'], ':');
+                $leaders = explode($value['J'], "\n");
+                $masters = explode($value['K'], "\n");
+                $auditors = explode($value['L'], "\n");
+
+                $leaderIds = [];
+                $masterIds = [];
+                $auditorIds = [];
+
+                foreach ($leaders as $e){
+                    $user = UserDao::find()
+                        ->where(['name' => $e])
+                        ->asArray()
+                        ->one();
+                    if(!$user){
+                        echo "未找到员工{$e}";
+                        return;
+                    }
+                    $leaderIds[] = $user['id'];
+                }
+
+                foreach ($masters as $e){
+                    $user = UserDao::find()
+                        ->where(['name' => $e])
+                        ->asArray()
+                        ->one();
+                    if(!$user){
+                        echo "未找到员工{$e}";
+                        return;
+                    }
+                    $masterIds[] = $user['id'];
+                }
+
+                foreach ($auditors as $e){
+                    $user = UserDao::find()
+                        ->where(['name' => $e])
+                        ->asArray()
+                        ->one();
+                    if(!$user){
+                        echo "未找到员工{$e}";
+                        return;
+                    }
+                    $auditorIds[] = $user['id'];
+                }
+
+                $location = explode($value['T'], ":");
+
+                $elem = [
+                    "projectnum" => strtotime('now'),
+                    "name" => $value['A'],
+                    "projyear" => $value['C'],
+                    "plantime" => $value['B'],
+                    "projdesc" => $value['D'],
+                    "projorgan" => $org['id'],
+                    "projtype" => $org['H'],
+                    "projlevel" => $level[0],
+                    "leadorgan" => $leaderOrg['id'],
+                    "leaders" => $leaderIds,
+                    "masters" => $masterIds,
+                    "auditors" => $auditorIds,
+                    "location" => $location[0]
+                ];
+                $elems[] = $elem;
+            }
+        }
+
+
+        foreach ($elems as $e){
+            $service = new ProjectService();
+            $projectId = $service->createProject(
+                ProjectDao::$statusToName['项目结束'],
+                $e['projectnum'],
+                $e['name'],
+                $e['projyear'],
+                $e['plantime'],
+                $e['projdesc'],
+                $e['projorgan'],
+                json_encode($e['projtype'], JSON_UNESCAPED_UNICODE),
+                $e['projlevel'],
+                $e['leadorgan'],
+                count($e['leaders']),
+                count($e['masters']),
+                count($e['auditors']),
+                $e['location']
+            );
+
+            $group = [];
+            foreach ($e['leaders'] as $leader) {
+                $auditGroup = new AuditGroupDao();
+                $group[$auditGroup->addAuditGroup($projectId)] = [
+                    "leader" => $leader
+                ];
+            }
+
+            while (count($e['masters']) > 0) {
+                foreach ($group as $key => $value) {
+                    $group[$key]['master'][] = array_pop($e['masters']);
+                }
+            }
+
+            while (count($e['auditors']) > 0) {
+                foreach ($group as $key => $value) {
+                    $group[$key]['auditor'][] = array_pop($e['auditors']);
+                }
+            }
+
+            foreach ($group as $key => $value){
+                //leader
+                $pepProject = new PeopleProjectDao();
+                $pepProject->pid = $value['leader'];
+                $pepProject->groupid = $key;
+                $pepProject->roletype = PeopleProjectDao::ROLE_TYPE_GROUP_LEADER;
+                $pepProject->islock = $pepProject::NOT_LOCK;
+                $pepProject->projid = $projectId;
+                $pepProject->save();
+
+
+
+                //master
+                foreach ($value['master'] as $m){
+                    $pepProject = new PeopleProjectDao();
+                    $pepProject->pid = $m;
+                    $pepProject->groupid = $key;
+                    $pepProject->roletype = PeopleProjectDao::ROLE_TYPE_MASTER;
+                    $pepProject->islock = $pepProject::NOT_LOCK;
+                    $pepProject->projid = $projectId;
+                    $pepProject->save();
+                }
+
+
+                //auditors
+                foreach ($value['auditor'] as $m){
+                    $pepProject = new PeopleProjectDao();
+                    $pepProject->pid = $m;
+                    $pepProject->groupid = $key;
+                    $pepProject->roletype = PeopleProjectDao::ROLE_TYPE_GROUPER;
+                    $pepProject->islock = $pepProject::NOT_LOCK;
+                    $pepProject->projid = $projectId;
+                    $pepProject->save();
+                }
+
+            }
+
+
+
+        }
     }
 
     /**
