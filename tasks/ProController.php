@@ -42,21 +42,19 @@ class ProController extends Controller {
         echo "当前处理文件为：".$pfile."\n";
         $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load( $pfile );
         $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
-        print_r( $sheetData[1]);
-        print_r($sheetData[2]);
-
 
         $elems = [];
 
         foreach ($sheetData as $key => $value){
             if($key >= 2 ) {
-                $organs = explode($value['G'], "-");
+                $organs = explode(":", $value['G']);
+                $organs = explode("-", $organs[1]);
                 $org = OrganizationDao::find()
                     ->where(['name' => $organs[0]])
                     ->asArray()
                     ->one();
                 if(!$org) {
-                   echo "未找到相关的项目单位！";
+                   echo "未找到{$organs[0]}相关的项目单位！";
                    return;
                 }
 
@@ -71,10 +69,10 @@ class ProController extends Controller {
                     return;
                 }
 
-                $level = explode($value['E'], ':');
-                $leaders = explode($value['J'], "\n");
-                $masters = explode($value['K'], "\n");
-                $auditors = explode($value['L'], "\n");
+                $level = explode( ':', $value['E']);
+                $leaders = explode("\n", $value['J']);
+                $masters = explode("\n", $value['K']);
+                $auditors = explode("\n", $value['L']);
 
                 $leaderIds = [];
                 $masterIds = [];
@@ -82,7 +80,7 @@ class ProController extends Controller {
 
                 foreach ($leaders as $e){
                     $user = UserDao::find()
-                        ->where(['name' => $e])
+                        ->where(['pid' => $e])
                         ->asArray()
                         ->one();
                     if(!$user){
@@ -94,7 +92,7 @@ class ProController extends Controller {
 
                 foreach ($masters as $e){
                     $user = UserDao::find()
-                        ->where(['name' => $e])
+                        ->where(['pid' => $e])
                         ->asArray()
                         ->one();
                     if(!$user){
@@ -106,7 +104,7 @@ class ProController extends Controller {
 
                 foreach ($auditors as $e){
                     $user = UserDao::find()
-                        ->where(['name' => $e])
+                        ->where(['pid' => $e])
                         ->asArray()
                         ->one();
                     if(!$user){
@@ -116,7 +114,7 @@ class ProController extends Controller {
                     $auditorIds[] = $user['id'];
                 }
 
-                $location = explode($value['T'], ":");
+                $location = explode(":", $value['T']);
 
                 $elem = [
                     "projectnum" => strtotime('now'),
@@ -125,7 +123,7 @@ class ProController extends Controller {
                     "plantime" => $value['B'],
                     "projdesc" => $value['D'],
                     "projorgan" => $org['id'],
-                    "projtype" => $org['H'],
+                    "projtype" => [substr($value['H'],1), $value['I']],
                     "projlevel" => $level[0],
                     "leadorgan" => $leaderOrg['id'],
                     "leaders" => $leaderIds,
