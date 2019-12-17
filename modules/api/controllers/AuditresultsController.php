@@ -11,6 +11,7 @@ use app\models\ViolationDao;
 use app\models\UserDao;
 use app\models\PeopleProjectDao;
 use app\classes\ErrorDict;
+use app\service\OrganizationService;
 use app\service\UserService;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -258,11 +259,16 @@ class AuditresultsController extends BaseController
             }
         }
         $arService = new AuditresultsService();
-        if ($this->userInfo['organid'] = '1012') {
+        if (in_array('审计组成员', $roleList)) {
+            $arList = $arService->getAuditResultsList($peopleid, $projectid,$status,$start,$length );
+        }elseif ($this->userInfo['organid'] = '1012') {
             $arList = $arService->getAuditResultsAllList($projectid,$status,$start,$length);
         }elseif (in_array('厅/局领导', $roleList) || in_array('项目计划管理人员', $roleList)
             || in_array('法规部门', $roleList) || in_array('审理部门', $roleList)) {
-            $arList = $arService->getAuditResultsByOrgan($this->userInfo['organid'],$projectid,$status,$start,$length);
+            $organizationService = new OrganizationService();
+            $ids = $organizationService->getSubIds($this->userInfo['organid']);
+            $ids[] = $this->userInfo['organid'];
+            $arList = $arService->getAuditResultsByOrganIds($ids,$projectid,$status,$start,$length);
         }else {
             $arList = $arService->getAuditResultsList($peopleid, $projectid,$status,$start,$length );
         }
