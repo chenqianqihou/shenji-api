@@ -82,7 +82,7 @@ class AuditresultsService
             ->innerJoin('project', 'auditresults.projectid = project.id')
             ->select('project.name, project.projectnum, auditresults.*')
             ->where(1);
-        $res = $res->andWhere(['in','project.projorgan',$projorganIds]);
+        $res = $res->andWhere(['or', ['in','project.projorgan',$projorganIds], ['in','project.leadorgan',$projorganIds]]);
         if( $status > 0 ){
             $res = $res->andWhere(['auditresults.status'=>$status]);
         }
