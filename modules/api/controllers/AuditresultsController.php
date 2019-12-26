@@ -261,7 +261,7 @@ class AuditresultsController extends BaseController
         $arService = new AuditresultsService();
         if (in_array('审计组成员', $roleList)) {
             $arList = $arService->getAuditResultsList($peopleid, $projectid,$status,$start,$length );
-        }elseif ($this->userInfo['organid'] = '1012') {
+        }elseif ($this->userInfo['organid'] == '1012') {
             $arList = $arService->getAuditResultsAllList($projectid,$status,$start,$length);
         }elseif (in_array('厅/局领导', $roleList) || in_array('项目计划管理人员', $roleList)
             || in_array('法规部门', $roleList) || in_array('审理部门', $roleList)) {
