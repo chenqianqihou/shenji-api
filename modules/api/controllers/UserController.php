@@ -276,18 +276,19 @@ class UserController extends BaseController
         //判断用户名是否存在
         $i = 0;
         $unique = false;
-        while ($i < 10) {
+        while ($i < 1000) {
             $peopleInfo = $userService->getPeopleInfo($pid);
             if ($peopleInfo) {
                 $i++;
-                $pid = 'sj' . $namePinyin . '0' . $i;
+                //$pid = 'sj' . $namePinyin . '0' . $i;
+                $pid = 'sj' . $namePinyin . str_pad($i,3,"0",STR_PAD_LEFT);
             }else {
                 $unique = true;
                 break;
             }
         }
         if (!$unique) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '用户名重复01-09已分配完成，不在分配，请联系管理员处理');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '用户名重复001-999已分配完成，不在分配，请联系管理员处理');
             $ret = $this->outputJson('', $error);
             return $ret;
         }

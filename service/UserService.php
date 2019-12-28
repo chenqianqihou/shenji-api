@@ -420,11 +420,11 @@ class UserService
         //判断用户名是否存在
         $i = 0;
         $unique = false;
-        while ($i < 10) {
+        while ($i < 1000) {
             $peopleInfo = $userService->getPeopleInfo($pid);
             if ($peopleInfo) {
                 $i++;
-                $pid = 'sj' . $namePinyin . '0' . $i;
+                $pid = 'sj' . $namePinyin . str_pad($i,3,"0",STR_PAD_LEFT);
             }else {
                 $unique = true;
                 break;
