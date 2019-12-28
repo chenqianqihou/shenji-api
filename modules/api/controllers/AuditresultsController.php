@@ -266,7 +266,8 @@ class AuditresultsController extends BaseController
         }elseif (in_array('厅/局领导', $roleList) || in_array('项目计划管理人员', $roleList)
             || in_array('法规部门', $roleList) || in_array('审理部门', $roleList)) {
             $organizationService = new OrganizationService();
-            $ids = $organizationService->getSubIds($this->userInfo['organid']);
+            $ids = $organizationService->getSubRegByUid( $this->userInfo['id']);
+            //$ids = $organizationService->getSubIds($this->userInfo['organid']);
             $ids[] = $this->userInfo['organid'];
             $arList = $arService->getAuditResultsByOrganIds($ids,$projectid,$status,$start,$length);
         }else {
