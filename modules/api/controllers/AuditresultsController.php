@@ -50,6 +50,11 @@ class AuditresultsController extends BaseController
         $userid = $arres['peopleid'];
         $arres['project_msg'] = $projectDao->queryByID( $projid );
         $arres['people_msg'] = $userDao->queryInfo( $userid );
+        $arres['peopleproject'] = (new \yii\db\Query())
+            ->from('peopleproject')
+            ->where(['projid' => $arres['project_msg']['id']])
+            ->andWhere(['pid' => $arres['people_msg']['id']])
+            ->one();
 
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($arres, $error);
@@ -277,6 +282,7 @@ class AuditresultsController extends BaseController
         $userDao = new UserDao();
         $peopleProjectRoleType = [];
         $peopleProjectDao = new PeopleProjectDao();
+
         $peopleProjects = $peopleProjectDao::find()->all();
         foreach ($peopleProjects as $one) {
             if (!isset($peopleProjectRoleType[$one['pid']])) {
