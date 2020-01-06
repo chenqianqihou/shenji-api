@@ -1360,7 +1360,8 @@ class ProjectController extends BaseController
 
         if ($user['organid'] !== 1012) {
             $org = new OrganizationService();
-            $orgIds = $org->getSubIds($user['organid'] ?? '');
+            //$orgIds = $org->getSubIds($user['organid'] ?? '');
+            $orgIds = $org->getSubRegByUid($user['id'] ?? '');
             $orgIds[] = $user['organid'];
 
             $con = $con->andWhere(["in", "projorgan", $orgIds]);
