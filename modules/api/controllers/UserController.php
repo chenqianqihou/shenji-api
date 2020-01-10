@@ -888,8 +888,17 @@ class UserController extends BaseController
         }
         $userService = new UserService(!in_array( $this->userInfo['pid'], Yii::$app->params['adminlist']) ?  $this->userInfo['organinfo']['regnum'] : '' );
         $userRegNum = $this->userInfo['organinfo']['regnum'];
-        $data = $userService->getUserList($userRegNum, $type, $regNum, $organid, $query, $status, $sex, $education,
-            $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $length, $page);
+
+        $data = [];
+        $orginService = new OrganizationService();
+        $orginList = $orginService->getSubRegByUid( $this->userInfo['id'] );
+        if( $orginService->isShenTing( $this->userInfo['organid']) ) {
+            $data = $userService->getUserList($userRegNum, $type, $regNum, $organid, $query, $status, $sex, $education,
+                    $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $length, $page);
+        }else if( in_array( $organid, $orginList ) ){
+            $data = $userService->getUserList($userRegNum, $type, $regNum, $organid, $query, $status, $sex, $education,
+                    $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $length, $page);
+        }
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($data, $error);
         return $ret;
