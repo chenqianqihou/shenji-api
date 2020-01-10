@@ -31,7 +31,19 @@ class DashbordController extends BaseController {
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '登录用户未知！'));
         }
         $originService = new OrganizationService();
-        $origins = $originService->getSubIds($user['organid']);
+        //$origins = $originService->getSubIds($user['organid']);
+        $originInfo = $originService->getOrganizationInfo( $user['organid']);
+        //$origins = $originService->getSubIds($user['organid']);
+        $organizes = OrganizationDao::find()
+            ->where(['regnum' => $originInfo['regnum']])
+            ->andWhere(['otype' => 3])
+            //->andWhere(['parentid' => 0])
+            ->asArray()
+            ->all();
+        $origins[]= $user['organid'];
+        foreach( $organizes as $oinfo){
+            $origins[] = $oinfo['id'];
+        }
         $origins[]= $user['organid'];
 
         $ret = [];
@@ -170,8 +182,18 @@ class DashbordController extends BaseController {
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '登录用户未知！'));
         }
         $originService = new OrganizationService();
-        $origins = $originService->getSubIds($user['organid']);
+        $originInfo = $originService->getOrganizationInfo( $user['organid']);
+        //$origins = $originService->getSubIds($user['organid']);
+        $organizes = OrganizationDao::find()
+            ->where(['regnum' => $originInfo['regnum']])
+            ->andWhere(['otype' => 3])
+            //->andWhere(['parentid' => 0])
+            ->asArray()
+            ->all();
         $origins[]= $user['organid'];
+        foreach( $organizes as $oinfo){
+            $origins[] = $oinfo['id'];    
+        }
 
         $uses = UserDao::find()
             ->where(["in", "organid", $origins])
@@ -239,7 +261,19 @@ class DashbordController extends BaseController {
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '登录用户未知！'));
         }
         $originService = new OrganizationService();
-        $origins = $originService->getSubIds($user['organid']);
+        //$origins = $originService->getSubIds($user['organid']);
+        $originInfo = $originService->getOrganizationInfo( $user['organid']);
+        //$origins = $originService->getSubIds($user['organid']);
+        $organizes = OrganizationDao::find()
+            ->where(['regnum' => $originInfo['regnum']])
+            ->andWhere(['otype' => 3])
+            //->andWhere(['parentid' => 0])
+            ->asArray()
+            ->all();
+        $origins[]= $user['organid'];
+        foreach( $organizes as $oinfo){
+            $origins[] = $oinfo['id'];
+        }
         $origins[]= $user['organid'];
 
         $originDatas = ProjectDao::find()
@@ -308,20 +342,20 @@ class DashbordController extends BaseController {
         }
 
         if ($user['organid'] !== 1012) {
-            return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS, '没有权限看其他市的！'));
+        //    return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS, '没有权限看其他市的！'));
         }
 
         if($city == 0){
             $organizes = OrganizationDao::find()
                 ->andWhere(['otype' => 3])
-                ->andWhere(['parentid' => 0])
+                //->andWhere(['parentid' => 0])
                 ->asArray()
                 ->all();
         }else{
             $organizes = OrganizationDao::find()
                 ->where(['regnum' => $city])
                 ->andWhere(['otype' => 3])
-                ->andWhere(['parentid' => 0])
+                //->andWhere(['parentid' => 0])
                 ->asArray()
                 ->all();
         }
