@@ -733,6 +733,7 @@ class OrganizationService
       $organInfo = OrganizationDao::find()->where(['id'=>$oid])->asArray()->one();
 
         $regList = [
+            "520000",
             "520100",
             "520200",
             "520300",
@@ -746,6 +747,9 @@ class OrganizationService
 
         $organList = [];
 
+        if( $organInfo['regnum'] == '520000' && $organInfo['name'] == '贵州省审计厅' ) {
+            return true;
+        }
         if( $organInfo['regnum'] == '520100' && $organInfo['name'] == '贵阳市审计局' ) {
             return true;
         }

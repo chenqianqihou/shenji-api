@@ -115,7 +115,6 @@ class BaseController extends Controller {
             $organService = new OrganizationService();
             $this->userInfo = $userDao->queryByID( $parse->getClaim('ID') );
             $this->userInfo['organinfo'] = $organService->getOrganizationInfo( $this->userInfo['organid'] );
-            //print_r( $this->userInfo );die;
         } catch (Exception $e) {
             Log::addLogNode('Invalid token', '');
             $this->noLogin();

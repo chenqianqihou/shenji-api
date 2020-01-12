@@ -34,6 +34,7 @@ class DashbordController extends BaseController {
         //$origins = $originService->getSubIds($user['organid']);
         $originInfo = $originService->getOrganizationInfo( $user['organid']);
         //$origins = $originService->getSubIds($user['organid']);
+        /*
         $organizes = OrganizationDao::find()
             ->where(['regnum' => $originInfo['regnum']])
             ->andWhere(['otype' => 3])
@@ -45,6 +46,14 @@ class DashbordController extends BaseController {
             $origins[] = $oinfo['id'];
         }
         $origins[]= $user['organid'];
+        */
+
+        $origins = [];
+        if( $originInfo['regnum'] == '520000') {
+            $origins = $this->getOrganIds(0);
+        } else {
+            $origins = $this->getOrganIds( $originInfo['regnum']);
+        }
 
         $ret = [];
 
@@ -184,6 +193,7 @@ class DashbordController extends BaseController {
         $originService = new OrganizationService();
         $originInfo = $originService->getOrganizationInfo( $user['organid']);
         //$origins = $originService->getSubIds($user['organid']);
+        /*
         $organizes = OrganizationDao::find()
             ->where(['regnum' => $originInfo['regnum']])
             ->andWhere(['otype' => 3])
@@ -193,6 +203,14 @@ class DashbordController extends BaseController {
         $origins[]= $user['organid'];
         foreach( $organizes as $oinfo){
             $origins[] = $oinfo['id'];    
+        }
+        */
+
+        $origins = [];
+        if( $originInfo['regnum'] == '520000') {
+            $origins = $this->getOrganIds(0);
+        } else {
+            $origins = $this->getOrganIds( $originInfo['regnum']);
         }
 
         $uses = UserDao::find()
@@ -264,6 +282,7 @@ class DashbordController extends BaseController {
         //$origins = $originService->getSubIds($user['organid']);
         $originInfo = $originService->getOrganizationInfo( $user['organid']);
         //$origins = $originService->getSubIds($user['organid']);
+        /*
         $organizes = OrganizationDao::find()
             ->where(['regnum' => $originInfo['regnum']])
             ->andWhere(['otype' => 3])
@@ -275,6 +294,13 @@ class DashbordController extends BaseController {
             $origins[] = $oinfo['id'];
         }
         $origins[]= $user['organid'];
+         */
+        $origins = [];
+        if( $originInfo['regnum'] == '520000') {
+            $origins = $this->getOrganIds(0);
+        } else {
+            $origins = $this->getOrganIds( $originInfo['regnum']);
+        }
 
         $originDatas = ProjectDao::find()
             ->where(["in", "projorgan", $origins])
@@ -344,25 +370,8 @@ class DashbordController extends BaseController {
         if ($user['organid'] !== 1012) {
         //    return $this->outputJson('', ErrorDict::getError(ErrorDict::SUCCESS, '没有权限看其他市的！'));
         }
-
-        if($city == 0){
-            $organizes = OrganizationDao::find()
-                ->andWhere(['otype' => 3])
-                //->andWhere(['parentid' => 0])
-                ->asArray()
-                ->all();
-        }else{
-            $organizes = OrganizationDao::find()
-                ->where(['regnum' => $city])
-                ->andWhere(['otype' => 3])
-                //->andWhere(['parentid' => 0])
-                ->asArray()
-                ->all();
-        }
-
-        $origins = array_map(function($e){
-            return $e['id'];
-        }, $organizes);
+        
+        $origins = $this->getOrganIds( $city );
 
         $uses = UserDao::find()
             ->where(["in", "organid", $origins])
@@ -441,6 +450,25 @@ class DashbordController extends BaseController {
 
     }
 
+    private function getOrganIds( $city ) {
+        if($city == 0){
+            $organizes = OrganizationDao::find()
+                ->andWhere(['otype' => 3])
+                //->andWhere(['parentid' => 0])
+                ->asArray()
+                ->all();
+        }else{
+            $organizes = OrganizationDao::find()
+                ->where(['regnum' => $city])
+                ->andWhere(['otype' => 3])
+                //->andWhere(['parentid' => 0])
+                ->asArray()
+                ->all();
+        }
 
-
+        $origins = array_map(function($e){
+                return $e['id'];
+                }, $organizes);    
+        return $origins;
+    }
 }
