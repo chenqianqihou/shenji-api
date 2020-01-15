@@ -3262,8 +3262,7 @@ class ProjectController extends BaseController
                     $city = [$city[0], $city[1] ?? ''];
                     $city = join(",", $city);
 
-
-                    return strpos($e['regnum'], $city) === false;
+                    return strpos($e['regnum'], $city) == false;
                 }));
                 break;
             case ProjectDao::$projLevelName['市州统一组织']:
@@ -3272,7 +3271,7 @@ class ProjectController extends BaseController
                     $city = [$city[0], $city[1] ?? ''];
                     $city = join(",", $city);
 
-                    return strpos($e['regnum'], $city) === false;
+                    return strpos($e['regnum'], $city) == false;
                 }));
                 break;
             case ProjectDao::$projLevelName['县级']:
