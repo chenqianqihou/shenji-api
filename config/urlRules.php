@@ -32,6 +32,7 @@ return [
     'api/organization/listbytype' => 'api/organization/listbytype',
     'api/organization/subordinate' => 'api/organization/subordinate',
     'api/organization/excel' => 'api/organization/excel',
+    'api/organization/download' => 'api/organization/download',
     'api/organization/excelupload' => 'api/organization/excelupload',
 
     'api/project/create' => 'api/project/create',
