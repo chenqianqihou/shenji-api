@@ -6,6 +6,7 @@ return [
     'api/user/add' => 'api/user/add',
     'api/user/delete' => 'api/user/delete',
     'api/user/update' => 'api/user/update',
+    'api/user/download' => 'api/user/download',
     'api/user/info' => 'api/user/info',
     'api/user/list' => 'api/user/list',
     'api/user/selectconfig' => 'api/user/selectconfig',
