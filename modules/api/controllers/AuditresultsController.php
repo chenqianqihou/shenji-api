@@ -4,6 +4,7 @@ namespace app\modules\api\controllers;
 
 use app\classes\BaseController;
 use app\models\RoleDao;
+use app\models\AuditGroupDao;
 use app\service\AuditresultsService;
 use app\service\AssessService;
 use app\models\ProjectDao;
@@ -535,5 +536,105 @@ class AuditresultsController extends BaseController
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($projects, $error);
         return $ret;
+    }
+
+    public function actionDownload() {
+        $this->defineMethod = 'GET';
+        $this->defineParams = array ();
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $peopleid = $this->userInfo['id'];
+        $projectid = $this->getParam('projectid','');
+        $status = intval($this->getParam('status',-1));
+        $start = $this->getParam('start',0);
+        $length = $this->getParam('length',100000);
+        //查询用户角色
+        $roleList = [];
+        $roleDao = new RoleDao();
+        $roleInfo = $roleDao->queryByPid($this->userInfo['pid']);
+        if ($roleInfo) {
+            foreach ($roleInfo as $role) {
+                $roleList[] = $role['name'];
+            }
+        }
+        $arService = new AuditresultsService();
+        if (in_array('审计组成员', $roleList)) {
+            $arList = $arService->getAuditResultsList($peopleid, $projectid,$status,$start,$length );
+        }elseif ($this->userInfo['organid'] == '1012') {
+            $arList = $arService->getAuditResultsAllList($projectid,$status,$start,$length);
+        }elseif (in_array('厅/局领导', $roleList) || in_array('项目计划管理人员', $roleList)
+            || in_array('法规部门', $roleList) || in_array('审理部门', $roleList)) {
+            $organizationService = new OrganizationService();
+            $ids = $organizationService->getSubRegByUid( $this->userInfo['id']);
+            //$ids = $organizationService->getSubIds($this->userInfo['organid']);
+            $ids[] = $this->userInfo['organid'];
+            $arList = $arService->getAuditResultsByOrganIds($ids,$projectid,$status,$start,$length);
+        }else {
+            $arList = $arService->getAuditResultsList($peopleid, $projectid,$status,$start,$length );
+        }
+        $projectDao = new ProjectDao();
+        $userDao = new UserDao();
+        $peopleProjectRoleType = [];
+        $peopleProjectDao = new PeopleProjectDao();
+
+        $peopleProjects = $peopleProjectDao::find()->all();
+        foreach ($peopleProjects as $one) {
+            if (!isset($peopleProjectRoleType[$one['pid']])) {
+                $peopleProjectRoleType[$one['pid']] = [];
+            }
+            $peopleProjectRoleType[$one['pid']][$one['projid']] = $one['roletype'];
+        }
+
+        foreach( $arList['list'] as $ak=>$av ) {
+            $projid = $av['projectid'];    
+            $userid = $av['peopleid'];
+            $arList['list'][$ak]['project_msg'] = $projectDao->queryByID( $projid );
+            $arList['list'][$ak]['people_msg'] = $userDao->queryInfo( $userid );
+            if (isset($peopleProjectRoleType[$userid]) && isset($peopleProjectRoleType[$userid][$projid])) {
+                $arList['list'][$ak]['roletype'] = $peopleProjectRoleType[$userid][$projid];
+            }else {
+                unset($arList['list'][$ak]);
+            }
+        }
+
+        $newExcel = new Spreadsheet();  //创建一个新的excel文档
+        $objSheet = $newExcel->getActiveSheet();  //获取当前操作sheet的对象
+        $objSheet->setTitle('审计成果表');  //设置当前sheet的标题
+
+        //设置宽度为true,不然太窄了
+        $newExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+
+        //设置第一栏的标题
+        $objSheet->setCellValue('A1', '项目编号')
+            ->setCellValue('B1', '项目名称')
+            ->setCellValue('C1', '项目层级')
+            ->setCellValue('D1', '项目年度')
+            ->setCellValue('E1', '姓名')
+            ->setCellValue('F1', '人员ID')
+            ->setCellValue('G1', '项目角色')
+            ->setCellValue('H1', '审核状态');
+
+        foreach ($arList['list'] as $k => $val) {
+            $k = $k + 2;
+            $objSheet->setCellValue('A' . $k, $val['projectnum'])
+                ->setCellValue('B' . $k, $val['project_msg']['name'])
+                ->setCellValue('C' . $k, ProjectDao::$projlevel[$val['project_msg']['projlevel']])
+                ->setCellValue('D' . $k, $val['project_msg']['projyear'])
+                ->setCellValue('E' . $k, $val['people_msg']['name'])
+                ->setCellValue('F' . $k, $val['people_msg']['pid'])
+                ->setCellValue('G' . $k, AuditGroupDao::$roleType[$val['roletype']])
+                ->setCellValue('H' . $k, AuditresultsService::$statusType[$val['status']]);
+        }
+
+        $this->downloadExcel($newExcel, '审计成果表');
     }
 }
