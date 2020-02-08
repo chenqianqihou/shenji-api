@@ -24,6 +24,16 @@ class OrganizationService
         return OrganizationDao::find()->where(['id' => $oid])->asArray()->one();
     }
 
+    //获取全部结构Map
+    public function getAllOrgans() {
+        $organList = OrganizationDao::find()->asArray()->all();
+        $result = [];
+        foreach( $organList as $v) {
+            $result[$v['id']] = $v;    
+        }    
+        return $result;
+    }
+
     // 查询某机构下的部门列表
     public function getOrganSonInfo($oid) {
         return OrganizationDao::find()->where(['parentid' => $oid])->asArray()->all();
