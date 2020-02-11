@@ -1360,7 +1360,8 @@ class ProjectController extends BaseController
 
         if ($user['organid'] !== 1012) {
             $org = new OrganizationService();
-            $orgIds = $org->getSubIds($user['organid'] ?? '');
+            //$orgIds = $org->getSubIds($user['organid'] ?? '');
+            $orgIds = $org->getSubRegByUid($user['id'] ?? '');
             $orgIds[] = $user['organid'];
 
             $con = $con->andWhere(["in", "projorgan", $orgIds]);
@@ -3261,8 +3262,7 @@ class ProjectController extends BaseController
                     $city = [$city[0], $city[1] ?? ''];
                     $city = join(",", $city);
 
-
-                    return strpos($e['regnum'], $city) === false;
+                    return strpos($e['regnum'], $city) == false;
                 }));
                 break;
             case ProjectDao::$projLevelName['市州统一组织']:
@@ -3271,7 +3271,7 @@ class ProjectController extends BaseController
                     $city = [$city[0], $city[1] ?? ''];
                     $city = join(",", $city);
 
-                    return strpos($e['regnum'], $city) === false;
+                    return strpos($e['regnum'], $city) == false;
                 }));
                 break;
             case ProjectDao::$projLevelName['县级']:
@@ -3290,5 +3290,398 @@ class ProjectController extends BaseController
 
         return $this->outputJson($data, ErrorDict::getError(ErrorDict::SUCCESS));
 
+    }
+
+    /**
+     * 项目列表下载接口
+     *
+     * @return array
+     */
+    public function actionDownload() {
+        $this->defineMethod = 'GET';
+        $this->defineParams = array (
+            'projyear' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'projlevel' => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
+            'medium' => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
+            'internal' => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
+            'projstage' => array (
+                'require' => false,
+                'checker' => 'isNumber',
+            ),
+            'query' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $projyear = $this->getParam('projyear', '');
+        $projlevel = intval($this->getParam('projlevel', 0));
+        $medium = intval($this->getParam('medium', 0));
+        $internal = intval($this->getParam('internal', 0));
+        $projstage = intval($this->getParam('projstage', 0));
+        $query = $this->getParam('query', '');
+
+        $prj = new ProjectDao();
+        $con = $prj::find();
+
+        if ($projyear) {
+            //if (date('Y', strtotime($projyear)) !== $projyear) {
+            if ( !is_numeric( $projyear) ) {
+                return $this->outputJson('',
+                    ErrorDict::getError(ErrorDict::G_PARAM, "项目年份 输入格式不对！应为年份格式!")
+                );
+            }
+            $con = $con->andwhere(['projyear' => $projyear]);
+        }
+
+        if ($projlevel) {
+            if (!in_array($projlevel, [1, 2, 3, 4, 5])) {
+                return $this->outputJson('',
+                    ErrorDict::getError(ErrorDict::G_PARAM, "项目层级 输入格式不对！")
+                );
+            }
+            $con = $con->andwhere(['projlevel' => $projlevel]);
+        }
+
+        if ($medium) {
+            if (!in_array($medium, [1, 2, 3, 4, 5])) {
+                return $this->outputJson('',
+                    ErrorDict::getError(ErrorDict::G_PARAM, "是否是中介机构 输入格式不对！")
+                );
+            }
+            if($medium == 1){
+                $projs = ReviewDao::find()
+                    ->where(['ptype' => 1])
+                    ->andWhere(['type' => 1])
+                    ->groupBy(['projid'])
+                    ->asArray()
+                    ->all();
+
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
+
+                if(count($projs) !== 0){
+                    $con = $con->andWhere(['not in', 'id', $projs]);
+                }
+            }else if($medium == 2){
+                //已经没有待提审了
+                $projs = [0];
+
+                $con = $con->andWhere(['in', 'id', $projs]);
+
+            }else if($medium == 3){
+                $projs = ReviewDao::find()
+                    ->where(['ptype' => 1])
+                    ->andWhere(['type' => 1])
+                    ->andWhere(['status' => 0])
+                    ->groupBy(['projid'])
+                    ->asArray()
+                    ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
+
+                if(count($projs) == 0) {
+                    $projs[] = 0;
+                }
+
+                $con = $con->andWhere(['in', 'id', $projs]);
+
+
+            }else if($medium == 4){
+                $projs = ReviewDao::find()
+                    ->where(['ptype' => 1])
+                    ->andWhere(['type' => 1])
+                    ->andWhere(['status' => 1])
+                    ->groupBy(['projid'])
+                    ->asArray()
+                    ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
+
+                if(count($projs) == 0) {
+                    $projs[] = 0;
+                }
+
+                $con = $con->andWhere(['in', 'id', $projs]);
+
+            }else if($medium == 5){
+                $projs = ReviewDao::find()
+                    ->where(['ptype' => 1])
+                    ->andWhere(['type' => 1])
+                    ->andWhere(['status' => 2])
+                    ->groupBy(['projid'])
+                    ->asArray()
+                    ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
+
+                if(count($projs) == 0) {
+                    $projs[] = 0;
+                }
+
+                $con = $con->andWhere(['in', 'id', $projs]);
+            }
+
+
+        }
+
+        if ($internal) {
+            if (!in_array($internal, [1, 2, 3, 4, 5])) {
+                return $this->outputJson('',
+                    ErrorDict::getError(ErrorDict::G_PARAM, "是否是中介机构 输入格式不对！")
+                );
+            }
+            if($internal == 1){
+                $projs = ReviewDao::find()
+                    ->where(['ptype' => 2])
+                    ->andWhere(['type' => 1])
+                    ->groupBy(['projid'])
+                    ->asArray()
+                    ->all();
+
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
+
+                if(count($projs) !== 0){
+                    $con = $con->andWhere(['not in', 'id', $projs]);
+                }
+            }else if($internal == 2){
+                //已经没有待提审了
+                $projs = [0];
+
+                $con = $con->andWhere(['in', 'id', $projs]);
+            }else if($internal == 3){
+                $projs = ReviewDao::find()
+                    ->where(['ptype' => 2])
+                    ->andWhere(['type' => 1])
+                    ->andWhere(['status' => 0])
+                    ->groupBy(['projid'])
+                    ->asArray()
+                    ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
+
+                if(count($projs) == 0) {
+                    $projs[] = 0;
+                }
+
+                $con = $con->andWhere(['in', 'id', $projs]);
+            }else if($internal == 4){
+                $projs = ReviewDao::find()
+                    ->where(['ptype' => 2])
+                    ->andWhere(['type' => 1])
+                    ->andWhere(['status' => 1])
+                    ->groupBy(['projid'])
+                    ->asArray()
+                    ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
+
+                if(count($projs) == 0) {
+                    $projs[] = 0;
+                }
+
+                $con = $con->andWhere(['in', 'id', $projs]);
+            }else if($internal == 5){
+                $projs = ReviewDao::find()
+                    ->where(['ptype' => 2])
+                    ->andWhere(['type' => 1])
+                    ->andWhere(['status' => 2])
+                    ->groupBy(['projid'])
+                    ->asArray()
+                    ->all();
+                $projs = array_map(function($e){
+                    return $e['projid'];
+                }, $projs);
+
+                if(count($projs) == 0) {
+                    $projs[] = 0;
+                }
+
+                $con = $con->andWhere(['in', 'id', $projs]);
+            }
+
+        }
+
+        if ($projstage) {
+            if (!in_array($projstage, [1, 2, 3, 4, 5])) {
+                return $this->outputJson('',
+                    ErrorDict::getError(ErrorDict::G_PARAM, "projstage 输入格式不对！")
+                );
+            }
+
+            if($projstage == 1){
+                $stage = [0, 1];
+            }else {
+                $stage = [$projstage];
+            }
+
+            $con = $con->andwhere(['in', 'status', $stage]);
+        }
+
+
+        $useCode = $this->data['ID'];
+        $user = UserDao::find()
+            ->where(['pid' => $useCode])
+            ->one();
+        if(!$user){
+            return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, '登录用户未知！'));
+        }
+
+        if ($user['organid'] !== 1012) {
+            $org = new OrganizationService();
+            //$orgIds = $org->getSubIds($user['organid'] ?? '');
+            $orgIds = $org->getSubRegByUid($user['id'] ?? '');
+            $orgIds[] = $user['organid'];
+
+            $con = $con->andWhere(["in", "projorgan", $orgIds]);
+        }
+
+
+        if ($query) {
+            $con = $con->andwhere(['or', ['like', 'projectnum', $query], ['like', 'name', $query]]);
+        }
+        /*
+        if (!$length) {
+            $length = 20;
+        }
+        if (!$page) {
+            $page = 1;
+        }
+        */
+        $countCon = clone $con;
+        //$list = $con->orderBy(['id' => SORT_DESC])->limit($length)->offset(($page - 1) * $length)->asArray()->all();
+        $list = $con->orderBy(['id' => SORT_DESC])->asArray()->all();
+        $rewService = new ReviewService();
+        $pro = new ProjectDao();
+        $list = array_map(function($e )use ($rewService, $pro){
+            $e['medium'] = $rewService->getMediumStatus($e['id']);
+            $e['internal'] = $rewService->getInternalStatus($e['id']);
+
+            switch ($e['status']){
+                case ProjectDao::$statusToName['未开始']:
+                    $e['operate'] = 1;
+                    break;
+                case ProjectDao::$statusToName['计划阶段']:
+                    $e['operate'] = 2;
+                    break;
+                case ProjectDao::$statusToName['实施阶段']:
+                    $e['operate'] = 3;
+                    break;
+                case ProjectDao::$statusToName['审理阶段']:
+                    $e['operate'] = 4;
+                    break;
+                default:
+                    $e['operate'] = 0;
+                    break;
+            }
+
+
+            return $e;
+        }, $list);
+        $total = $countCon->count();
+
+        //获取所有organ list map
+        $organService = new OrganizationService();
+        $organMap = $organService->getAllOrgans();
+
+        //select data
+        $selectdata = [
+            'projlevel' => [
+            '1' => '省厅统一组织',
+            '2' => '市州本级',
+            '3' => '市州统一组织' ,
+            '4' => '县级',
+            '5' => '省厅本级',
+            ],
+            'medium' => [
+                '1' => '无需审核',
+            //                [ '2' => '待提审'],
+            '3' => '待审核',
+            '4' => '审核通过',
+            '5' => '审核未通过',
+            ],
+            'internal' => [
+                '1' => "无需审核",
+            //                [ '2' => '待提审'],
+            '3' => '待审核',
+            '4' => '审核通过',
+            '5' => '审核未通过',
+            ],
+            'projstage' => [
+                '0' => '计划阶段',
+                '1' => '计划阶段',
+            '2' => '实施阶段',
+            '3' => '审理阶段',
+            '4' => '报告阶段',
+            '5' => '项目结束'
+            ]
+            ];
+
+        $newExcel = new Spreadsheet();  //创建一个新的excel文档
+        $objSheet = $newExcel->getActiveSheet();  //获取当前操作sheet的对象
+        $objSheet->setTitle('项目列表导出');  //设置当前sheet的标题
+        //设置宽度为true,不然太窄了
+        $newExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+
+        //设置第一栏的标题
+        $objSheet->setCellValue('A1', '项目编号')
+            ->setCellValue('B1', '项目名称')
+            ->setCellValue('C1', '项目年度')
+            ->setCellValue('D1', '项目单位')
+            ->setCellValue('E1', '项目层级')
+            ->setCellValue('F1', '计划时长（天）')
+            ->setCellValue('G1', '中介审核')
+            ->setCellValue('H1', '内审审核')
+            ->setCellValue('I1', '项目阶段');
+
+        foreach ($list as $k => $val) {
+            $k = $k + 2;
+            $objSheet->setCellValue('A' . $k, $val['projectnum'])
+                ->setCellValue('B' . $k, $val['name'])
+                ->setCellValue('C' . $k, $val['projyear'])
+                ->setCellValue('D' . $k, $organMap[$val['projorgan']]['name'])
+                ->setCellValue('E' . $k, ProjectDao::$projlevel[$val['projlevel']])
+                ->setCellValue('F' . $k, $val['plantime'])
+                ->setCellValue('G' . $k, $selectdata['medium'][$val['medium']])
+                ->setCellValue('H' . $k, $selectdata['internal'][$val['internal']])
+                ->setCellValue('I' . $k, $selectdata['projstage'][$val['status']]);
+        }
+
+        $this->downloadExcel($newExcel, "项目管理导出表","Xlsx");
+        return $this->outputJson([
+            'list' => $list,
+            'total' => $total,
+        ], ErrorDict::SUCCESS);
     }
 }

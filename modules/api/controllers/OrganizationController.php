@@ -6,6 +6,7 @@ use app\classes\BaseController;
 use app\classes\ErrorDict;
 use app\classes\Util;
 use app\models\UserDao;
+use app\models\OrganizationDao;
 use app\service\OrganizationService;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -730,4 +731,53 @@ class OrganizationController extends BaseController
         $ret = $this->outputJson('', $error);
         return $ret;
     }
+
+    public function actionDownload()
+    {
+        $this->defineMethod = 'GET';
+        $this->defineParams = array ();
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $keyword = $this->getParam('key','');
+        $otype = intval($this->getParam('type',-1));
+        $start = $this->getParam('start',0);
+        $length = $this->getParam('length',100000);
+        $organService = new OrganizationService( !in_array( $this->userInfo['pid'], Yii::$app->params['adminlist']) ?  $this->userInfo['organinfo']['regnum'] : '' );
+        $organList = $organService->getOrganizationList( $keyword,$otype,$start,$length );
+
+        $newExcel = new Spreadsheet();  //创建一个新的excel文档
+        $objSheet = $newExcel->getActiveSheet();  //获取当前操作sheet的对象
+        $objSheet->setTitle('机构表');  //设置当前sheet的标题
+
+        //设置宽度为true,不然太窄了
+        $newExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+
+        //设置第一栏的标题
+        $objSheet->setCellValue('A1', 'id')
+            ->setCellValue('B1', '机构名称')
+            ->setCellValue('C1', '机构类型')
+            ->setCellValue('D1', '注册时间')
+            ->setCellValue('E1', '注册资金(万元)')
+            ->setCellValue('F1', '开始从业日期');
+
+        foreach ($organList['list'] as $k => $val) {
+            $k = $k + 2;
+            $objSheet->setCellValue('A' . $k, $val['id'])
+                ->setCellValue('B' . $k, $val['name'])
+                ->setCellValue('C' . $k, OrganizationDao::getOTypeMsg($val['otype']))
+                ->setCellValue('D' . $k, date('Y-m-d', $val['regtime']))
+                ->setCellValue('E' . $k, $val['capital'])
+                ->setCellValue('F' . $k, date('Y-m-d', $val['workbegin']));
+        }
+
+        $this->downloadExcel($newExcel, '机构表');
+    }
+
 }

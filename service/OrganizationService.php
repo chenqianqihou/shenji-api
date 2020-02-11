@@ -24,6 +24,16 @@ class OrganizationService
         return OrganizationDao::find()->where(['id' => $oid])->asArray()->one();
     }
 
+    //获取全部结构Map
+    public function getAllOrgans() {
+        $organList = OrganizationDao::find()->asArray()->all();
+        $result = [];
+        foreach( $organList as $v) {
+            $result[$v['id']] = $v;    
+        }    
+        return $result;
+    }
+
     // 查询某机构下的部门列表
     public function getOrganSonInfo($oid) {
         return OrganizationDao::find()->where(['parentid' => $oid])->asArray()->all();
@@ -643,8 +653,6 @@ class OrganizationService
         return $res;
     }
 
-
-
     //获取当前机构下所有下属机构
     public function getSubIds($organid){
         $ids = OrganizationDao::find()
@@ -656,6 +664,140 @@ class OrganizationService
         }, $ids);
 
         return $ids;
+
+    }
+
+    //通过用户id获取用户所属机构下所有下属机构
+    public function getSubRegByUid($uid){
+        $userInfo = UserDao::find()->where(['id'=>$uid])->asArray()->one();
+        $oid = $userInfo['organid'];
+        $organInfo = OrganizationDao::find()->where(['id'=>$oid])->asArray()->one();
+
+        $regList = [
+            "520100",
+            "520200",
+            "520300",
+            "520400",
+            "520500",
+            "520600",
+            "522300",
+            "522600",
+            "522700",
+        ];
+
+        $organList = [];
+
+        while(1) {
+            if( $organInfo['regnum'] == '520100' && $organInfo['name'] == '贵阳市审计局' ) {
+                $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'520100'])->asArray()->all());
+                break;
+            }
+            if( $organInfo['regnum'] == '520200' && $organInfo['name'] == '六盘水市审计局' ) {
+                $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'520200'])->asArray()->all());
+                break;
+            }
+            if( $organInfo['regnum'] == '520300' && $organInfo['name'] == '遵义市审计局' ) {
+                $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'520300'])->asArray()->all());
+                break;
+            }
+            if( $organInfo['regnum'] == '520400' && $organInfo['name'] == '安顺市审计局' ) {
+                $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'520400'])->asArray()->all());
+                break;
+            }
+            if( $organInfo['regnum'] == '520500' && $organInfo['name'] == '毕节市审计局' ) {
+                $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'520500'])->asArray()->all());
+                break;
+            }
+            if( $organInfo['regnum'] == '520600' && $organInfo['name'] == '铜川市审计局' ) {
+                $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'520600'])->asArray()->all());
+                break;
+            }
+            if( $organInfo['regnum'] == '522300' && $organInfo['name'] == '黔西南布依族苗族自治州审计局' ) {
+                $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'522300'])->asArray()->all());
+                break;
+            }
+            if( $organInfo['regnum'] == '522600' && $organInfo['name'] == '黔东南苗族侗族自治州审计局' ) {
+                $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'522600'])->asArray()->all());
+                break;
+            }
+            if( $organInfo['regnum'] == '522700' && $organInfo['name'] == '黔南布依族苗族自治州审计局' ) {
+                $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'522700'])->asArray()->all());
+                break;
+            }
+
+            //================
+            $organList = array_merge($organList, OrganizationDao::find()->where(['parentid' => $organInfo['id']])->asArray()->all());
+            $organList[] = $organInfo;
+            break;
+        }
+
+        $ids = array_map(function($e){
+            return $e['id'];
+        }, $organList);
+
+        return $ids;
+
+    }
+
+    public function isShenTing( $oid ) {
+      $organInfo = OrganizationDao::find()->where(['id'=>$oid])->asArray()->one();
+
+        $regList = [
+            "520000",
+            "520100",
+            "520200",
+            "520300",
+            "520400",
+            "520500",
+            "520600",
+            "522300",
+            "522600",
+            "522700",
+        ];
+
+        $organList = [];
+
+        if( $organInfo['regnum'] == '520000' && $organInfo['name'] == '贵州省审计厅' ) {
+            return true;
+        }
+        if( $organInfo['regnum'] == '520100' && $organInfo['name'] == '贵阳市审计局' ) {
+            return true;
+        }
+        if( $organInfo['regnum'] == '520200' && $organInfo['name'] == '六盘水市审计局' ) {
+            $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'520200'])->asArray()->all());
+            return true;
+        }
+        if( $organInfo['regnum'] == '520300' && $organInfo['name'] == '遵义市审计局' ) {
+            $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'520300'])->asArray()->all());
+            return true;
+        }
+        if( $organInfo['regnum'] == '520400' && $organInfo['name'] == '安顺市审计局' ) {
+            $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'520400'])->asArray()->all());
+            return true;
+        }
+        if( $organInfo['regnum'] == '520500' && $organInfo['name'] == '毕节市审计局' ) {
+            $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'520500'])->asArray()->all());
+            return true;
+        }
+        if( $organInfo['regnum'] == '520600' && $organInfo['name'] == '铜川市审计局' ) {
+            $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'520600'])->asArray()->all());
+            return true;
+        }
+        if( $organInfo['regnum'] == '522300' && $organInfo['name'] == '黔西南布依族苗族自治州审计局' ) {
+            $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'522300'])->asArray()->all());
+            return true;
+        }
+        if( $organInfo['regnum'] == '522600' && $organInfo['name'] == '黔东南苗族侗族自治州审计局' ) {
+            $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'522600'])->asArray()->all());
+            return true;
+        }
+        if( $organInfo['regnum'] == '522700' && $organInfo['name'] == '黔南布依族苗族自治州审计局' ) {
+            $organList = array_merge($organList, OrganizationDao::find()->where(['regnum'=>'522700'])->asArray()->all());
+            return true;
+        }
+
+        //================
+        return false;
 
     }
 

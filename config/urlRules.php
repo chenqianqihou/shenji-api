@@ -6,6 +6,7 @@ return [
     'api/user/add' => 'api/user/add',
     'api/user/delete' => 'api/user/delete',
     'api/user/update' => 'api/user/update',
+    'api/user/download' => 'api/user/download',
     'api/user/info' => 'api/user/info',
     'api/user/list' => 'api/user/list',
     'api/user/selectconfig' => 'api/user/selectconfig',
@@ -31,6 +32,7 @@ return [
     'api/organization/listbytype' => 'api/organization/listbytype',
     'api/organization/subordinate' => 'api/organization/subordinate',
     'api/organization/excel' => 'api/organization/excel',
+    'api/organization/download' => 'api/organization/download',
     'api/organization/excelupload' => 'api/organization/excelupload',
 
     'api/project/create' => 'api/project/create',
@@ -48,6 +50,7 @@ return [
     'api/project/excelupload' => 'api/project/excelupload',
     'api/project/projtypenum' => 'api/project/projtypenum',
     'api/project/locationorgan' => 'api/project/locationorgan',
+    'api/project/download' => 'api/project/download',
     //拆分接口----------------------start
     'api/project/sure' => 'api/project/sure',
     'api/project/begin' => 'api/project/begin',
@@ -93,6 +96,7 @@ return [
     'api/auditresults/submitresult' => 'api/auditresults/submitresult',
     'api/auditresults/delresult' => 'api/auditresults/delresult',
     'api/auditresults/excel' => 'api/auditresults/excel',
+    'api/auditresults/download' => 'api/auditresults/download',
     'api/auditresults/excelupload' => 'api/auditresults/excelupload',
     'api/auditresults/projectlist' => 'api/auditresults/projectlist',
 

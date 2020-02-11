@@ -276,18 +276,19 @@ class UserController extends BaseController
         //判断用户名是否存在
         $i = 0;
         $unique = false;
-        while ($i < 10) {
+        while ($i < 1000) {
             $peopleInfo = $userService->getPeopleInfo($pid);
             if ($peopleInfo) {
                 $i++;
-                $pid = 'sj' . $namePinyin . '0' . $i;
+                //$pid = 'sj' . $namePinyin . '0' . $i;
+                $pid = 'sj' . $namePinyin . str_pad($i,3,"0",STR_PAD_LEFT);
             }else {
                 $unique = true;
                 break;
             }
         }
         if (!$unique) {
-            $error = ErrorDict::getError(ErrorDict::G_PARAM, '用户名重复01-09已分配完成，不在分配，请联系管理员处理');
+            $error = ErrorDict::getError(ErrorDict::G_PARAM, '用户名重复001-999已分配完成，不在分配，请联系管理员处理');
             $ret = $this->outputJson('', $error);
             return $ret;
         }
@@ -887,8 +888,17 @@ class UserController extends BaseController
         }
         $userService = new UserService(!in_array( $this->userInfo['pid'], Yii::$app->params['adminlist']) ?  $this->userInfo['organinfo']['regnum'] : '' );
         $userRegNum = $this->userInfo['organinfo']['regnum'];
-        $data = $userService->getUserList($userRegNum, $type, $regNum, $organid, $query, $status, $sex, $education,
-            $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $length, $page);
+
+        $data = [];
+        $orginService = new OrganizationService();
+        $orginList = $orginService->getSubRegByUid( $this->userInfo['id'] );
+        if( $orginService->isShenTing( $this->userInfo['organid']) ) {
+            $data = $userService->getUserList($userRegNum, $type, $regNum, $organid, $query, $status, $sex, $education,
+                    $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $length, $page);
+        }else if( in_array( $organid, $orginList ) ){
+            $data = $userService->getUserList($userRegNum, $type, $regNum, $organid, $query, $status, $sex, $education,
+                    $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $length, $page);
+        }
         $error = ErrorDict::getError(ErrorDict::SUCCESS);
         $ret = $this->outputJson($data, $error);
         return $ret;
@@ -1123,7 +1133,7 @@ class UserController extends BaseController
         $i = 0;
         foreach( $organDict as $odk=>$odv){
             if($odv['parentid'] == 0){
-                //$spreadsheet->setActiveSheetIndex(0)->setCellValue('ZZ'.(++$i), $odk.':'.$odv['name']);
+                $spreadsheet->setActiveSheetIndex(0)->setCellValue('ZZ'.(++$i), $odk.':'.$odv['name']);
             } else {
                 if( !isset($organDict[$odv['parentid']]) ){
                     continue;    
@@ -1743,4 +1753,131 @@ class UserController extends BaseController
         return $ret;
     }
 
+    //下载列表
+    public function actionDownload() {
+        $this->defineMethod = 'GET';
+        $this->defineParams = array (
+            'type' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'regnum' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'organid' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'query' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'status' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'sex' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'education' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'position' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'techtitle' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'expertise' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'auditbeginleft' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+            'auditbeginright' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
+        );
+        if (false === $this->check()) {
+            $ret = $this->outputJson(array(), $this->err);
+            return $ret;
+        }
+        $type = $this->getParam('type', ''); //人员类型 1 中介机构 2 内审机构 3 审计机关 4 第三方机构
+        $regNum = $this->getParam('regnum', '');
+        $organid = $this->getParam('organid', '');
+        $query = $this->getParam('query', '');
+        $status = intval($this->getParam('status', 0));
+        $sex = $this->getParam('sex', '');
+        $education = intval($this->getParam('education', 0));
+        $position = $this->getParam('position', '');
+        $techtitle = $this->getParam('techtitle', '');
+        $expertise = intval($this->getParam('expertise', 0));
+        $auditBeginLeft = $this->getParam('auditbeginleft', '');
+        $auditBeginRight = $this->getParam('auditbeginright', '');
+        $length = 100000;
+        $page = 0;
+        if (intval($auditBeginLeft) && intval($auditBeginRight)) {
+            $auditBeginLeft = date('Y-m-d', intval($auditBeginLeft));
+            $auditBeginRight = date('Y-m-d', intval($auditBeginRight));
+        }
+        $userService = new UserService(!in_array( $this->userInfo['pid'], Yii::$app->params['adminlist']) ?  $this->userInfo['organinfo']['regnum'] : '' );
+        $userRegNum = $this->userInfo['organinfo']['regnum'];
+
+        $data = [];
+        $orginService = new OrganizationService();
+        $orginList = $orginService->getSubRegByUid( $this->userInfo['id'] );
+        if( $orginService->isShenTing( $this->userInfo['organid']) ) {
+            $data = $userService->getUserList($userRegNum, $type, $regNum, $organid, $query, $status, $sex, $education,
+                    $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $length, $page);
+        }else if( in_array( $organid, $orginList ) ){
+            $data = $userService->getUserList($userRegNum, $type, $regNum, $organid, $query, $status, $sex, $education,
+                    $position, $techtitle, $expertise, $auditBeginLeft, $auditBeginRight, $length, $page);
+        }
+
+        $newExcel = new Spreadsheet();  //创建一个新的excel文档
+        $objSheet = $newExcel->getActiveSheet();  //获取当前操作sheet的对象
+        $objSheet->setTitle('人员表');  //设置当前sheet的标题
+
+        //设置宽度为true,不然太窄了
+        $newExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+        $newExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+
+        //设置第一栏的标题
+        $objSheet->setCellValue('A1', '姓名')
+            ->setCellValue('B1', '人员ID')
+            ->setCellValue('C1', '性别')
+            ->setCellValue('D1', '人员类型')
+            ->setCellValue('E1', '所属机构')
+            ->setCellValue('F1', '所在部门')
+            ->setCellValue('G1', '工作状态')
+            ->setCellValue('H1', '兼办项目');
+
+        foreach ($data['list'] as $k => $val) {
+            $k = $k + 2;
+            $objSheet->setCellValue('A' . $k, $val['name'])
+                ->setCellValue('B' . $k, $val['pid'])
+                ->setCellValue('C' . $k, UserDao::$sex[$val['sex']])
+                ->setCellValue('D' . $k, UserDao::$type[$val['type']])
+                ->setCellValue('E' . $k, $val['organization'])
+                ->setCellValue('F' . $k, $val['department'])
+                ->setCellValue('G' . $k, UserDao::$isJob[$val['status']])
+                ->setCellValue('H' . $k, $val['projectnum']);
+        }
+
+        $this->downloadExcel($newExcel, "人员导出表","Xlsx");
+    }
 }

@@ -12,6 +12,9 @@ use yii\base\Exception;
 use yii\web\Response;
 use \Lcobucci\JWT\Parser;
 use \Lcobucci\JWT\Signer\Hmac\Sha256;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 
 class BaseController extends Controller {
     protected $requestCookie;
@@ -72,6 +75,8 @@ class BaseController extends Controller {
      */
     public function beforeAction($action) {
         //for debug
+       // $this->userInfo = json_decode('{"id":"401","pid":"sj16625","name":"\u6d4b\u8bd5\u55ef\u55ef\u55ef","sex":"1","type":"3","organid":"1012","department":"1202","level":"2","phone":"18627879721","email":"2137@qq.com","passwd":"25d55ad283aa400af464c76d713c07ad","cardid":"43098119960304661X","address":"\u5317\u4eac\u5e02\u6d77\u6dc0\u533a\u897f\u4e8c\u65d7\u897f\u8def2\u53f7\u966235\u53f7\u697c","education":"1","school":"\u897f\u5317\u5de5\u4e1a\u5927\u5b66","major":"\u8f6f\u4ef6\u5de5\u7a0b","political":"2","nature":"1","specialties":"","achievements":"","position":"3","location":"520000,520200","workbegin":"1970-01-19","auditbegin":"2019-07-02","comment":"\u8fd9\u662f\u6d4b\u8bd5","isaudit":"1","isjob":"1","ctime":"2019-07-08 23:36:18","utime":"2020-01-10 18:01:59","organinfo":{"id":"1012","name":"\u8d35\u5dde\u7701\u5ba1\u8ba1\u5385","otype":"3","deputy":"-","regtime":"20190101","regnum":"520000","regaddress":"-","category":"-","level":"-","capital":"1","workbegin":"20190101","costeng":"1","coster":"1","accountant":"1","highlevel":"1","midlevel":"1","retiree":"1","parttimers":"1","contactor":"-","contactphone":"","contactnumber":"","officenum":"520000","officeaddress":"","ctime":"2019-07-06 14:53:09","utime":"2019-07-09 10:41:24","qualiaudit":"0","parentid":"0"}}',true);
+        //$this->data = ['ID'=>'sj16625'];
         //return parent::beforeAction( $action );
 
         $this->beginTime = microtime(true);
@@ -115,7 +120,6 @@ class BaseController extends Controller {
             $organService = new OrganizationService();
             $this->userInfo = $userDao->queryByID( $parse->getClaim('ID') );
             $this->userInfo['organinfo'] = $organService->getOrganizationInfo( $this->userInfo['organid'] );
-            //print_r( $this->userInfo );die;
         } catch (Exception $e) {
             Log::addLogNode('Invalid token', '');
             $this->noLogin();
@@ -341,4 +345,35 @@ class BaseController extends Controller {
         return true;
     }
 
+    function downloadExcel($newExcel, $filename)
+    {
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment;filename="
+                . $filename . date('Y-m-d') . '.Xlsx');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Expose-Headers: Content-Disposition');
+        $objWriter = IOFactory::createWriter($newExcel, 'Xlsx');
+
+        $objWriter->save('php://output');
+
+        //通过php保存在本地的时候需要用到
+        //$objWriter->save($dir.'/demo.xlsx');
+
+        //以下为需要用到IE时候设置
+        // If you're serving to IE 9, then the following may be needed
+        //header('Cache-Control: max-age=1');
+        // If you're serving to IE over SSL, then the following may be needed
+        //header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        //header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+        //header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        //header('Pragma: public'); // HTTP/1.0
+        Yii::$app->end();
+    }
 } 
