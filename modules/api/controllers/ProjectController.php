@@ -3236,7 +3236,6 @@ class ProjectController extends BaseController
         $projlevel = $this->getParam('projlevel', 0);
         $location = $this->getParam('location', 0);
 
-
         if(!in_array($projlevel, [ProjectDao::$projLevelName['省厅统一组织'], ProjectDao::$projLevelName['省厅本级'], ProjectDao::$projLevelName['县级'],
             ProjectDao::$projLevelName['市州本级'], ProjectDao::$projLevelName['市州统一组织']]) || empty($location)){
             return $this->outputJson('', ErrorDict::getError(ErrorDict::G_PARAM, "类型不对!"));
@@ -3252,8 +3251,12 @@ class ProjectController extends BaseController
                 }));
                 break;
             case ProjectDao::$projLevelName['市州本级']:
-                $ret = array_values(array_filter($all, function($e){
-                    return count(explode(",", $e['regnum'])) == 2;
+                $ret = array_values(array_filter($all, function($e) use ($location){
+                    $city = explode(",", $location);
+                    $city = [$city[0], $city[1] ?? ''];
+                    $city = join(",", $city);
+                    //return count(explode(",", $e['regnum'])) == 2 && strpos($e['regnum'], $city) === 0;
+                    return strpos($e['regnum'], $city) === 0;
                 }));
                 break;
             case ProjectDao::$projLevelName['省厅统一组织']:
