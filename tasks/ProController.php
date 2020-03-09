@@ -46,6 +46,9 @@ class ProController extends Controller {
         $elems = [];
 
         foreach ($sheetData as $key => $value){
+            if( trim($value['A']) == '' ) {
+                continue;    
+            }
             if($key >= 2 ) {
                 $organs = explode(":", $value['G']);
                 $organs = explode("-", $organs[1]);
@@ -53,7 +56,7 @@ class ProController extends Controller {
                     ->where(['name' => $organs[0]])
                     ->asArray()
                     ->one();
-                if(!$org) {
+                if(is_null($org)) {
                    echo "未找到{$organs[0]}相关的项目单位！";
                    return;
                 }
@@ -117,7 +120,7 @@ class ProController extends Controller {
                 $location = explode(":", $value['T']);
 
                 $elem = [
-                    "projectnum" => strtotime('now'),
+                    "projectnum" => strtotime('now').'-'.mt_rand(0,time()),
                     "name" => $value['A'],
                     "projyear" => $value['C'],
                     "plantime" => $value['B'],
@@ -212,7 +215,7 @@ class ProController extends Controller {
 
             }
 
-
+            echo "导入成功: ".$e['projectnum']." - ".$e['name']."\n";
 
         }
     }
