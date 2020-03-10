@@ -48,11 +48,15 @@ class DashbordController extends BaseController {
         $origins[]= $user['organid'];
         */
 
+        $city = $this->getParam('city', 0);
+        if( $city == 0 ) {
+            $city = $originInfo['regnum'];    
+        }
         $origins = [];
-        if( $originInfo['regnum'] == '520000') {
+        if( $city == '520000') {
             $origins = $this->getOrganIds(0);
         } else {
-            $origins = $this->getOrganIds( $originInfo['regnum']);
+            $origins = $this->getOrganIds( $city);
         }
 
         $ret = [];
@@ -206,11 +210,15 @@ class DashbordController extends BaseController {
         }
         */
 
+        $city = $this->getParam('city', 0);
+        if( $city == 0 ) {
+            $city = $originInfo['regnum'];    
+        }
         $origins = [];
-        if( $originInfo['regnum'] == '520000') {
+        if( $city == '520000') {
             $origins = $this->getOrganIds(0);
         } else {
-            $origins = $this->getOrganIds( $originInfo['regnum']);
+            $origins = $this->getOrganIds( $city);
         }
 
         $uses = UserDao::find()
@@ -295,13 +303,16 @@ class DashbordController extends BaseController {
         }
         $origins[]= $user['organid'];
          */
+        $city = $this->getParam('city', 0);
+        if( $city == 0 ) {
+            $city = $originInfo['regnum'];    
+        }
         $origins = [];
-        if( $originInfo['regnum'] == '520000') {
+        if( $city == '520000') {
             $origins = $this->getOrganIds(0);
         } else {
-            $origins = $this->getOrganIds( $originInfo['regnum']);
+            $origins = $this->getOrganIds( $city);
         }
-
         $originDatas = ProjectDao::find()
             ->where(["in", "projorgan", $origins])
             ->asArray()
