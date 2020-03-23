@@ -1342,8 +1342,8 @@ class UserController extends BaseController
             $tmpdata['cardid'] = $data['B'];
             if( !Util::checkIdCard( $data['B'] )) {
                 $error = ErrorDict::getError(ErrorDict::G_PARAM, $data['B'].' 身份证号格式错误！');
-                $ret = $this->outputJson('', $error);
-                return $ret;
+                //$ret = $this->outputJson('', $error);
+                //return $ret;
             }
             $tmpdata['sex'] = Util::getSexByIdcard($data['B']);
             $tmpdata['phone'] = $data['C'];
@@ -1393,6 +1393,7 @@ class UserController extends BaseController
             }
             if( $organDict[$organid]['parentid'] == 0 ){
                 $tmpdata['organization'] = $organid;
+                $tmpdata['department'] = $organid;
             } else {
                 $tmpdata['organization'] = $organDict[$organid]['parentid'];
                 $tmpdata['department'] = $organid;

@@ -351,8 +351,9 @@ class UserService
         foreach ($needed as $e) {
             if (!in_array($e, array_keys($params))) {
                 Log::addLogNode('addNewUser', $e . ' column lost is error');
-                $info['msg'] = '缺少列错误';
-                return $info;
+                $params[$e] = '';
+                //$info['msg'] = '缺少列错误';
+                //return $info;
             }
         }
 
@@ -467,7 +468,7 @@ class UserService
                     $info['msg'] = '所属部门错误';
                     return $info;
                 }
-                if ($organInfo['parentid'] != $organization) {
+                if ($organInfo['parentid'] != 0 && $organInfo['parentid'] != $organization) {
                     Log::addLogNode('addNewUser', 'organization is error');
                     $info['msg'] = '所属机构错误';
                     return $info;
