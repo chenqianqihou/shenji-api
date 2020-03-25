@@ -50,6 +50,8 @@ class UserService
     public function updatePeopleInfo($pid, $name, $sex, $type, $organId, $department, $level, $phone, $email,
                                   $cardid, $address, $education, $school, $major, $political, $nature,
                                   $specialties, $achievements, $position, $location, $workbegin, $auditbegin, $comment, $isAudit) {
+
+
         $userDao = new UserDao();
         $ret = $userDao->updatePeople($pid, $name, $sex, $type, $organId, $department, $level, $phone, $email,
             $cardid, $address, $education, $school, $major, $political, $nature,

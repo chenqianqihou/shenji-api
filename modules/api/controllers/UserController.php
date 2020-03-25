@@ -692,6 +692,11 @@ class UserController extends BaseController
                     $ret = $this->outputJson('', $error);
                     return $ret;
                 }
+
+                //判断时间戳是否是10位
+                if( strlen($workbegin) > 10 ) { $workbegin = intval($workbegin/1000);}
+                if( strlen($auditbegin) > 10 ) { $auditbegin = intval($auditbegin/1000);}
+
                 $workbegin = date('Y-m-d H:i:s', intval($workbegin));
                 $auditbegin = date('Y-m-d H:i:s', intval($auditbegin));
                 //todo 判断techtitle ID是否存在
