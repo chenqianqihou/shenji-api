@@ -3086,6 +3086,9 @@ class ProjectController extends BaseController
 
             $flag = count($idGroupMap);
             while ($flag > 0 && $num > 0){
+                if( count( $groups) <= 0 ){
+                    break;    
+                }
                 foreach ($groups as $e){
                     foreach ($idGroupMap as $key => $v){
                         if($v['group'] !== $e['id']){
