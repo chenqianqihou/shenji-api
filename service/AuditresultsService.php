@@ -124,6 +124,11 @@ class AuditresultsService
         }
 
         foreach( $params as $pk=>$pv) {
+            if( $pv == '' ) {
+                if( !in_array($pk,['desc','transferpeople','transferresult']) ) {
+                    $pv = 0;    
+                }
+            }
             if( in_array($pk,$attrs) ){
                 $auditdao->$pk=$pv;    
             }    
@@ -146,6 +151,11 @@ class AuditresultsService
         }
 
         foreach( $params as $pk=>$pv) {
+            if( $pv == '' ) {
+                if( !in_array($pk,['desc','transferpeople','transferresult']) ) {
+                    $pv = 0;
+                }
+            }
             if( in_array($pk,$attrs) ){
                 $auditdao->$pk=$pv;    
             }    

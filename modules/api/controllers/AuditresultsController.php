@@ -78,7 +78,7 @@ class AuditresultsController extends BaseController
 
         $projectid = $this->getParam('projectid');
         $peopleid = $this->data['ID'];
-        $problemid = $this->getParam('problemid', 0);
+        $problemid = intval( $this->getParam('problemid', 0) );
 
         //判断项目是否存在
         $projectDao = new ProjectDao();
