@@ -11,6 +11,7 @@ use app\classes\BaseController;
 use app\classes\ErrorDict;
 use app\classes\Log;
 use app\models\AuditGroupDao;
+use app\models\AuditresultsDao;
 use app\models\JugeProjectDao;
 use app\models\OrganizationDao;
 use app\models\PeopleProjectDao;
@@ -157,7 +158,8 @@ class AuditgroupController extends BaseController {
                     $oldLeader->roletype = PeopleProjectDao::ROLE_TYPE_GROUPER;
                     $oldLeader->save();
                 }
-
+                //如果是更改审计组长角色，则需要将auditresults中的operatorid更换
+                AuditresultsDao::updateAll(['operatorid'=>$peoPro->pid],['projectid'=>$peoPro->projid,'operatorid'=>$oldLeader->pid]);
             }
 
 
