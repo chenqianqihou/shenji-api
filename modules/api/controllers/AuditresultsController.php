@@ -256,6 +256,8 @@ class AuditresultsController extends BaseController
         $status = intval($this->getParam('status',-1));
         $start = $this->getParam('start',0);
         $length = $this->getParam('length',10);
+        $name = $this->getParam('name','');
+        $year = $this->getParam('year',0);
         //查询用户角色
         $roleList = [];
         $roleDao = new RoleDao();
@@ -267,18 +269,18 @@ class AuditresultsController extends BaseController
         }
         $arService = new AuditresultsService();
         if (in_array('审计组成员', $roleList)) {
-            $arList = $arService->getAuditResultsList($peopleid, $projectid,$status,$start,$length );
+            $arList = $arService->getAuditResultsList($peopleid, $projectid,$status,$name,$year,$start,$length );
         }elseif ($this->userInfo['organid'] == '1012') {
-            $arList = $arService->getAuditResultsAllList($projectid,$status,$start,$length);
+            $arList = $arService->getAuditResultsAllList($projectid,$status,$name,$year,$start,$length);
         }elseif (in_array('厅/局领导', $roleList) || in_array('项目计划管理人员', $roleList)
             || in_array('法规部门', $roleList) || in_array('审理部门', $roleList)) {
             $organizationService = new OrganizationService();
             $ids = $organizationService->getSubRegByUid( $this->userInfo['id']);
             //$ids = $organizationService->getSubIds($this->userInfo['organid']);
             $ids[] = $this->userInfo['organid'];
-            $arList = $arService->getAuditResultsByOrganIds($ids,$projectid,$status,$start,$length);
+            $arList = $arService->getAuditResultsByOrganIds($ids,$projectid,$status,$name,$year,$start,$length);
         }else {
-            $arList = $arService->getAuditResultsList($peopleid, $projectid,$status,$start,$length );
+            $arList = $arService->getAuditResultsList($peopleid, $projectid,$status,$name,$year,$start,$length );
         }
         $projectDao = new ProjectDao();
         $userDao = new UserDao();

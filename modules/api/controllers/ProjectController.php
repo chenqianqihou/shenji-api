@@ -1122,6 +1122,10 @@ class ProjectController extends BaseController
                 'require' => false,
                 'checker' => 'noCheck',
             ),
+            'unit' => array (
+                'require' => false,
+                'checker' => 'noCheck',
+            ),
             'length' => array (
                 'require' => false,
                 'checker' => 'isNumber',
@@ -1141,6 +1145,7 @@ class ProjectController extends BaseController
         $internal = intval($this->getParam('internal', 0));
         $projstage = intval($this->getParam('projstage', 0));
         $query = $this->getParam('query', '');
+        $unit = $this->getParam('unit', 0);
         $length = intval($this->getParam('length', 0));
         $page = intval($this->getParam('page', 0));
 
@@ -1155,6 +1160,10 @@ class ProjectController extends BaseController
                 );
             }
             $con = $con->andwhere(['projyear' => $projyear]);
+        }
+
+        if( intval($unit) > 0 ) {
+            $con = $con->andwhere(['projorgan' => $unit]);    
         }
 
         if ($projlevel) {
@@ -1248,8 +1257,6 @@ class ProjectController extends BaseController
 
                 $con = $con->andWhere(['in', 'id', $projs]);
             }
-
-
         }
 
         if ($internal) {

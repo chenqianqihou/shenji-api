@@ -40,18 +40,25 @@ class AuditresultsService
             return AuditresultsDao::deleteAll(['id'=>$ids]);    
     }
 
-    public function getAuditResultsList($peopleid, $projectid, $status, $start, $length) {
+    public function getAuditResultsList($peopleid, $projectid, $status,$name,$year, $start, $length) {
         $res = (new \yii\db\Query())
             ->from('auditresults')
             ->innerJoin('project', 'auditresults.projectid = project.id')
+            ->innerJoin('people', 'auditresults.peopleid = people.id')
             ->select('project.name, project.projectnum, auditresults.*')
             ->where(1);
         $res = $res->andWhere(['auditresults.peopleid'=>$peopleid]);
         if( $status > 0 ){
             $res = $res->andWhere(['auditresults.status'=>$status]);
         }
+        if( !empty( $name ) ){
+            $res = $res->andWhere(['like','people.name',$name]);    
+        }
+        if( intval($year) > 0 ){
+            $res = $res->andWhere(['project.projyear'=>$year]); 
+        }
         if ($projectid) {
-            $res = $res->andwhere(['or', ['like', 'projectnum', $projectid], ['like', 'name', $projectid]]);
+            $res = $res->andwhere(['or', ['like', 'project.projectnum', $projectid], ['like', 'project.name', $projectid]]);
         }
         $total = $res->count();
         $list = $res->orderBy('id desc')->offset( $start )->limit($length)->all();
@@ -80,31 +87,45 @@ class AuditresultsService
         $res = (new \yii\db\Query())
             ->from('auditresults')
             ->innerJoin('project', 'auditresults.projectid = project.id')
+            ->innerJoin('people', 'auditresults.peopleid = people.id')
             ->select('project.name, project.projectnum, auditresults.*')
             ->where(1);
         $res = $res->andWhere(['or', ['in','project.projorgan',$projorganIds], ['in','project.leadorgan',$projorganIds]]);
         if( $status > 0 ){
             $res = $res->andWhere(['auditresults.status'=>$status]);
         }
+        if( !empty( $name ) ){
+            $res = $res->andWhere(['like','people.name',$name]);
+        }
+        if( intval($year) > 0 ){
+            $res = $res->andWhere(['project.projyear'=>$year]);
+        }
         if ($projectid) {
-            $res = $res->andwhere(['or', ['like', 'projectnum', $projectid], ['like', 'name', $projectid]]);
+            $res = $res->andwhere(['or', ['like', 'project.projectnum', $projectid], ['like', 'project.name', $projectid]]);
         }
         $total = $res->count();
         $list = $res->orderBy('id desc')->offset( $start )->limit($length)->all();
         return ['total'=>$total,'list'=>$list];
     }
 
-    public function getAuditResultsAllList($projectid, $status, $start, $length) {
+    public function getAuditResultsAllList($projectid, $status, $name,$year,$start, $length) {
         $res = (new \yii\db\Query())
             ->from('auditresults')
             ->innerJoin('project', 'auditresults.projectid = project.id')
+            ->innerJoin('people', 'auditresults.peopleid = people.id')
             ->select('project.name, project.projectnum, auditresults.*')
             ->where(1);
         if( $status > 0 ){
             $res = $res->andWhere(['auditresults.status'=>$status]);
         }
+        if( !empty( $name ) ){
+            $res = $res->andWhere(['like','people.name',$name]);
+        }
+        if( intval($year) > 0 ){
+            $res = $res->andWhere(['project.projyear'=>$year]);
+        }
         if ($projectid) {
-            $res = $res->andwhere(['or', ['like', 'projectnum', $projectid], ['like', 'name', $projectid]]);
+            $res = $res->andwhere(['or', ['like', 'project.projectnum', $projectid], ['like', 'project.name', $projectid]]);
         }
         $total = $res->count();
         $list = $res->orderBy('id desc')->offset( $start )->limit($length)->all();
