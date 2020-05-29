@@ -421,7 +421,8 @@ class UserDao extends ActiveRecord{
                 WHERE %s group by people.pid',
             self::tableName(), $condition
         );
-        $sql = $sql . " order by ctime desc limit $start, $length";
+        //$sql = $sql . " order by ctime desc limit $start, $length";
+        $sql = $sql . " order by people.pid limit $start, $length";
         $stmt = self::getDb()->createCommand($sql);
         $stmt->prepare();
         $stmt->bindParam(':type', $type, \PDO::PARAM_INT);
