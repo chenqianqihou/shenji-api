@@ -545,6 +545,8 @@ class AuditgroupController extends BaseController {
                 ->select("people.id")
                 ->andWhere(['like', 'people.pid', $query])
                 ->orWhere(['like', 'people.name', $query])
+                ->orWhere(['like', 'people.phone', $query])
+                ->andWhere(['like', 'people.email', $query])
                 ->orWhere(['like', 'organization.name', $query])
                 ->all();
             $tmp = array_map(function($e){
