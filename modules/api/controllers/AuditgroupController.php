@@ -543,11 +543,14 @@ class AuditgroupController extends BaseController {
                 ->from('people')
                 ->join('INNER JOIN', 'organization', 'organization.id = people.organid')
                 ->select("people.id")
-                ->andWhere(['like', 'people.pid', $query])
-                ->orWhere(['like', 'people.name', $query])
-                ->orWhere(['like', 'people.phone', $query])
-                ->andWhere(['like', 'people.email', $query])
-                ->orWhere(['like', 'organization.name', $query])
+                ->where(1)
+                ->andWhere(['or', ['like', 'people.pid', $query],['like', 'people.name', $query],['like', 'people.phone', $query],['like', 'people.email', $query],['like', 'organization.name', $query]])
+                //->andWhere('or', ['like', 'people.pid', $query],['like', 'people.name', $query],['like', 'people.phone', $query],['like', 'people.email', $query],['like', 'organization.name', $query])
+                //->orWhere(['like', 'people.pid', $query])
+                //->orWhere(['like', 'people.name', $query])
+                //->orWhere(['like', 'people.phone', $query])
+                //->orWhere(['like', 'people.email', $query])
+                //->orWhere(['like', 'organization.name', $query])
                 ->all();
             $tmp = array_map(function($e){
                 return $e['id'];
