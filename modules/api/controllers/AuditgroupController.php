@@ -507,10 +507,20 @@ class AuditgroupController extends BaseController {
         $length = intval($this->getParam('length', 0));
         $page = intval($this->getParam('page', 0));
         $query = $this->getParam('query', '');
+        $sex = $this->getParam('sex',-1);   //性别
+        $location = $this->getParam('location',-1);   //所属市县
+        $education = $this->getParam('education',-1);   //学历
+        $position = $this->getParam('position',-1);  //职务
+        $techtitle = $this->getParam('techtitle',-1);  //职称
+        $expertise = $this->getParam('expertise',-1); //审计特长
+        $pnum = $this->getParam('pnum',-1);  //兼职项目个数
+        
 
         $con = (new \yii\db\Query())
             ->from('people')
             ->join('INNER JOIN', 'organization', 'organization.id = people.organid')
+            ->join('INNER JOIN','peopleexpertise','peopleexpertise.pid = people.pid')
+            ->join('INNER JOIN','peopletitle','peopletitle.pid = people.pid')
             ->where(['isaudit' => 1])
             ->select('people.id,people.pid, people.name, people.sex, people.isjob, people.type, organization.name AS oname, people.location');
 
@@ -533,11 +543,29 @@ class AuditgroupController extends BaseController {
             );
         }
 
-
         if($jobstatus){
             $con = $con->andWhere(['people.isjob' => $jobstatus]);
         }
+        if($sex >= 0) {
+            $con = $con->andWhere(['people.sex' => $jobstatus]);
+        }
+        if($location >= 0) {
+            $con = $con->andWhere(['people.location' => $location]);
+        }
+        if($education >= 0) {
+            $con = $con->andWhere(['people.education' => $education]);
+        }
+        if($position >= 0) {
+            $con = $con->andWhere(['people.position' => $position]);
+        }
+        if($expertise >= 0) {
+            $con = $con->andWhere(['peopleexpertise.eid' => $expertise]);
+        }
+        if($techtitle >= 0 ) {
+            $con = $con->andWhere(['peopletitle.tid' => $techtitle]);    
+        }
 
+/*
         if($query){
             $tmp = (new \yii\db\Query())
                 ->from('people')
@@ -558,6 +586,7 @@ class AuditgroupController extends BaseController {
 
             $con->andWhere(['in', 'people.id', $tmp]);
         }
+*/
 
         $countCon = clone $con;
 
