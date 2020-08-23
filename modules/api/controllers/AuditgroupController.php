@@ -522,7 +522,7 @@ class AuditgroupController extends BaseController {
             ->join('INNER JOIN','peopleexpertise','peopleexpertise.pid = people.pid')
             ->join('INNER JOIN','peopletitle','peopletitle.pid = people.pid')
             ->where(['isaudit' => 1])
-            ->select('people.id,people.pid, people.name, people.sex, people.isjob, people.type, organization.name AS oname, people.location');
+            ->select('people.id,people.pid, people.name, people.sex, people.isjob, people.type, organization.name AS oname, people.location')->distinct();
 
 
         $organTypes = explode(",", $organType);
@@ -550,7 +550,8 @@ class AuditgroupController extends BaseController {
             $con = $con->andWhere(['people.sex' => $jobstatus]);
         }
         if($location >= 0) {
-            $con = $con->andWhere(['people.location' => $location]);
+            $locationStr = join(',',$location);
+            $con = $con->andWhere(['people.location' => $locationStr]);
         }
         if($education >= 0) {
             $con = $con->andWhere(['people.education' => $education]);
