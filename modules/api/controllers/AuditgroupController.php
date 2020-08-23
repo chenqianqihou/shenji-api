@@ -546,23 +546,23 @@ class AuditgroupController extends BaseController {
         if($jobstatus){
             $con = $con->andWhere(['people.isjob' => $jobstatus]);
         }
-        if($sex >= 0) {
-            $con = $con->andWhere(['people.sex' => $jobstatus]);
+        if(intval($sex) > 0) {
+            $con = $con->andWhere(['people.sex' => $sex]);
         }
-        if($location >= 0) {
+        if(is_array($location) && count($location) > 0) {
             $locationStr = join(',',$location);
             $con = $con->andWhere(['people.location' => $locationStr]);
         }
-        if($education >= 0) {
+        if(intval($education) > 0) {
             $con = $con->andWhere(['people.education' => $education]);
         }
-        if($position >= 0) {
+        if(intval($position) > 0) {
             $con = $con->andWhere(['people.position' => $position]);
         }
-        if($expertise >= 0) {
+        if(intval($expertise) > 0) {
             $con = $con->andWhere(['peopleexpertise.eid' => $expertise]);
         }
-        if($techtitle >= 0 ) {
+        if(intval($techtitle) > 0 ) {
             $con = $con->andWhere(['peopletitle.tid' => $techtitle]);    
         }
 
