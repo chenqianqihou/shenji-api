@@ -519,8 +519,6 @@ class AuditgroupController extends BaseController {
         $con = (new \yii\db\Query())
             ->from('people')
             ->join('INNER JOIN', 'organization', 'organization.id = people.organid')
-            ->join('INNER JOIN','peopleexpertise','peopleexpertise.pid = people.pid')
-            ->join('INNER JOIN','peopletitle','peopletitle.pid = people.pid')
             ->where(['isaudit' => 1])
             ->select('people.id,people.pid, people.name, people.sex, people.isjob, people.type, organization.name AS oname, people.location')->distinct();
 
@@ -560,10 +558,14 @@ class AuditgroupController extends BaseController {
             $con = $con->andWhere(['people.position' => $position]);
         }
         if(intval($expertise) > 0) {
-            $con = $con->andWhere(['peopleexpertise.eid' => $expertise]);
+            $con = $con
+            ->join('INNER JOIN','peopleexpertise','peopleexpertise.pid = people.pid')
+            ->andWhere(['peopleexpertise.eid' => $expertise]);
         }
         if(intval($techtitle) > 0 ) {
-            $con = $con->andWhere(['peopletitle.tid' => $techtitle]);    
+            $con = $con
+            ->join('INNER JOIN','peopletitle','peopletitle.pid = people.pid')
+            ->andWhere(['peopletitle.tid' => $techtitle]);    
         }
 
 /*
