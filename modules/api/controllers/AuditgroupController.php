@@ -514,6 +514,7 @@ class AuditgroupController extends BaseController {
         $techtitle = $this->getParam('techtitle',-1);  //职称
         $expertise = $this->getParam('expertise',-1); //审计特长
         $pnum = $this->getParam('pnum',-1);  //兼职项目个数
+        $keyname = $this->getParam('keyname','');   //查询姓名
         
 
         $con = (new \yii\db\Query())
@@ -566,6 +567,9 @@ class AuditgroupController extends BaseController {
             $con = $con
             ->join('INNER JOIN','peopletitle','peopletitle.pid = people.pid')
             ->andWhere(['peopletitle.tid' => $techtitle]);    
+        }
+        if( trim($keyname) != '') {
+            $con = $con->andWhere(['or', ['like', 'people.pid', $keyname],['like', 'people.name', $keyname]]);
         }
 
 /*
