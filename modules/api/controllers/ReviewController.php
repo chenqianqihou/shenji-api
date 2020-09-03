@@ -417,8 +417,8 @@ class ReviewController extends BaseController{
                     }
                 }
             }else{
-                $peoplePro = new PeopleProjectDao();
                 foreach ($pids as $e){
+                    $peoplePro = new PeopleProjectDao();
                     $peoplePro->pid = $e;
                     $peoplePro->groupid = $rew->groupid;
                     $peoplePro->projid = $rew->projid;
